@@ -1,0 +1,177 @@
+import 'dart:async';
+
+import 'package:flame_audio/flame_audio.dart';
+
+import 'prefs.dart';
+
+/// Sound effect and music front end.
+///
+/// Every call is guarded: until the real mp3 files land in assets/audio the
+/// clips simply fail to load and the whole class degrades to a no-op rather
+/// than crashing the game.
+class Audio {
+  Audio._();
+
+  // Placeholder clips synthesised by tool/generate_placeholder_audio.dart.
+  // Swapping in the commissioned mp3s is a change to these six names.
+  static const _pass = 'pass.wav';
+  static const _hit = 'hit.wav';
+  static const _shield = 'shield.wav';
+  static const _smash = 'smash.wav';
+  static const _gameOver = 'gameover.wav';
+  static const _music = 'music_loop.wav';
+
+  static const _clips = <String>[_pass, _hit, _shield, _smash, _gameOver];
+
+  /// Pitch rise per clean pass in a row, and the ceiling it stops at.
+  static const _pitchStep = 0.06;
+  static const _pitchMax = 1.6;
+
+  /// The loudest the music is ever played, before the player's own level is
+  /// applied. Music sits under the effects, never level with them.
+  static const _musicHeadroom = 0.45;
+
+  /// How far the music dips under a sound effect, as a share of its level.
+  static const _duckShare = 0.4;
+  static const _duckMs = 350;
+
+  /// What the music should be playing at right now.
+  static double get _musicVolume => _musicHeadroom * Prefs.musicLevel;
+
+  static bool _sfxReady = false;
+  static bool _musicReady = false;
+  static Timer? _duckTimer;
+
+  static Future<void> init() async {
+    try {
+      await FlameAudio.audioCache.loadAll(_clips);
+      _sfxReady = true;
+    } catch (_) {
+      _sfxReady = false;
+    }
+    // The ambient category honours the iOS silent switch.
+    final context = AudioContext(
+      iOS: AudioContextIOS(category: AVAudioSessionCategory.ambient),
+    );
+    try {
+      await AudioPlayer.global.setAudioContext(context);
+    } catch (_) {
+      // Not every platform implements a global context.
+    }
+    try {
+      await FlameAudio.bgm.initialize(audioContext: context);
+      await FlameAudio.audioCache.load(_music);
+      _musicReady = true;
+    } catch (_) {
+      _musicReady = false;
+    }
+  }
+
+  static Future<void> _sfx(String clip, {double rate = 1.0}) async {
+    if (!_sfxReady || Prefs.soundLevel <= 0) return;
+    try {
+      final player = await FlameAudio.play(clip, volume: Prefs.soundLevel);
+      if (rate != 1.0) await player.setPlaybackRate(rate);
+    } catch (_) {
+      // A missing or unplayable clip must never interrupt the run.
+    }
+  }
+
+  /// Soft chime whose pitch rises with the current clean-pass streak.
+  static void pass(int streak) {
+    final rate = (1.0 + streak * _pitchStep).clamp(1.0, _pitchMax);
+    _duck();
+    unawaited(_sfx(_pass, rate: rate));
+  }
+
+  static void hit() {
+    _duck();
+    unawaited(_sfx(_hit));
+  }
+
+  static void shieldGranted() => unawaited(_sfx(_shield));
+
+  static void shieldSmash() {
+    _duck();
+    unawaited(_sfx(_smash));
+  }
+
+  static void gameOver() {
+    _duck();
+    unawaited(_sfx(_gameOver));
+  }
+
+  /// Applies the player's music level to whatever is already playing, and
+  /// starts or stops the track if they have just crossed zero.
+  static Future<void> applyMusicLevel() async {
+    if (!_musicReady) return;
+    if (Prefs.musicLevel <= 0) {
+      await stopMusic();
+      return;
+    }
+    if (!FlameAudio.bgm.isPlaying) {
+      await startMusic();
+      return;
+    }
+    await _setMusicVolume(_musicVolume);
+  }
+
+  static Future<void> startMusic() async {
+    if (!_musicReady || Prefs.musicLevel <= 0 || FlameAudio.bgm.isPlaying) {
+      return;
+    }
+    try {
+      await FlameAudio.bgm.play(_music, volume: _musicVolume);
+    } catch (_) {
+      _musicReady = false;
+    }
+  }
+
+  static Future<void> stopMusic() async {
+    // Check readiness first: touching FlameAudio.bgm builds a platform-backed
+    // player, which must not happen when audio never came up.
+    if (!_musicReady || !FlameAudio.bgm.isPlaying) return;
+    try {
+      await FlameAudio.bgm.stop();
+    } catch (_) {
+      // Nothing to stop.
+    }
+  }
+
+  static Future<void> pauseMusic() async {
+    if (!_musicReady || !FlameAudio.bgm.isPlaying) return;
+    try {
+      await FlameAudio.bgm.pause();
+    } catch (_) {
+      // Nothing to pause.
+    }
+  }
+
+  static Future<void> resumeMusic() async {
+    if (!_musicReady || Prefs.musicLevel <= 0) return;
+    try {
+      await FlameAudio.bgm.resume();
+    } catch (_) {
+      // Nothing to resume.
+    }
+  }
+
+  /// Dips the music under a sound effect, then lifts it back.
+  static void _duck() {
+    if (!_musicReady || !FlameAudio.bgm.isPlaying) return;
+    _duckTimer?.cancel();
+    unawaited(_setMusicVolume(_musicVolume * _duckShare));
+    _duckTimer = Timer(
+      const Duration(milliseconds: _duckMs),
+      () => unawaited(_setMusicVolume(_musicVolume)),
+    );
+  }
+
+  static Future<void> _setMusicVolume(double volume) async {
+    try {
+      await FlameAudio.bgm.audioPlayer.setVolume(volume);
+    } catch (_) {
+      // Volume is cosmetic; ignore.
+    }
+  }
+}
