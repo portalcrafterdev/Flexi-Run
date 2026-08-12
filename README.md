@@ -8,11 +8,8 @@ hole punched through them, over the left, middle or right track. Get the slime
 into the right track wearing the right shape and it passes cleanly through;
 get either one wrong and it slams into the bricks and loses a life.
 
-> **The view has changed since [CLAUDE.md](CLAUDE.md) was written.** That
-> document specifies a flat side-scroller with parallax layers and a slime that
-> runs to the right. The game is now a three quarter view from behind the
-> runner, so §1, §7, §8, §10, §11 and §12 of the spec describe the old design.
-> The rules, difficulty curve and UI sections still hold.
+Three shapes, three tracks, three lives. Every five clean passes earns a shield
+that eats the next wall whatever shape it is.
 
 ## Run it
 
@@ -79,9 +76,23 @@ camera, change `kVanishX`, `kNearLaneX` and `kNearGroundY`.
 ## Art and audio
 
 The game ships with placeholder art generated in code by
-`lib/core/placeholder_art.dart`. Everything is already behind a `Sprite`, so
-dropping in the real PNGs listed in CLAUDE.md section 17 means replacing
-`buildPlaceholderArt()` with a loader and nothing else.
+`lib/core/placeholder_art.dart`, lit from one direction so the pieces read as
+one scene. Everything already goes through a `Sprite`, so swapping in
+commissioned PNGs means replacing `buildPlaceholderArt()` with a loader and
+touching nothing else.
+
+The art it would replace, into `assets/images/`:
+
+```
+bg/       sky, clouds, hills, trees, bushes, ground
+player/   one slime per shape, plus the shield ring
+walls/    one wall per shape per lane, hole genuinely transparent
+ui/       hearts and the three shape buttons
+```
+
+Two rules for the wall art: the hole must be a real transparent opening, not a
+painted one, and its centre must land on `kHoleLocalY` so it lines up with the
+runner's body when the wall's base sits on the ground.
 
 The sound effects and music loop in `assets/audio/` are placeholders too,
 synthesised as WAV by:
@@ -104,15 +115,17 @@ Only two numbers should be touched after playtesting with an actual child:
 
 Both are in `lib/core/constants.dart`.
 
-The difficulty curve has been tuned away from CLAUDE.md section 16 in two ways:
+The difficulty curve works in one way and deliberately not the other:
 
-- **The speed never changes.** It is held flat at 265, rather than ramping 350
-  to 620. A wall always takes about four and a half seconds to arrive, so the
-  timing a child learns in the first minute is the timing for the whole run.
-- **Only the spacing tightens.** `kGapDecay` closes the gap between walls from
-  1.8s to 1.15s over `kRampScore`, which is 500 - fifty walls. The spec put it
-  at 200, which was twenty walls: a child hit the ceiling before they had
+- **The speed never changes.** It is held flat at 265. A wall always takes
+  about four and a half seconds to arrive, so the timing a child learns in the
+  first minute is the timing for the whole run. Earlier versions ramped the
+  speed and it made the game unplayable well before a six year old had
   finished learning the shapes.
+- **Only the spacing tightens.** `kGapDecay` closes the gap between walls from
+  1.8s to 1.15s over `kRampScore`, which is 500 - fifty walls, two or three
+  minutes of play. Past that the run holds its pace and becomes a stamina
+  test rather than getting harder.
 
 `kRampScore` is the one knob for pace, and `kGapDecay` is derived from it. To
 put a speed ramp back, raise `kSpeedMax` above `kSpeedStart`; `kSpeedPerPoint`
