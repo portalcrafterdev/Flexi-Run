@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/constants.dart';
 import '../core/level.dart';
+import '../core/prefs.dart';
 import '../game/shape_shifter_game.dart';
 
 /// Easy, Medium and Hard, side by side.
@@ -22,20 +23,26 @@ class LevelPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Level>(
       valueListenable: game.level,
-      builder: (_, current, _) => Row(
-        children: <Widget>[
-          for (final level in Level.values) ...<Widget>[
-            if (level != Level.values.first)
-              const SizedBox(width: kLevelTileGap),
-            Expanded(
-              child: _LevelTile(
-                label: level.label,
-                selected: level == current,
-                onPressed: () => game.chooseLevel(level),
+      // Also rebuilt when the best changes, so a record set on the run you
+      // just finished is already on the button when you get back here.
+      builder: (_, current, _) => ValueListenableBuilder<int>(
+        valueListenable: game.highScore,
+        builder: (_, _, _) => Row(
+          children: <Widget>[
+            for (final level in Level.values) ...<Widget>[
+              if (level != Level.values.first)
+                const SizedBox(width: kLevelTileGap),
+              Expanded(
+                child: _LevelTile(
+                  label: level.label,
+                  best: Prefs.highScore(level),
+                  selected: level == current,
+                  onPressed: () => game.chooseLevel(level),
+                ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -46,11 +53,17 @@ class LevelPicker extends StatelessWidget {
 class _LevelTile extends StatelessWidget {
   const _LevelTile({
     required this.label,
+    required this.best,
     required this.selected,
     required this.onPressed,
   });
 
   final String label;
+
+  /// This level's own best. Zero until it has been played, which is honest:
+  /// an empty slot is an invitation.
+  final int best;
+
   final bool selected;
   final VoidCallback onPressed;
 
@@ -94,16 +107,41 @@ class _LevelTile extends StatelessWidget {
                     color: selected ? kPlayFill : kLevelTileFill,
                     borderRadius: BorderRadius.circular(kLevelTileRadius),
                   ),
-                  child: Center(
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: kLevelTileFontSize,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.4,
-                        color: selected ? kMenuButtonInk : kLevelTileInk,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: kLevelTileFontSize,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                          height: 1,
+                          color: selected ? kMenuButtonInk : kLevelTileInk,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: kLevelBestGap),
+                      Text(
+                        // Named, not just a number. A figure on its own under
+                        // a level name could be anything - a score to beat, a
+                        // level number, how many you have played.
+                        //
+                        // Unpadded, unlike the live score. That one is padded
+                        // so it holds its width while it counts up; a record
+                        // is a fact being reported, and 00400 overstates how
+                        // big the numbers in this game get.
+                        'Best $best',
+                        style: TextStyle(
+                          fontSize: kLevelBestFontSize,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.4,
+                          height: 1,
+                          color: selected
+                              ? kLevelBestSelectedInk
+                              : kLevelBestInk,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

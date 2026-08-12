@@ -115,7 +115,7 @@ class ShapeShifterGame extends FlameGame {
   Future<void> onLoad() async {
     _art = await buildPlaceholderArt();
     _field = WallField(_art);
-    _road = Road();
+    _road = Road(_art);
     _clouds = Clouds(_art.clouds);
     _scenery = Scenery(_art);
     _player = Player(_art);

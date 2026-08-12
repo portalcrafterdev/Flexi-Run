@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flame/sprite.dart';
 
 import 'art_character.dart';
@@ -22,6 +24,9 @@ class ArtPack {
     required this.trees,
     required this.bushes,
     required this.tuft,
+    required this.grassPatchDeep,
+    required this.grassPatchLit,
+    required this.vergeTufts,
     required this.shieldRing,
     required this.shard,
     required this.leg,
@@ -45,6 +50,12 @@ class ArtPack {
   final List<Sprite> bushes;
 
   final Sprite tuft;
+
+  /// Ground cover, held as raw images rather than sprites because the road
+  /// stamps hundreds of them in a single batched draw call.
+  final ui.Image grassPatchDeep;
+  final ui.Image grassPatchLit;
+  final List<ui.Image> vergeTufts;
   final Sprite shieldRing;
   final Sprite shard;
   final Sprite leg;
@@ -87,6 +98,11 @@ Future<ArtPack> buildPlaceholderArt() async {
         Sprite(await paintBush(i)),
     ],
     tuft: Sprite(await paintTuft()),
+    grassPatchDeep: await paintGrassPatch(false),
+    grassPatchLit: await paintGrassPatch(true),
+    vergeTufts: <ui.Image>[
+      for (var i = 0; i < kVergeTuftVariants; i++) await paintVergeTuft(i),
+    ],
     shieldRing: Sprite(await paintShieldRing()),
     shard: Sprite(await paintShard()),
     leg: Sprite(await paintLeg()),

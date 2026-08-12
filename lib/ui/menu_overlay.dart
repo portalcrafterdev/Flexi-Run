@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../core/constants.dart';
-import '../core/lane.dart';
 import '../core/shape_kind.dart';
 import '../game/shape_shifter_game.dart';
 import 'level_picker.dart';
@@ -145,8 +144,6 @@ class _Home extends StatelessWidget {
           edge: kHowToEdge,
           onPressed: onHowTo,
         ),
-        const SizedBox(height: kMenuButtonGap * 0.6),
-        _Stats(game: game),
       ],
     );
   }
@@ -193,47 +190,9 @@ class _Tagline extends StatelessWidget {
   }
 }
 
-class _Stats extends StatelessWidget {
-  const _Stats({required this.game});
-
-  final ShapeShifterGame game;
-
-  @override
-  Widget build(BuildContext context) {
-    return MenuCard(
-      rimmed: false,
-      padding: kMenuButtonGap * 0.8,
-      child: ValueListenableBuilder<int>(
-        valueListenable: game.highScore,
-        builder: (_, high, _) => Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Icon(
-              Icons.star_rounded,
-              size: kMenuIconSize,
-              color: kMenuCardEdge,
-            ),
-            const SizedBox(width: kMenuRuleGap),
-            Text(
-              // Counted, not written in: a fourth shape is a v2 unlock and
-              // this line should not need editing when it lands. The track
-              // count follows the level, which is how Easy explains itself.
-              'Best ${high.toString().padLeft(kScoreDigits, '0')}'
-              '   ·   ${ShapeKind.values.length} shapes'
-              '   ·   ${game.level.value.centreLaneOnly ? 1 : Lane.values.length}'
-              ' ${game.level.value.centreLaneOnly ? 'track' : 'tracks'}',
-              style: const TextStyle(
-                fontSize: kMenuStatSize,
-                fontWeight: FontWeight.w700,
-                color: kMenuStat,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// The stats pill that used to sit under the buttons is gone. The best score
+// still has a home: the game over panel names it, per level, at the moment it
+// actually means something.
 
 class _GearButton extends StatelessWidget {
   const _GearButton({required this.onPressed});

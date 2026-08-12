@@ -1,10 +1,12 @@
 import 'package:flame_test/flame_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flexirun/core/lane.dart';
 import 'package:flexirun/core/level.dart';
 import 'package:flexirun/core/prefs.dart';
 import 'package:flexirun/game/shape_shifter_game.dart';
+import 'package:flexirun/ui/level_picker.dart';
 
 // What each level actually does, checked by playing it rather than by reading
 // the numbers back off the enum - difficulty_test.dart already does that.
@@ -110,6 +112,25 @@ void main() {
 
       game.chooseLevel(Level.hard);
       expect(game.highScore.value, 120);
+    });
+
+    testWidgets('is shown on each level button, its own and no other', (
+      tester,
+    ) async {
+      await Prefs.setHighScore(Level.easy, 540);
+      await Prefs.setHighScore(Level.hard, 120);
+      final game = await boot();
+
+      await tester.pumpWidget(
+        MaterialApp(home: Scaffold(body: LevelPicker(game: game))),
+      );
+
+      // Named, so the number cannot be mistaken for something else, and not
+      // padded out to five digits it will never reach.
+      expect(find.text('Best 540'), findsOneWidget);
+      expect(find.text('Best 120'), findsOneWidget);
+      // Medium has never been played, and says so rather than borrowing one.
+      expect(find.text('Best 0'), findsOneWidget);
     });
 
     test('a best from before there were levels lands on medium', () async {

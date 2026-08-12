@@ -395,7 +395,13 @@ const kGroundPatchJitter = 0.6;
 
 /// Blurred, so they read as mottling rather than as lily pads on a lawn. A
 /// hard edged ellipse on grass is a shape; a soft one is texture.
+///
+/// Baked into a sprite once, never applied at draw time - see
+/// [paintGrassPatch]. Blurring per frame was costing the game its frame rate.
 const kGroundPatchBlur = 12.0;
+
+/// Room round the blotch for the blur to fall off in, in blur radii.
+const kGroundPatchBlurPad = 3.0;
 
 /// Patches shrink away over this stretch rather than popping out of existence,
 /// and are not drawn at all beyond the far end of it.
@@ -423,6 +429,13 @@ const kVergeTuftCullZ = 620.0;
 /// Blades grow out of the ground over this last stretch rather than appearing
 /// at full height, so nothing pops into being at the cull distance.
 const kVergeTuftGrowZ = 260.0;
+
+/// Clumps are stamped from a few pre-drawn images rather than built as paths
+/// every frame. The box one is drawn in, and how many different ones there are.
+const kVergeTuftW = 40.0;
+const kVergeTuftH = 34.0;
+const kVergeTuftVariants = 3;
+const kVergeSeed = 47;
 
 // ---------------------------------------------------------------------------
 // Roadside scenery
@@ -960,14 +973,25 @@ const kMenuSparkleCount = 16;
 
 /// The level picker: three pills in a row, the chosen one filled green like
 /// the PLAY slab so it reads as the thing that is switched on.
-const kLevelTileH = 44.0;
+const kLevelTileH = 60.0;
 const kLevelTileRadius = 13.0;
 const kLevelTileDepth = 4.0;
-const kLevelTileGap = 6.0;
+const kLevelTileGap = 11.0;
 const kLevelTileFontSize = 14.0;
+
+/// Air between the level's name and its best, so the two read as two things
+/// rather than one stacked label.
+const kLevelBestGap = 5.0;
 const kLevelTileFill = Color(0xFFF2F7F3);
 const kLevelTileEdge = Color(0xFFDCE7E0);
 const kLevelTileInk = Color(0xFF7B8A82);
+
+/// Each level carries its own best under its name, so the three can be
+/// compared at a glance. Smaller and dimmer than the name: it is what you have
+/// done, not what you are choosing.
+const kLevelBestFontSize = 11.0;
+const kLevelBestInk = Color(0xFFA3B0A9);
+const kLevelBestSelectedInk = Color(0xCCFFFFFF);
 
 // ---------------------------------------------------------------------------
 // App icon

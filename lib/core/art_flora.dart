@@ -232,6 +232,87 @@ void _twigs(Canvas canvas, Random rng, Offset centre, double w, double h) {
   }
 }
 
+/// One soft blotch of grass, with the blur baked in.
+///
+/// Pre-rendered rather than blurred as it is drawn. A MaskFilter allocates an
+/// offscreen the size of the path's bounds every time it runs, and running two
+/// of them per frame across the whole field was costing more than everything
+/// else in the game put together - enough to force 300ms garbage collections
+/// mid-run. Baked once, the same look costs one texture lookup.
+Future<ui.Image> paintGrassPatch(bool lit) {
+  const pad = kGroundPatchBlur * kGroundPatchBlurPad;
+  return rasterize(
+    kGroundPatchW + pad * 2,
+    kGroundPatchH + pad * 2,
+    kArtScaleLayer,
+    (canvas, size) => softOval(
+      canvas,
+      Rect.fromCenter(
+        center: Offset(size.width / 2, size.height / 2),
+        width: kGroundPatchW,
+        height: kGroundPatchH,
+      ),
+      lit ? kGrassPatchLitColor : kGrassPatchDeepColor,
+      kGroundPatchBlur,
+    ),
+  );
+}
+
+/// A clump of blades for the verge, drawn once and then stamped.
+///
+/// Several variants, because one repeated clump reads as a pattern - but a
+/// handful of images stamped thousands of times is nothing next to rebuilding
+/// every blade as a path on every frame.
+Future<ui.Image> paintVergeTuft(int variant) {
+  final rng = Random(kVergeSeed + variant);
+  return rasterize(kVergeTuftW, kVergeTuftH, kArtScaleSprite, (canvas, size) {
+    for (var i = 0; i < kVergeBlades; i++) {
+      final root = Offset(
+        size.width / 2 + (rng.nextDouble() - 0.5) * size.width * 0.7,
+        size.height,
+      );
+      final path = Path();
+      _blade(
+        path,
+        root,
+        kVergeBladeH * (0.6 + rng.nextDouble() * 0.6),
+        (rng.nextDouble() - 0.5) * kVergeBladeLean,
+        kVergeBladeW,
+      );
+      canvas.drawPath(
+        path,
+        fillWith(rng.nextBool() ? kVergeBladeColor : kVergeBladeLitColor),
+      );
+    }
+  });
+}
+
+/// One tapered blade, appended to [into]. Wide at the root and pointed at the
+/// tip: a constant width blade reads as wire.
+void _blade(
+  Path into,
+  Offset root,
+  double height,
+  double lean,
+  double half,
+) {
+  into
+    ..moveTo(root.dx - half, root.dy)
+    ..quadraticBezierTo(
+      root.dx - half * 0.3 + lean * 0.4,
+      root.dy - height * 0.6,
+      root.dx + lean,
+      root.dy - height,
+    )
+    ..quadraticBezierTo(
+      root.dx + half + lean * 0.4,
+      root.dy - height * 0.55,
+      root.dx + half,
+      root.dy,
+    )
+    ..close();
+}
+
 /// Grass tufts, scattered on the verge. Blades are filled and tapered rather
 /// than stroked: a blade of grass has a width at the root and a point at the
 /// tip, and a constant-width stroke reads as wire.

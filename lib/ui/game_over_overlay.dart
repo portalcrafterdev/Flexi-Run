@@ -27,9 +27,11 @@ class GameOverOverlay extends StatelessWidget {
         ValueListenableBuilder<int>(
           valueListenable: game.highScore,
           // Named, because the best is per level: without it the number looks
-          // like an all-time best that Easy has quietly been beating.
+          // like an all-time best that Easy has quietly been beating. Not
+          // padded, unlike the score above it: that one is a readout holding
+          // its width, this is a fact.
           builder: (_, high, _) =>
-              PanelLine('${game.level.value.label} best  ${_pad(high)}'),
+              PanelLine('${game.level.value.label} best  $high'),
         ),
         const SizedBox(height: kMenuButtonGap),
         BigButton(label: 'PLAY AGAIN', onPressed: game.startRun),

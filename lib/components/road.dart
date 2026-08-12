@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:ui';
 
@@ -6,6 +7,7 @@ import 'package:flame/components.dart';
 
 import '../core/art_canvas.dart';
 import '../core/constants.dart';
+import '../core/placeholder_art.dart';
 import '../game/projection.dart';
 
 /// The grass and the path running away to the horizon.
@@ -16,7 +18,7 @@ import '../game/projection.dart';
 /// the same way, for the same reason - a field painted once and left alone is
 /// wallpaper, however good the painting is.
 class Road extends PositionComponent {
-  Road({Random? random}) : super(priority: kPrioRoad) {
+  Road(this._art, {Random? random}) : super(priority: kPrioRoad) {
     final rng = random ?? Random(kGroundSeed);
     for (var i = 0; i < kGroundPatchCount; i++) {
       _patches.add(_Patch.random(rng, i));
@@ -24,10 +26,21 @@ class Road extends PositionComponent {
     for (var i = 0; i < kVergeTuftCount; i++) {
       _tufts.add(_Tuft.random(rng, i));
     }
+    _deepStamp = _Stamp(_art.grassPatchDeep, _patches.length);
+    _litStamp = _Stamp(_art.grassPatchLit, _patches.length);
+    _tuftStamps = <_Stamp>[
+      for (final image in _art.vergeTufts) _Stamp(image, _tufts.length),
+    ];
   }
 
+  final ArtPack _art;
   final List<_Patch> _patches = <_Patch>[];
   final List<_Tuft> _tufts = <_Tuft>[];
+
+  // Built in the constructor: one batch per image, reused every frame.
+  late final _Stamp _deepStamp;
+  late final _Stamp _litStamp;
+  late final List<_Stamp> _tuftStamps;
 
   /// How far the rungs have travelled, wrapped to one rung spacing.
   double _offset = 0;
@@ -109,94 +122,54 @@ class Road extends PositionComponent {
   /// Patches of longer and shorter grass either side of the path. Projected
   /// and scrolled like everything else, so the field moves.
   ///
-  /// Both tones go into one path each and are blurred as a whole, which is two
-  /// draw calls for the entire field. Blurring them individually would be
-  /// fifty-odd, and a blur is the most expensive thing on the frame.
+  /// Stamped from two pre-blurred images, one draw call per tone however many
+  /// blotches there are. The blur is baked into the image: applying one here
+  /// would allocate an offscreen the size of the field on every frame, which
+  /// is what used to cost this game its frame rate.
   void _cover(Canvas canvas) {
-    final deep = Path();
-    final lit = Path();
+    _deepStamp.begin();
+    _litStamp.begin();
     for (final patch in _patches) {
       final z = _wrap(patch.basisZ - _grassScroll, kGroundPatchSpanZ);
       if (z > kGroundPatchCullZ) continue;
-      final s = scaleAt(z);
-      // Patches shrink away toward the horizon rather than fading, because a
-      // shared blurred path cannot carry a per-patch alpha.
+      // Blotches shrink away toward the horizon rather than fading, because
+      // one batch of stamps carries one colour between them all.
       final fade =
           ((kGroundPatchCullZ - z) / (kGroundPatchCullZ - kGroundPatchFadeZ))
               .clamp(0.0, 1.0);
-      final w = patch.w * s * fade;
+      final scale = patch.jitter * scaleAt(z) * fade;
+      final w = kGroundPatchW * scale;
       final x = sideXAt(patch.lateral, z);
       if (w < 1 || x + w < 0 || x - w > kWorldW) continue;
 
-      (patch.lit ? lit : deep).addOval(
-        Rect.fromCenter(
-          center: Offset(x, groundYAt(z)),
-          width: w,
-          height: patch.h * s * fade,
-        ),
-      );
+      (patch.lit ? _litStamp : _deepStamp).at(x, groundYAt(z), scale);
     }
-
-    final paint = Paint()
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, kGroundPatchBlur);
-    canvas
-      ..drawPath(deep, paint..color = kGrassPatchDeepColor)
-      ..drawPath(lit, paint..color = kGrassPatchLitColor);
+    _deepStamp.render(canvas);
+    _litStamp.render(canvas);
   }
 
-  /// Grass along both edges of the path. Every blade goes into one of two
-  /// paths and the whole verge is two draw calls, however many blades it has.
+  /// Grass along both edges of the path, stamped the same way.
   void _verge(Canvas canvas) {
-    final deep = Path();
-    final lit = Path();
+    for (final stamp in _tuftStamps) {
+      stamp.begin();
+    }
     for (final tuft in _tufts) {
       final z = _wrap(tuft.basisZ - _vergeScroll, kVergeTuftSpanZ);
       if (z > kVergeTuftCullZ) continue;
-      final s = min(scaleAt(z), kVergeMaxScale);
-      final grow = ((kVergeTuftCullZ - z) / kVergeTuftGrowZ).clamp(0.0, 1.0);
       final x = sideXAt(tuft.lateral, z);
-      if (x < -kVergeBladeH || x > kWorldW + kVergeBladeH) continue;
+      if (x < -kVergeTuftW || x > kWorldW + kVergeTuftW) continue;
 
-      final y = groundYAt(z);
-      for (var i = 0; i < kVergeBlades; i++) {
-        _blade(
-          tuft.lit[i] ? lit : deep,
-          Offset(x + tuft.dx[i] * s, y),
-          kVergeBladeH * tuft.height[i] * s * grow,
-          tuft.lean[i] * s,
-          kVergeBladeW * s,
-        );
-      }
+      final grow = ((kVergeTuftCullZ - z) / kVergeTuftGrowZ).clamp(0.0, 1.0);
+      _tuftStamps[tuft.variant].at(
+        x,
+        groundYAt(z),
+        min(scaleAt(z), kVergeMaxScale) * grow,
+        bottomAnchored: true,
+      );
     }
-    canvas
-      ..drawPath(deep, fillWith(kVergeBladeColor))
-      ..drawPath(lit, fillWith(kVergeBladeLitColor));
-  }
-
-  /// One tapered blade, appended to [into]. Wide at the root and pointed at
-  /// the tip: a constant width blade reads as wire.
-  static void _blade(
-    Path into,
-    Offset root,
-    double height,
-    double lean,
-    double half,
-  ) {
-    into
-      ..moveTo(root.dx - half, root.dy)
-      ..quadraticBezierTo(
-        root.dx - half * 0.3 + lean * 0.4,
-        root.dy - height * 0.6,
-        root.dx + lean,
-        root.dy - height,
-      )
-      ..quadraticBezierTo(
-        root.dx + half + lean * 0.4,
-        root.dy - height * 0.55,
-        root.dx + half,
-        root.dy,
-      )
-      ..close();
+    for (final stamp in _tuftStamps) {
+      stamp.render(canvas);
+    }
   }
 
   /// Brings a scrolled depth back into the draw range.
@@ -237,19 +210,74 @@ class Road extends PositionComponent {
   }
 }
 
+/// A batch of one image, stamped many times in a single draw call.
+///
+/// The transform and source buffers are allocated once and rewritten in place
+/// every frame, so drawing the whole ground cover allocates nothing at all.
+/// Entries left over from a shorter frame are zeroed, which draws nothing.
+class _Stamp {
+  _Stamp(this._image, int capacity)
+    : _transforms = Float32List(capacity * 4),
+      _sources = Float32List(capacity * 4) {
+    // Every stamp uses the whole image, so the source rectangles never change.
+    for (var i = 0; i < capacity; i++) {
+      _sources[i * 4 + 2] = _image.width.toDouble();
+      _sources[i * 4 + 3] = _image.height.toDouble();
+    }
+  }
+
+  final ui.Image _image;
+  final Float32List _transforms;
+  final Float32List _sources;
+  final Paint _paint = Paint();
+
+  int _count = 0;
+
+  void begin() => _count = 0;
+
+  /// Places the image centred on [x], [y] at [scale]. With [bottomAnchored]
+  /// the image sits on that point instead, which is what a tuft of grass
+  /// growing out of the ground wants.
+  void at(double x, double y, double scale, {bool bottomAnchored = false}) {
+    if (_count * 4 >= _transforms.length) return;
+    final anchorX = _image.width / 2;
+    final anchorY = bottomAnchored ? _image.height.toDouble() : _image.height / 2;
+    final i = _count++ * 4;
+    // scos, ssin, tx, ty. No rotation, so ssin is zero and the translation is
+    // just the anchor scaled out of the position.
+    _transforms[i] = scale;
+    _transforms[i + 1] = 0;
+    _transforms[i + 2] = x - scale * anchorX;
+    _transforms[i + 3] = y - scale * anchorY;
+  }
+
+  void render(Canvas canvas) {
+    for (var i = _count * 4; i < _transforms.length; i++) {
+      _transforms[i] = 0;
+    }
+    canvas.drawRawAtlas(
+      _image,
+      _transforms,
+      _sources,
+      null,
+      null,
+      null,
+      _paint,
+    );
+  }
+}
+
 /// A blotch of grass, at a fixed place in the field.
 class _Patch {
   const _Patch({
     required this.basisZ,
     required this.lateral,
-    required this.w,
-    required this.h,
+    required this.jitter,
     required this.lit,
   });
 
   factory _Patch.random(Random rng, int index) {
     final side = index.isEven ? -1.0 : 1.0;
-    final jitter = 1 + (rng.nextDouble() - 0.5) * kGroundPatchJitter;
     return _Patch(
       // Spread evenly along the span, then nudged, so the field is never
       // clumped at one depth and never in a visible line either.
@@ -259,16 +287,18 @@ class _Patch {
           side *
           (kGroundPatchNear +
               rng.nextDouble() * (kGroundPatchFar - kGroundPatchNear)),
-      w: kGroundPatchW * jitter,
-      h: kGroundPatchH * jitter,
+      jitter: 1 + (rng.nextDouble() - 0.5) * kGroundPatchJitter,
       lit: rng.nextBool(),
     );
   }
 
   final double basisZ;
   final double lateral;
-  final double w;
-  final double h;
+
+  /// How far this one varies from the drawn size. One number, not two: the
+  /// stamp scales uniformly, so the blotch keeps its shape.
+  final double jitter;
+
   final bool lit;
 }
 
@@ -277,10 +307,7 @@ class _Tuft {
   const _Tuft({
     required this.basisZ,
     required this.lateral,
-    required this.dx,
-    required this.height,
-    required this.lean,
-    required this.lit,
+    required this.variant,
   });
 
   factory _Tuft.random(Random rng, int index) {
@@ -288,25 +315,14 @@ class _Tuft {
     return _Tuft(
       basisZ: kVergeTuftSpanZ * (index + rng.nextDouble()) / kVergeTuftCount,
       lateral: side * (kRoadHalfWidth + rng.nextDouble() * kVergeTuftBand),
-      dx: <double>[
-        for (var i = 0; i < kVergeBlades; i++)
-          (rng.nextDouble() - 0.5) * kVergeBladeH * 0.5,
-      ],
-      height: <double>[
-        for (var i = 0; i < kVergeBlades; i++) 0.6 + rng.nextDouble() * 0.6,
-      ],
-      lean: <double>[
-        for (var i = 0; i < kVergeBlades; i++)
-          (rng.nextDouble() - 0.5) * kVergeBladeLean,
-      ],
-      lit: <bool>[for (var i = 0; i < kVergeBlades; i++) rng.nextBool()],
+      variant: rng.nextInt(kVergeTuftVariants),
     );
   }
 
   final double basisZ;
   final double lateral;
-  final List<double> dx;
-  final List<double> height;
-  final List<double> lean;
-  final List<bool> lit;
+
+  /// Which of the drawn clumps this one is, so the verge is not one shape
+  /// repeated down the whole path.
+  final int variant;
 }
