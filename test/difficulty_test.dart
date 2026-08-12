@@ -133,13 +133,18 @@ void main() {
       expect(Level.hard.centreLaneOnly, isFalse);
     });
 
-    test('easy is more forgiving in every way it can be', () {
-      expect(Level.easy.lives, greaterThan(Level.medium.lives));
+    test('easy is more forgiving in every way except lives', () {
+      // Lives are the same on all three now. Easy earns its name by giving
+      // more time to think, more slack on a late tap and a shield more often -
+      // not by handing out extra goes, which only made the hearts at the top
+      // of the screen mean a different number on each level.
+      expect(Level.easy.lives, Level.medium.lives);
       expect(
         Level.easy.forgiveSeconds,
         greaterThan(Level.medium.forgiveSeconds),
       );
       expect(Level.easy.shieldEvery, lessThan(Level.medium.shieldEvery));
+      expect(Level.easy.gapStart, greaterThan(Level.medium.gapStart));
     });
 
     test('hard is tighter but not meaner', () {

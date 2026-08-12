@@ -81,6 +81,9 @@ class ShapeShifterGame extends FlameGame {
   int _streak = 0;
   double _hitT = 0;
 
+  /// Whether this run has already had its one second chance.
+  bool _extraLifeUsed = false;
+
   Player get player => _player;
 
   ArtPack get art => _art;
@@ -203,8 +206,42 @@ class ShapeShifterGame extends FlameGame {
     unawaited(Prefs.setLevel(value));
   }
 
+  /// Whether a second chance can still be offered on this run.
+  ///
+  /// One per run. Without the limit a player with patience for adverts never
+  /// has to stop, and the score stops meaning anything.
+  bool get canOfferExtraLife =>
+      _state == GameState.gameOver && !_extraLifeUsed;
+
+  /// Puts the runner back on the road with one life, keeping the score.
+  ///
+  /// A continue, not a restart. The score, the coins and the level's own
+  /// difficulty ramp all carry on from where they were, because the thing the
+  /// player wanted back was the run - starting over is what PLAY AGAIN is for
+  /// and nobody would sit through an advert for it.
+  void reviveWithExtraLife() {
+    if (!canOfferExtraLife) return;
+    _extraLifeUsed = true;
+    _clearPause();
+    lives.value = 1;
+    _hitT = 0;
+    _shake.reset();
+    _field.clearApproach(kReviveClearZ, kReviveBreather);
+    _player
+      ..reset()
+      ..isVisible = true
+      ..setInvulnerable(kReviveInvulnSeconds);
+    activeShape.value = _player.shape;
+    activeLane.value = _player.lane;
+    shielded.value = false;
+    _streak = 0;
+    state = GameState.running;
+    unawaited(Audio.startMusic());
+  }
+
   void startRun() {
     _clearPause();
+    _extraLifeUsed = false;
     score.value = 0;
     coins.value = 0;
     lives.value = level.value.lives;

@@ -56,7 +56,18 @@ const kFocal = 260.0;
 // ---------------------------------------------------------------------------
 
 /// Walls appear at this depth, small, near the horizon.
-const kWallSpawnZ = 1300.0;
+///
+/// It was 1300, which put a wall on screen for only about five seconds before
+/// it arrived - and for the first second of that it is small enough to miss.
+/// The complaint was exactly that: the wall is not there in the distance, it
+/// turns up once you have already run some way. Further back does not make it
+/// bigger when it appears - it makes it appear sooner, which is what "seeing
+/// it coming" actually means.
+///
+/// The reaction window is unchanged by this. That is set by the gap between
+/// one wall arriving and the next, which is the spawn interval, not the
+/// distance they travel.
+const kWallSpawnZ = 2000.0;
 
 /// The runner's plane. A wall crossing this is a hit or a pass.
 const kWallHitZ = 0.0;
@@ -180,7 +191,14 @@ const kMinWallSeparationZ = 260.0;
 const kEasyGapStart = 2.4;
 const kEasyGapMin = 1.9;
 const kEasyRampScore = 700.0;
-const kEasyLives = 5;
+/// Three, the same as every other level.
+///
+/// Easy used to start with five. Every level having a different number of
+/// hearts made the row at the top left mean something different depending on
+/// where you were, and the extra two were papering over difficulty that the
+/// gap and the single centre track already handle. Easy is easier because
+/// less is coming at you, not because you get more goes at it.
+const kEasyLives = kLives;
 const kEasyShieldEvery = 3;
 const kEasyForgiveSeconds = 0.25;
 
@@ -344,8 +362,18 @@ const kPrioNearSpan = 50;
 
 const kPrioBurst = 800;
 
-/// Depth quantisation for the priority bands.
-const kDepthPriorityStep = 8.0;
+/// The furthest anything in the world is ever drawn.
+///
+/// Draw order is quantised across this range, so it has to cover the most
+/// distant thing there is - the scenery, which starts further back than the
+/// walls do. Measuring from the wall spawn instead left everything beyond it
+/// sharing one priority, so a far tree and a just-spawned wall had no defined
+/// order between them.
+const kDepthPriorityFarZ = kScenerySpawnZ;
+
+/// Depth quantisation for the priority bands. Derived, so moving either the
+/// spawn depth or the band width cannot silently flatten the sort.
+const kDepthPriorityStep = kDepthPriorityFarZ / kPrioFarSpan;
 
 // ---------------------------------------------------------------------------
 // Road
@@ -946,6 +974,37 @@ const kPauseIcon = 32.0;
 const kPanelTitleSize = 26.0;
 const kPanelScoreSize = 24.0;
 
+// ---------------------------------------------------------------------------
+// Ads.
+//
+// Two placements, both at the end of a run, plus a banner on the menu. Nothing
+// interrupts play: a full-screen ad that lands mid-run in a reflex game costs
+// the player the run it interrupted, and this one is played by six year olds.
+// ---------------------------------------------------------------------------
+
+/// Runs between interstitials. One means every run opens with an ad.
+///
+/// Set to every run on request. Worth knowing what that buys: a short run here
+/// is fifteen seconds, so this is close to an ad every fifteen seconds, and
+/// Google Play's Families policy is specific about ads that get in the way of
+/// play for an audience this age. If installs start dropping or the listing
+/// gets flagged, this is the first number to move - 2 or 3 costs far less
+/// revenue than it looks like it should.
+const kRunsPerInterstitial = 1;
+
+/// A revive clears the road out to here, so the wall that was arriving is not
+/// still arriving when the runner comes back.
+const kReviveClearZ = 1500.0;
+
+/// And holds the next spawn back this long, so there is a moment to get a
+/// thumb back on the pad before anything has to be solved.
+const kReviveBreather = 2.2;
+
+/// Blinking, on the house. Longer than an ordinary hit: the player has just
+/// sat through an ad for this life and should not lose it to a wall they were
+/// never going to see coming.
+const kReviveInvulnSeconds = 2.0;
+
 const kOverlayPad = 18.0;
 
 const kUiScrim = Color(0x66000000);
@@ -1141,10 +1200,13 @@ const kMenuSunX = 0.52;
 const kMenuSunY = 0.36;
 const kMenuSunR = 0.085;
 
-/// Cloud positions, set out by hand rather than spaced evenly: an even spread
-/// put one squarely on the sun, and the sun is the thing the whole sky is lit
-/// from. The gap in the middle is its.
-const kMenuCloudXs = <double>[0.15, 0.30, 0.68, 0.87];
+/// Cloud positions, set out by hand rather than spaced evenly.
+///
+/// Two gaps are deliberate. Nothing sits over the sun, which is what the whole
+/// sky is lit from; and nothing sits over the top left corner, where the name
+/// goes - a cloud behind the logo puts white behind white letters and takes
+/// the edge off the one thing on the screen that has to read instantly.
+const kMenuCloudXs = <double>[0.44, 0.70, 0.89];
 const kMenuCloudTop = 0.04;
 const kMenuCloudBand = 0.13;
 
@@ -1280,6 +1342,11 @@ const kMenuButtonInk = Color(0xFFFFFFFF);
 
 const kPlayFill = Color(0xFF41C275);
 const kPlayEdge = Color(0xFF2C8B51);
+
+/// The second chance slab. Gold rather than green, because it is not the
+/// button that carries on - it is the one that costs something first.
+const kRewardFill = Color(0xFFF0A93B);
+const kRewardEdge = Color(0xFFB87A1E);
 const kHowToFill = Color(0xFF4A93E8);
 const kHowToEdge = Color(0xFF3169AC);
 const kSheetFill = Color(0xFFFFFFFF);

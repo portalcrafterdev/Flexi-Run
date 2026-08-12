@@ -4,6 +4,20 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<!-- AdMob app ID. Not an ad unit: the SDK will not start without it. The
+	     unit IDs live in lib/core/ad_ids.dart. -->
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-8244651657160773~9771201312</string>
+	<!-- Google's own network. A full SKAdNetwork list for the other ad
+	     networks belongs here before release, from the current AdMob docs;
+	     without it iOS attribution is limited to Google's own demand. -->
+	<key>SKAdNetworkItems</key>
+	<array>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>cstr6suwn9.skadnetwork</string>
+		</dict>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

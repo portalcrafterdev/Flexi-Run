@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flexirun/core/audio.dart';
@@ -45,6 +47,28 @@ void main() {
       await Audio.suspend();
       Audio.wake();
       expect(Audio.isOffScreen, isFalse);
+    });
+
+    test('a dragged music bar settles on its final position', () async {
+      // The bug this guards: every step of a drag fired an unserialised round
+      // trip to the player, so the stop from passing zero could land after the
+      // start from coming back up. The music went off and stayed off, with
+      // nothing left that would turn it on again.
+      //
+      // Fired the way a drag fires them - all at once, none awaited - and then
+      // the queue is drained. Whatever the bar was left on has to be what the
+      // audio layer ends up believing.
+      for (final level in <double>[0.8, 0.4, 0, 0.2, 0, 1.0]) {
+        await Prefs.setMusicLevel(level);
+        unawaited(Audio.applyMusicLevel());
+      }
+      // Joining the back of the queue: it cannot finish before the jobs in
+      // front of it have.
+      await Audio.applyMusicLevel();
+
+      expect(Prefs.musicLevel, 1.0);
+      // And the queue is idle rather than wedged behind a failed job.
+      await Audio.applyMusicLevel().timeout(const Duration(seconds: 5));
     });
 
     test('waking is not conditional on the run being unpaused', () async {

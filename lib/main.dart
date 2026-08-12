@@ -4,6 +4,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'core/ads.dart';
 import 'core/audio.dart';
 import 'core/constants.dart';
 import 'core/prefs.dart';
@@ -27,6 +28,10 @@ Future<void> main() async {
   // Plays under the menu as well as the run; the Music toggle stops it.
   // Deliberately not awaited: nothing should delay the first frame.
   unawaited(Audio.startMusic());
+  // Same again. The SDK takes a moment to start and then goes off to fetch an
+  // ad; none of that may sit between launching and the menu appearing, and
+  // nothing needs an ad until a run has already been played.
+  unawaited(Ads.init());
   runApp(const ShapeShifterApp());
 }
 

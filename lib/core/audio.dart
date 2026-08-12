@@ -230,12 +230,36 @@ class Audio {
   /// dragging it has no way to tell what it did.
   static void preview() => unawaited(_sfx(_pass));
 
+  /// Music work, run strictly one job at a time.
+  ///
+  /// This is the whole fix for the bar that killed the music. Every one of
+  /// these is a round trip to a platform player, and the Music bar fires a
+  /// fresh one on every step of a drag. Run loose they interleave: the stop
+  /// from the moment the bar passed zero lands *after* the start from the
+  /// moment it came back up, so the track is left stopped with nothing
+  /// remaining to turn it on. Queued, the last thing the player did is the
+  /// last thing that happens - and because each job reads the level when it
+  /// runs rather than when it was queued, the bar's final position wins.
+  static Future<void> _musicQueue = Future<void>.value();
+
+  static Future<void> _queue(Future<void> Function() work) {
+    final next = _musicQueue.then((_) => work()).catchError((_) {});
+    _musicQueue = next;
+    return next;
+  }
+
   /// Applies the player's music level to whatever is already playing, and
   /// starts or stops the track if they have just crossed zero.
-  static Future<void> applyMusicLevel() async {
+  static Future<void> applyMusicLevel() => _queue(_applyMusicLevel);
+
+  // Each job below calls the private forms of the others, never the queued
+  // ones: a queued job waiting on the queue it is already at the head of would
+  // wait for itself.
+
+  static Future<void> _applyMusicLevel() async {
     if (!_musicReady) return;
     if (Prefs.musicLevel <= 0) {
-      await stopMusic();
+      await _stopMusic();
       return;
     }
     // Parked, not stopped: set the volume the track will come back at, and
@@ -245,13 +269,15 @@ class Audio {
       return;
     }
     if (!FlameAudio.bgm.isPlaying) {
-      await startMusic();
+      await _startMusic();
       return;
     }
     await _setMusicVolume(_musicVolume);
   }
 
-  static Future<void> startMusic() async {
+  static Future<void> startMusic() => _queue(_startMusic);
+
+  static Future<void> _startMusic() async {
     if (!_musicReady || Prefs.musicLevel <= 0 || FlameAudio.bgm.isPlaying) {
       return;
     }
@@ -263,7 +289,9 @@ class Audio {
     }
   }
 
-  static Future<void> stopMusic() async {
+  static Future<void> stopMusic() => _queue(_stopMusic);
+
+  static Future<void> _stopMusic() async {
     _paused = false;
     // Check readiness first: touching FlameAudio.bgm builds a platform-backed
     // player, which must not happen when audio never came up.
@@ -275,7 +303,9 @@ class Audio {
     }
   }
 
-  static Future<void> pauseMusic() async {
+  static Future<void> pauseMusic() => _queue(_pauseMusic);
+
+  static Future<void> _pauseMusic() async {
     if (!_musicReady || !FlameAudio.bgm.isPlaying) return;
     _paused = true;
     try {
@@ -285,18 +315,25 @@ class Audio {
     }
   }
 
-  static Future<void> resumeMusic() async {
+  static Future<void> resumeMusic() => _queue(_resumeMusic);
+
+  static Future<void> _resumeMusic() async {
     if (!_musicReady) return;
     // Turned off while the game was parked: there is nothing to come back to,
     // and the level is what decides that, not the pause.
     if (Prefs.musicLevel <= 0) {
-      await stopMusic();
+      await _stopMusic();
       return;
     }
     _paused = false;
     try {
       await FlameAudio.bgm.resume();
       await _setMusicVolume(_musicVolume);
+      // A resume on a player that was stopped rather than paused does nothing
+      // at all, and leaves the game silent with no way back. Coming out of a
+      // pause is exactly where that happens, so it is checked rather than
+      // assumed.
+      if (!FlameAudio.bgm.isPlaying) await _startMusic();
     } catch (_) {
       // Nothing to resume.
     }

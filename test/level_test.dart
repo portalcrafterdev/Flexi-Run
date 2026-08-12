@@ -47,13 +47,19 @@ void main() {
       );
     });
 
-    test('starts with more lives than medium', () async {
+    test('starts with the same lives as every other level', () async {
       final game = await boot();
       game.chooseLevel(Level.easy);
       game.startRun();
 
       expect(game.lives.value, Level.easy.lives);
-      expect(game.lives.value, greaterThan(Level.medium.lives));
+      // Easy used to start with five. A row of hearts that means a different
+      // number depending on which level you picked is a worse readout than a
+      // fixed one, and Easy is already easier for the reasons that matter:
+      // more thinking time, and only one track to be on.
+      for (final level in Level.values) {
+        expect(level.lives, Level.medium.lives, reason: '${level.label} lives');
+      }
     });
   });
 

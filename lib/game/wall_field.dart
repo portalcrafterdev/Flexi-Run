@@ -48,6 +48,27 @@ class WallField {
     _spawnT = kFirstSpawnDelay;
   }
 
+  /// Clears the road out to [z] and holds the next spawn back by [breather].
+  ///
+  /// For a revive. The wall that ended the run is still standing right in
+  /// front of the runner, with the next one behind it: dropping a player back
+  /// into that spends the life they just earned before they can press
+  /// anything. Coins go too - leaving a trail hanging in the air with its wall
+  /// removed reads as a bug.
+  void clearApproach(double z, double breather) {
+    _walls.removeWhere((wall) {
+      if (wall.z > z) return false;
+      wall.removeFromParent();
+      return true;
+    });
+    _coins.removeWhere((coin) {
+      if (coin.z > z) return false;
+      coin.removeFromParent();
+      return true;
+    });
+    if (_spawnT < breather) _spawnT = breather;
+  }
+
   /// Brings every wall one frame closer, spawning and culling as needed.
   void advance({
     required double speed,

@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../core/ads.dart';
 import '../core/audio.dart';
 import '../core/constants.dart';
 import '../game/shape_shifter_game.dart';
+import 'banner_slot.dart';
 import 'level_picker.dart';
 import 'menu_background.dart';
 import 'menu_logo.dart';
@@ -44,36 +47,16 @@ class _MenuOverlayState extends State<MenuOverlay> {
         child: Stack(
           children: <Widget>[
             const Positioned.fill(child: MenuBackground()),
-            SafeArea(
-              minimum: const EdgeInsets.symmetric(
-                horizontal: kOverlayPad,
-                vertical: kOverlayPad / 2,
-              ),
-              child: LayoutBuilder(
-                builder: (_, box) {
-                  // Both dimensions have to be there: a short landscape phone
-                  // is wide enough for the spread but cannot hold the runner
-                  // and the buttons at the same time.
-                  final spread =
-                      box.maxWidth >= kMenuWideW && box.maxHeight >= kMenuWideH;
-                  return spread
-                      ? _Spread(
-                          game: widget.game,
-                          height: box.maxHeight,
-                          onPlay: widget.game.startRun,
-                          onHowTo: () => _open(_Sheet.howTo),
-                        )
-                      : Center(
-                          child: SingleChildScrollView(
-                            child: _Stacked(
-                              game: widget.game,
-                              onPlay: widget.game.startRun,
-                              onHowTo: () => _open(_Sheet.howTo),
-                            ),
-                          ),
-                        );
-                },
-              ),
+            _body(),
+            // Laid over the bottom of the scene rather than given a row of
+            // its own. Taking the height out of the layout was worse than it
+            // sounds: the menu dropped under the threshold for the spread,
+            // fell back to one centred column, and the runner disappeared -
+            // an advert loading rearranged the home screen. It sits below
+            // everything the layout puts on screen, over empty grass.
+            const Align(
+              alignment: Alignment.bottomCenter,
+              child: BannerSlot(),
             ),
             Positioned(
               top: 0,
@@ -98,6 +81,40 @@ class _MenuOverlayState extends State<MenuOverlay> {
     );
   }
 
+  Widget _body() {
+    return SafeArea(
+      minimum: const EdgeInsets.symmetric(
+        horizontal: kOverlayPad,
+        vertical: kOverlayPad / 2,
+      ),
+      child: LayoutBuilder(
+        builder: (_, box) {
+          // Both dimensions have to be there: a short landscape phone is wide
+          // enough for the spread but cannot hold the runner and the buttons
+          // at the same time.
+          final spread =
+              box.maxWidth >= kMenuWideW && box.maxHeight >= kMenuWideH;
+          return spread
+              ? _Spread(
+                  game: widget.game,
+                  height: box.maxHeight,
+                  onPlay: _play,
+                  onHowTo: () => _open(_Sheet.howTo),
+                )
+              : Center(
+                  child: SingleChildScrollView(
+                    child: _Stacked(
+                      game: widget.game,
+                      onPlay: _play,
+                      onHowTo: () => _open(_Sheet.howTo),
+                    ),
+                  ),
+                );
+        },
+      ),
+    );
+  }
+
   // The same bars the pause panel carries, so the two can never disagree.
   Widget _settingsSheet() => MenuSheet(
     title: 'Settings',
@@ -115,6 +132,11 @@ class _MenuOverlayState extends State<MenuOverlay> {
       MenuStep(number: 4, text: 'Fit through, and keep going!'),
     ],
   );
+
+  /// PLAY goes through the same door the game over panel's PLAY AGAIN does, so
+  /// the interstitial pacing counts every run once however the player got
+  /// here - rather than being skippable by taking the long way round.
+  void _play() => unawaited(Ads.beforeRun(widget.game.startRun));
 
   void _open(_Sheet sheet) => setState(() => _sheet = sheet);
 
