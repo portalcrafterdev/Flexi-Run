@@ -5,11 +5,16 @@ import 'dart:ui';
 import 'art_canvas.dart';
 import 'constants.dart';
 
-// Scenery, drawn in code until the real PNGs land. Everything here is lit from
-// the same direction as the runner and the walls, and everything far away is
-// washed toward the haze colour, because that is what distance does to colour.
+// Sky, weather and the hills on the horizon, drawn in code until the real PNGs
+// land. Everything here is lit from the same direction as the runner and the
+// walls, and everything far away is washed toward the haze colour, because
+// that is what distance does to colour.
 
-/// Sky, sun and the haze that gathers on the horizon.
+/// Sky, sun, light shafts and the haze that gathers on the horizon.
+///
+/// No clouds: those live in their own drifting band, because a cloud painted
+/// into the sky can never move, and a sky that never moves has no weather in
+/// it.
 Future<ui.Image> paintSky() {
   return rasterize(kWorldW, kWorldH, kArtScaleLayer, (canvas, size) {
     final area = Offset.zero & size;
@@ -23,10 +28,8 @@ Future<ui.Image> paintSky() {
         ),
     );
 
-    final sun = Offset(
-      size.width * kSunCentre.dx,
-      size.height * kSunCentre.dy,
-    );
+    final sun = Offset(size.width * kSunCentre.dx, size.height * kSunCentre.dy);
+    _shafts(canvas, sun);
     canvas
       ..drawCircle(
         sun,
@@ -41,49 +44,135 @@ Future<ui.Image> paintSky() {
         Paint()
           ..color = kSunCoreColor
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 22),
+      )
+      // Air thickens toward the horizon, which is most of why a landscape
+      // reads as deep rather than as a backdrop.
+      ..drawRect(
+        Rect.fromLTRB(0, kHorizonY - kHillsH, size.width, kHorizonY + 4),
+        Paint()
+          ..shader = ui.Gradient.linear(
+            Offset(0, kHorizonY - kHillsH),
+            Offset(0, kHorizonY),
+            const <Color>[Color(0x00EAF7FF), kHazeColor],
+          ),
       );
-
-    _clouds(canvas, size);
-
-    // Air thickens toward the horizon, which is most of why a landscape reads
-    // as deep rather than as a backdrop.
-    canvas.drawRect(
-      Rect.fromLTRB(0, kHorizonY - kHillsH, size.width, kHorizonY + 4),
-      Paint()
-        ..shader = ui.Gradient.linear(
-          Offset(0, kHorizonY - kHillsH),
-          Offset(0, kHorizonY),
-          const <Color>[Color(0x00EAF7FF), kHazeColor],
-        ),
-    );
   });
 }
 
-void _clouds(Canvas canvas, Size size) {
-  final rng = Random(4);
-  for (var i = 0; i < 5; i++) {
-    final at = Offset(
-      size.width * (0.06 + i * 0.21) + rng.nextDouble() * 40,
-      size.height * (0.08 + rng.nextDouble() * 0.16),
+/// Shafts leaning down and away from the sun.
+void _shafts(Canvas canvas, Offset sun) {
+  final paint = Paint()
+    ..color = kSunShaftColor
+    ..maskFilter = const MaskFilter.blur(BlurStyle.normal, kSunShaftBlur);
+  for (var i = 0; i < kSunShafts; i++) {
+    final lean = (i - (kSunShafts - 1) / 2) * kSunShaftSpread;
+    final foot = sun.translate(lean * kSunShaftLength, kSunShaftLength);
+    canvas.drawPath(
+      Path()
+        ..moveTo(sun.dx - kSunShaftWidth * 0.2, sun.dy)
+        ..lineTo(sun.dx + kSunShaftWidth * 0.2, sun.dy)
+        ..lineTo(foot.dx + kSunShaftWidth, foot.dy)
+        ..lineTo(foot.dx - kSunShaftWidth, foot.dy)
+        ..close(),
+      paint,
     );
-    final w = 90 + rng.nextDouble() * 90;
-    final paint = Paint()
-      ..color = kCloudColor.withValues(alpha: 0.5 + rng.nextDouble() * 0.28)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
-    for (var puff = 0; puff < 3; puff++) {
-      canvas.drawOval(
+  }
+}
+
+/// One tile of the drifting cloud band.
+///
+/// Every cloud is kept clear of the left and right edges by [kCloudEdgeGuard],
+/// so two copies of this image laid end to end never cut one in half and the
+/// band can wrap without a seam.
+Future<ui.Image> paintClouds() {
+  final rng = Random(kCloudSeed);
+  return rasterize(kWorldW, kCloudBandH, kArtScaleLayer, (canvas, size) {
+    final guard = size.width * kCloudEdgeGuard;
+    final span = size.width - guard * 2;
+
+    for (var i = 0; i < kCirrusCount; i++) {
+      final at = Offset(
+        guard + rng.nextDouble() * span,
+        size.height * (0.06 + rng.nextDouble() * 0.22),
+      );
+      softOval(
+        canvas,
         Rect.fromCenter(
-          center: at.translate(
-            (puff - 1) * w * 0.32,
-            (rng.nextDouble() - 0.5) * 12,
-          ),
-          width: w * (0.62 + rng.nextDouble() * 0.4),
-          height: w * 0.3,
+          center: at,
+          width: kCirrusW * (0.5 + rng.nextDouble() * 0.8),
+          height: kCirrusH * (0.6 + rng.nextDouble() * 0.8),
         ),
-        paint,
+        kCirrusColor,
+        kCirrusBlur,
       );
     }
+
+    for (var i = 0; i < kCloudCount; i++) {
+      _cumulus(
+        canvas,
+        Offset(
+          guard + span * (i + 0.5) / kCloudCount + rng.nextDouble() * 30,
+          size.height *
+              (kCloudHighest +
+                  rng.nextDouble() * (kCloudLowest - kCloudHighest)),
+        ),
+        kCloudMinW + rng.nextDouble() * (kCloudMaxW - kCloudMinW),
+        rng,
+      );
+    }
+  });
+}
+
+/// A fair weather cumulus: billowing crown, flat base.
+///
+/// The flat base is not decoration - it is the condensation level, the height
+/// at which rising air cools enough to become visible, and it is the same
+/// height for every cloud in the sky. Round-bottomed clouds read as cotton
+/// wool for exactly this reason.
+void _cumulus(Canvas canvas, Offset at, double w, Random rng) {
+  final h = w * kCloudAspect;
+  final base = at.dy + h * 0.5;
+  final puffs = <(Offset, double)>[];
+  for (var i = 0; i < kCloudPuffs; i++) {
+    final t = i / (kCloudPuffs - 1) - 0.5;
+    // Tallest in the middle, tapering to the shoulders.
+    final rise = (1 - (t * 2).abs()) * (0.5 + rng.nextDouble() * 0.5);
+    puffs.add((
+      at.translate(
+        t * w * (1 - kCloudPuffSpread * 0.5),
+        -rise * h * kCloudPuffSpread,
+      ),
+      h * (0.34 + rise * 0.4) * (0.85 + rng.nextDouble() * 0.3),
+    ));
   }
+
+  canvas
+    ..save()
+    ..clipRect(Rect.fromLTRB(at.dx - w, at.dy - h * 1.6, at.dx + w, base));
+
+  // The belly first, as one soft mass the lit puffs then sit on top of.
+  for (final (centre, r) in puffs) {
+    canvas.drawCircle(centre.translate(0, h * 0.2), r, fillWith(kCloudShadeColor));
+  }
+  for (final (centre, r) in puffs) {
+    canvas.drawCircle(
+      centre,
+      r * 0.94,
+      volumeShade(centre, r, kCloudLitColor, kCloudMidColor, kCloudShadeColor),
+    );
+  }
+  // A shadow gathering along the flat base, where the cloud shades itself.
+  canvas
+    ..drawRect(
+      Rect.fromLTRB(at.dx - w, base - h * 0.34, at.dx + w, base),
+      Paint()
+        ..shader = ui.Gradient.linear(
+          Offset(0, base - h * 0.34),
+          Offset(0, base),
+          const <Color>[Color(0x00A9C6DC), kCloudBaseShadow],
+        ),
+    )
+    ..restore();
 }
 
 /// Rolling hills with a castle, sitting on the horizon.
@@ -117,9 +206,32 @@ Future<ui.Image> paintHills() {
       ..drawPath(
         mid.shift(const Offset(0, 7)),
         strokeWith(shift(kHillsMidColor, 0.2), 9),
-      )
-      ..restore();
+      );
+    _woodland(canvas, size);
+    canvas.restore();
   });
+}
+
+/// Suggestions of tree cover on the near ridge. Individual trees are far too
+/// small to read at this distance; a broken dark edge along the crest is what
+/// the eye actually uses to tell a wooded hill from a bare one.
+void _woodland(Canvas canvas, Size size) {
+  final rng = Random(kTreeSeed);
+  final paint = fillWith(shift(kHillsMidColor, -0.16).withValues(alpha: 0.5));
+  for (var i = 0; i < 26; i++) {
+    final at = Offset(
+      rng.nextDouble() * size.width,
+      size.height * (0.7 + rng.nextDouble() * 0.3),
+    );
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: at,
+        width: 26 + rng.nextDouble() * 34,
+        height: 14 + rng.nextDouble() * 12,
+      ),
+      paint,
+    );
+  }
 }
 
 void _castle(Canvas canvas, Offset base) {
@@ -145,128 +257,4 @@ void _castle(Canvas canvas, Offset base) {
         roof,
       );
   }
-}
-
-/// A roadside tree. Drawn at its z = 0 size and scaled down by depth.
-Future<ui.Image> paintTree() {
-  return rasterize(kSceneryBaseSize, kSceneryBaseSize, kArtScaleLayer, (
-    canvas,
-    size,
-  ) {
-    final base = Offset(size.width / 2, size.height);
-    final trunkW = size.width * 0.13;
-    final trunkH = size.height * 0.34;
-    final trunk = Rect.fromLTWH(
-      base.dx - trunkW / 2,
-      base.dy - trunkH,
-      trunkW,
-      trunkH,
-    );
-
-    softOval(
-      canvas,
-      Rect.fromCenter(
-        center: base,
-        width: size.width * 0.44,
-        height: size.height * 0.06,
-      ),
-      kContactShadowColor,
-      kContactShadowBlur,
-    );
-    canvas.drawRRect(
-      RRect.fromRectXY(trunk, trunkW * 0.3, trunkW * 0.3),
-      Paint()
-        ..shader = ui.Gradient.linear(
-          trunk.centerLeft,
-          trunk.centerRight,
-          const <Color>[kTreeTrunkColor, kTrunkDarkColor],
-        ),
-    );
-
-    // Clusters, biggest and darkest at the bottom of the canopy where the sky
-    // cannot reach, lightest on the side facing the light.
-    final leafR = size.width * 0.3;
-    final crown = base.dy - trunkH - leafR * 0.55;
-    for (final puff in <(double, double, double, Color)>[
-      (-0.72, 0.42, 0.66, kTreeLeafDeepColor),
-      (0.72, 0.42, 0.66, kTreeLeafDeepColor),
-      (0, 0, 1, kTreeLeafColor),
-      (-0.3, -0.4, 0.55, kTreeLeafLightColor),
-    ]) {
-      final at = Offset(base.dx + leafR * puff.$1, crown + leafR * puff.$2);
-      final r = leafR * puff.$3;
-      canvas.drawCircle(
-        at,
-        r,
-        volumeShade(at, r, shift(puff.$4, 0.16), puff.$4, kTreeLeafDeepColor),
-      );
-    }
-  });
-}
-
-/// A roadside bush, so the verge is not all trees.
-Future<ui.Image> paintBush() {
-  return rasterize(kSceneryBaseSize, kSceneryBaseSize, kArtScaleLayer, (
-    canvas,
-    size,
-  ) {
-    final base = Offset(size.width / 2, size.height);
-    final r = size.width * 0.22;
-    softOval(
-      canvas,
-      Rect.fromCenter(center: base, width: r * 3.4, height: r * 0.5),
-      kContactShadowColor,
-      kContactShadowBlur * 0.7,
-    );
-    for (final puff in <(double, double, double, Color)>[
-      (-0.8, -0.5, 0.8, kBushColor),
-      (0.8, -0.5, 0.8, kBushColor),
-      (0, -0.85, 1, kBushLightColor),
-      (-0.5, -0.35, 0.62, kBushLightColor),
-    ]) {
-      final at = base.translate(r * puff.$1, r * puff.$2);
-      final radius = r * puff.$3;
-      canvas.drawCircle(
-        at,
-        radius,
-        volumeShade(
-          at,
-          radius,
-          shift(puff.$4, 0.2),
-          puff.$4,
-          kTreeLeafDeepColor,
-        ),
-      );
-    }
-  });
-}
-
-/// A few grass tufts, scattered on the verge.
-Future<ui.Image> paintTuft() {
-  final rng = Random(9);
-  return rasterize(kSceneryBaseSize, kSceneryBaseSize, kArtScaleLayer, (
-    canvas,
-    size,
-  ) {
-    final base = Offset(size.width / 2, size.height);
-    for (var i = 0; i < 9; i++) {
-      final dx = (rng.nextDouble() - 0.5) * size.width * 0.6;
-      final h = size.height * (0.12 + rng.nextDouble() * 0.16);
-      final blade = Path()
-        ..moveTo(base.dx + dx, base.dy)
-        ..quadraticBezierTo(
-          base.dx + dx * 1.1,
-          base.dy - h * 0.6,
-          base.dx + dx * 1.35,
-          base.dy - h,
-        );
-      canvas.drawPath(
-        blade,
-        strokeWith(
-          i.isEven ? kGrassDarkColor : kTreeLeafDeepColor,
-          size.width * 0.03,
-        )..style = PaintingStyle.stroke,
-      );
-    }
-  });
 }

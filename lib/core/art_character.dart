@@ -19,39 +19,56 @@ Future<ui.Image> paintSlime(ShapeKind kind) {
   return rasterize(kPlayerBodySize, kPlayerBodySize, kArtScaleSprite, (
     canvas,
     size,
-  ) {
-    final centre = Offset(size.width / 2, size.height / 2);
-    final radius = kPlayerHalf * kSlimeInset;
-    final body = shapePath(kind, centre, radius);
+  ) => drawSlimeBody(
+    canvas,
+    kind,
+    Offset(size.width / 2, size.height / 2),
+    kPlayerHalf * kSlimeInset,
+  ));
+}
 
-    canvas
-      ..drawPath(
-        body,
-        // See-through: the ground and the dust read faintly through the body,
-        // which is the whole difference between jelly and plastic. The alpha
-        // has to be baked into the gradient stops - a shader ignores the
-        // paint's own colour, so setting it there would do nothing.
-        volumeShade(
-          centre,
-          radius,
-          kSlimeLightColor.withValues(alpha: kSlimeBodyAlpha),
-          kSlimeMidColor.withValues(alpha: kSlimeBodyAlpha),
-          kSlimeDeepColor.withValues(alpha: kSlimeBodyAlpha),
-        ),
-      )
-      ..save()
-      ..clipPath(body);
+/// Draws the runner's body straight onto [canvas].
+///
+/// Public so the app icon can draw the actual character rather than a
+/// lookalike of it: retune the runner and the icon follows. Line weights scale
+/// with [radius], so at the runner's own size this is identical to what it has
+/// always drawn.
+void drawSlimeBody(
+  Canvas canvas,
+  ShapeKind kind,
+  Offset centre,
+  double radius,
+) {
+  final body = shapePath(kind, centre, radius);
+  final k = radius / kSlimeRefRadius;
 
-    _edgeTint(canvas, body, radius);
-    _occlusion(canvas, centre, radius);
-    _gloss(canvas, centre, radius);
-    _rim(canvas, body, centre, radius);
+  canvas
+    ..drawPath(
+      body,
+      // See-through: the ground and the dust read faintly through the body,
+      // which is the whole difference between jelly and plastic. The alpha
+      // has to be baked into the gradient stops - a shader ignores the
+      // paint's own colour, so setting it there would do nothing.
+      volumeShade(
+        centre,
+        radius,
+        kSlimeLightColor.withValues(alpha: kSlimeBodyAlpha),
+        kSlimeMidColor.withValues(alpha: kSlimeBodyAlpha),
+        kSlimeDeepColor.withValues(alpha: kSlimeBodyAlpha),
+      ),
+    )
+    ..save()
+    ..clipPath(body);
 
-    canvas
-      ..restore()
-      // Outside the clip, so the outline stays crisp at the silhouette edge.
-      ..drawPath(body, strokeWith(kSlimeDeepColor, kSlimeStroke));
-  });
+  _edgeTint(canvas, body, radius);
+  _occlusion(canvas, centre, radius);
+  _gloss(canvas, centre, radius, k);
+  _rim(canvas, body, radius, k);
+
+  canvas
+    ..restore()
+    // Outside the clip, so the outline stays crisp at the silhouette edge.
+    ..drawPath(body, strokeWith(kSlimeDeepColor, kSlimeStroke * k));
 }
 
 /// A darker band just inside the outline.
@@ -86,7 +103,7 @@ void _occlusion(Canvas canvas, Offset centre, double radius) {
 
 /// The wet highlight. Two of them: a broad soft one where the light lands and
 /// a small hard one inside it, which is what makes a surface read as glossy.
-void _gloss(Canvas canvas, Offset centre, double radius) {
+void _gloss(Canvas canvas, Offset centre, double radius, double k) {
   final at = centre.translate(radius * kLightOffsetX, radius * kLightOffsetY);
   canvas
     ..drawOval(
@@ -97,7 +114,7 @@ void _gloss(Canvas canvas, Offset centre, double radius) {
       ),
       Paint()
         ..color = kSlimeGlossSmall
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 9),
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, kGlossBlur * k),
     )
     ..drawOval(
       Rect.fromCenter(
@@ -115,11 +132,11 @@ void _gloss(Canvas canvas, Offset centre, double radius) {
 /// Offset *against* the light: shifting the outline up and left leaves its
 /// lower right arc inside the silhouette, which is the edge facing away from
 /// the key light and so the one a rim would catch.
-void _rim(Canvas canvas, Path body, Offset centre, double radius) {
+void _rim(Canvas canvas, Path body, double radius, double k) {
   canvas
     ..save()
     ..translate(radius * kLightOffsetX * 0.2, radius * kLightOffsetY * 0.2)
-    ..drawPath(body, strokeWith(kSlimeRimColor, kRimWidth))
+    ..drawPath(body, strokeWith(kSlimeRimColor, kRimWidth * k))
     ..restore();
 }
 
@@ -147,63 +164,74 @@ Future<ui.Image> paintContactShadow() {
 }
 
 /// A leg: a stubby limb with a foot at the bottom, shaded down its length.
-Future<ui.Image> paintLeg() {
-  return rasterize(kLegW, kLegLength, kArtScaleSprite, (canvas, size) {
-    final footH = size.height * 0.34;
-    final shin = Rect.fromLTWH(
-      size.width * 0.2,
-      0,
-      size.width * 0.6,
-      size.height - footH * 0.5,
+Future<ui.Image> paintLeg() => rasterize(
+  kLegW,
+  kLegLength,
+  kArtScaleSprite,
+  (canvas, size) => drawLeg(canvas, Offset.zero & size),
+);
+
+/// The same leg, into a box on an existing canvas. Shared with the app icon.
+void drawLeg(Canvas canvas, Rect box) {
+  final footH = box.height * 0.34;
+  final shin = Rect.fromLTWH(
+    box.left + box.width * 0.2,
+    box.top,
+    box.width * 0.6,
+    box.height - footH * 0.5,
+  );
+  final foot = Rect.fromLTWH(
+    box.left,
+    box.bottom - footH,
+    box.width,
+    footH,
+  );
+  canvas
+    ..drawRRect(
+      RRect.fromRectXY(shin, box.width * 0.3, box.width * 0.3),
+      faceShade(shin, kSlimeMidColor, kSlimeDeepColor),
+    )
+    ..drawOval(
+      foot,
+      volumeShade(
+        foot.center,
+        foot.width / 2,
+        kSlimeMidColor,
+        kSlimeFootColor,
+        kSlimeFootColor,
+      ),
     );
-    final foot = Rect.fromLTWH(0, size.height - footH, size.width, footH);
-    canvas
-      ..drawRRect(
-        RRect.fromRectXY(shin, size.width * 0.3, size.width * 0.3),
-        faceShade(shin, kSlimeMidColor, kSlimeDeepColor),
-      )
-      ..drawOval(
-        foot,
-        volumeShade(
-          foot.center,
-          foot.width / 2,
-          kSlimeMidColor,
-          kSlimeFootColor,
-          kSlimeFootColor,
-        ),
-      );
-  });
 }
 
 /// An arm, drawn pointing right with the hand on the outer end. The left arm
 /// is the same sprite flipped.
-Future<ui.Image> paintArm() {
-  return rasterize(kArmW, kArmH, kArtScaleSprite, (canvas, size) {
-    final handR = size.height * 0.5;
-    final upper = Rect.fromLTWH(
-      0,
-      size.height * 0.22,
-      size.width - handR,
-      size.height * 0.56,
+Future<ui.Image> paintArm() => rasterize(
+  kArmW,
+  kArmH,
+  kArtScaleSprite,
+  (canvas, size) => drawArm(canvas, Offset.zero & size),
+);
+
+/// The same arm, into a box on an existing canvas. Shared with the app icon.
+void drawArm(Canvas canvas, Rect box) {
+  final handR = box.height * 0.5;
+  final upper = Rect.fromLTWH(
+    box.left,
+    box.top + box.height * 0.22,
+    box.width - handR,
+    box.height * 0.56,
+  );
+  final hand = Offset(box.right - handR, box.center.dy);
+  canvas
+    ..drawRRect(
+      RRect.fromRectXY(upper, box.height * 0.28, box.height * 0.28),
+      faceShade(upper, kSlimeMidColor, kSlimeDeepColor),
+    )
+    ..drawCircle(
+      hand,
+      handR,
+      volumeShade(hand, handR, kSlimeMidColor, kSlimeFootColor, kSlimeFootColor),
     );
-    final hand = Offset(size.width - handR, size.height / 2);
-    canvas
-      ..drawRRect(
-        RRect.fromRectXY(upper, size.height * 0.28, size.height * 0.28),
-        faceShade(upper, kSlimeMidColor, kSlimeDeepColor),
-      )
-      ..drawCircle(
-        hand,
-        handR,
-        volumeShade(
-          hand,
-          handR,
-          kSlimeMidColor,
-          kSlimeFootColor,
-          kSlimeFootColor,
-        ),
-      );
-  });
 }
 
 /// The shield: a ring of light around the runner, with orbiting motes.

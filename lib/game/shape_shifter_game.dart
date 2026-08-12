@@ -7,6 +7,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/foundation.dart';
 
 import '../components/burst.dart';
+import '../components/clouds.dart';
 import '../components/coin.dart';
 import '../components/dust_emitter.dart';
 import '../components/player.dart';
@@ -63,6 +64,7 @@ class ShapeShifterGame extends FlameGame {
   late final ArtPack _art;
   late final WallField _field;
   late final Road _road;
+  late final Clouds _clouds;
   late final Scenery _scenery;
   late final Player _player;
   late final DustEmitter _dust;
@@ -82,6 +84,9 @@ class ShapeShifterGame extends FlameGame {
   /// Coins in play, furthest first. Named apart from [coins], which is the
   /// running count the HUD watches.
   List<Coin> get coinsInPlay => _field.coins;
+
+  /// Roadside props, in the fixed pool they are recycled through.
+  List<SceneryItem> get scenery => _scenery.items;
 
   GameState get state => _state;
 
@@ -104,6 +109,7 @@ class ShapeShifterGame extends FlameGame {
     _art = await buildPlaceholderArt();
     _field = WallField(_art);
     _road = Road();
+    _clouds = Clouds(_art.clouds);
     _scenery = Scenery(_art);
     _player = Player(_art);
     _dust = DustEmitter();
@@ -114,6 +120,7 @@ class ShapeShifterGame extends FlameGame {
         size: Vector2(kWorldW, kWorldH),
         priority: kPrioSky,
       ),
+      _clouds,
       SpriteComponent(
         sprite: _art.hills,
         size: Vector2(kWorldW, kHillsH),
@@ -161,6 +168,7 @@ class ShapeShifterGame extends FlameGame {
 
     final v = speed;
     _road.advance(v, dt);
+    _clouds.advance(v, dt);
     _scenery.advance(v, dt);
     // No runner on screen, no footfalls to kick dust up.
     if (_player.isVisible) _dust.emit(v, dt);
@@ -196,6 +204,7 @@ class ShapeShifterGame extends FlameGame {
     _player.reset();
     _player.isVisible = false;
     _road.reset();
+    _clouds.reset();
     _scenery.reset();
     state = GameState.menu;
   }

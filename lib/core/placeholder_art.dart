@@ -1,7 +1,9 @@
 import 'package:flame/sprite.dart';
 
 import 'art_character.dart';
+import 'art_flora.dart';
 import 'art_wall.dart';
+import 'constants.dart';
 import 'lane.dart';
 import 'placeholder_bg.dart';
 import 'shape_kind.dart';
@@ -15,9 +17,10 @@ import 'shape_kind.dart';
 class ArtPack {
   const ArtPack({
     required this.sky,
+    required this.clouds,
     required this.hills,
-    required this.tree,
-    required this.bush,
+    required this.trees,
+    required this.bushes,
     required this.tuft,
     required this.shieldRing,
     required this.shard,
@@ -30,9 +33,17 @@ class ArtPack {
   });
 
   final Sprite sky;
+
+  /// One tile of the drifting cloud band.
+  final Sprite clouds;
+
   final Sprite hills;
-  final Sprite tree;
-  final Sprite bush;
+
+  /// Several silhouettes of each, not one. A verge lined with the same tree
+  /// over and over reads as wallpaper however well that tree is drawn.
+  final List<Sprite> trees;
+  final List<Sprite> bushes;
+
   final Sprite tuft;
   final Sprite shieldRing;
   final Sprite shard;
@@ -65,9 +76,16 @@ Future<ArtPack> buildPlaceholderArt() async {
   }
   return ArtPack(
     sky: Sprite(await paintSky()),
+    clouds: Sprite(await paintClouds()),
     hills: Sprite(await paintHills()),
-    tree: Sprite(await paintTree()),
-    bush: Sprite(await paintBush()),
+    trees: <Sprite>[
+      for (var i = 0; i < kTreeShapes.length; i++)
+        Sprite(await paintTree(i)),
+    ],
+    bushes: <Sprite>[
+      for (var i = 0; i < kBushShapes.length; i++)
+        Sprite(await paintBush(i)),
+    ],
     tuft: Sprite(await paintTuft()),
     shieldRing: Sprite(await paintShieldRing()),
     shard: Sprite(await paintShard()),

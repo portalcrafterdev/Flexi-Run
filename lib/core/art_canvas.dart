@@ -98,6 +98,29 @@ void speckle(
   }
 }
 
+/// The distance wash for something at depth [z], or null if it is near enough
+/// to need none.
+///
+/// Air is not transparent over a mile of it: colour drains toward the sky and
+/// contrast flattens. Applied with srcATop so the sprite's own transparency
+/// survives - srcOver would fill the whole box.
+ColorFilter? hazeAt(double z) {
+  if (z <= kSceneryHazeStartZ) return null;
+  final t = ((z - kSceneryHazeStartZ) / (kSceneryHazeFullZ - kSceneryHazeStartZ))
+      .clamp(0.0, 1.0);
+  return _hazeFilters[(t * kSceneryHazeSteps).round()];
+}
+
+/// Built once. A new ColorFilter per sprite per frame is an allocation the
+/// scene does not need.
+final List<ColorFilter> _hazeFilters = List<ColorFilter>.generate(
+  kSceneryHazeSteps + 1,
+  (i) => ColorFilter.mode(
+    kHazeTintColor.withValues(alpha: kSceneryHazeMax * i / kSceneryHazeSteps),
+    BlendMode.srcATop,
+  ),
+);
+
 /// Nudges a colour lighter or darker by [amount], -1 to 1.
 ///
 /// Used for per-item jitter, so a repeated element - bricks especially - is

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 
+import '../core/art_canvas.dart';
 import '../core/constants.dart';
 import '../core/placeholder_art.dart';
 import '../game/projection.dart';
@@ -18,6 +19,9 @@ class SceneryItem extends SpriteComponent {
     final s = scaleAt(z);
     size.setValues(kSceneryBaseSize * s, kSceneryBaseSize * s);
     position.setValues(sideXAt(lateral, z), groundYAt(z));
+    // Far scenery is washed toward the sky. Without it a tree at the horizon
+    // is the same tree, only smaller, and the scene has no air in it.
+    paint.colorFilter = hazeAt(z);
     final wanted = depthPriority(z);
     if (priority != wanted) priority = wanted;
   }
@@ -30,7 +34,7 @@ class SceneryItem extends SpriteComponent {
 class Scenery {
   Scenery(ArtPack art, {Random? random})
     : _rng = random ?? Random(),
-      _sprites = <Sprite>[art.tree, art.bush, art.tuft] {
+      _sprites = <Sprite>[...art.trees, ...art.bushes, art.tuft] {
     for (var i = 0; i < kSceneryCount; i++) {
       final item = SceneryItem(
         sprite: _sprites[i % _sprites.length],

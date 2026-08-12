@@ -282,8 +282,9 @@ const kShakeHzY = 27.0;
 // ---------------------------------------------------------------------------
 
 const kPrioSky = 0;
-const kPrioHills = 1;
-const kPrioRoad = 2;
+const kPrioClouds = 1;
+const kPrioHills = 2;
+const kPrioRoad = 3;
 
 /// Depth-sorted band for anything still ahead of the runner.
 const kPrioFarBase = 20;
@@ -319,14 +320,120 @@ const kStripeDuty = 0.45;
 const kRungCount = 26;
 
 // ---------------------------------------------------------------------------
+// Ground cover
+//
+// A flat green field is the single clearest tell that a scene is painted
+// rather than travelled through: it never moves, so the eye reads it as
+// wallpaper behind a scrolling path. These are patches of lighter and darker
+// grass, projected and scrolled with everything else, so the field rushes past
+// at the same rate the path does.
+// ---------------------------------------------------------------------------
+
+const kGroundPatchCount = 84;
+
+/// Seeded, so the field is laid out the same way every run.
+const kGroundSeed = 23;
+
+/// Depth the patch field wraps over. Larger than the draw distance, so a patch
+/// is recycled well out of sight.
+const kGroundPatchSpanZ = 2600.0;
+
+/// Patches sit off the path, from just past its edge out to the verge.
+const kGroundPatchNear = 452.0;
+const kGroundPatchFar = 1600.0;
+
+const kGroundPatchW = 260.0;
+const kGroundPatchH = 54.0;
+
+/// How much each patch varies from that size, as a fraction.
+const kGroundPatchJitter = 0.6;
+
+/// Blurred, so they read as mottling rather than as lily pads on a lawn. A
+/// hard edged ellipse on grass is a shape; a soft one is texture.
+const kGroundPatchBlur = 12.0;
+
+/// Patches shrink away over this stretch rather than popping out of existence,
+/// and are not drawn at all beyond the far end of it.
+const kGroundPatchFadeZ = 900.0;
+const kGroundPatchCullZ = 1600.0;
+
+/// Blades along the edge of the path, so the two surfaces meet in a fringe
+/// rather than a drawn line.
+const kVergeTuftCount = 120;
+const kVergeTuftSpanZ = 900.0;
+const kVergeTuftBand = 76.0;
+const kVergeBlades = 3;
+const kVergeBladeH = 26.0;
+const kVergeBladeW = 2.2;
+const kVergeBladeLean = 13.0;
+
+/// Perspective would make a blade at the camera's feet taller than the runner.
+/// True, and unreadable, so the near end of the scale is capped.
+const kVergeMaxScale = 1.5;
+
+/// Nearest blades are the only ones big enough to read; past this they are
+/// sub-pixel noise and cost more than they show.
+const kVergeTuftCullZ = 620.0;
+
+/// Blades grow out of the ground over this last stretch rather than appearing
+/// at full height, so nothing pops into being at the cull distance.
+const kVergeTuftGrowZ = 260.0;
+
+// ---------------------------------------------------------------------------
 // Roadside scenery
 // ---------------------------------------------------------------------------
 
-const kSceneryCount = 14;
+const kSceneryCount = 24;
 const kScenerySpawnZ = 2400.0;
 const kSceneryLateral = 520.0;
 const kSceneryLateralJitter = 240.0;
 const kSceneryBaseSize = 300.0;
+
+/// One row per tree: canopy width, canopy height, trunk height and lean, all
+/// as fractions of the sprite box.
+///
+/// Three silhouettes rather than one. A verge lined with the same tree over
+/// and over is the other half of why scenery reads as wallpaper.
+const kTreeShapes = <(double, double, double, double)>[
+  (0.74, 0.60, 0.34, 0.015), // broad, round headed
+  (0.44, 0.80, 0.26, -0.03), // tall and narrow
+  (0.86, 0.44, 0.24, 0.045), // low and spreading
+];
+
+/// Same idea for bushes: one round, one low and wide.
+const kBushShapes = <(double, double)>[
+  (0.52, 0.44),
+  (0.72, 0.30),
+];
+
+/// Leaf clusters per canopy. The rim ones are what make the silhouette
+/// scalloped instead of a circle; the core ones fill the mass behind them.
+const kTreeRimClusters = 18;
+const kTreeCoreClusters = 9;
+const kTreeRimRadius = 0.20;
+const kTreeCoreRadius = 0.30;
+
+/// Seeds, so every build draws the same trees.
+const kTreeSeed = 17;
+const kBushSeed = 31;
+
+// ---------------------------------------------------------------------------
+// Haze
+//
+// Air between the camera and a distant object washes it toward the colour of
+// the sky. Without it a far tree is the same tree, only smaller, and the scene
+// has no air in it at all.
+// ---------------------------------------------------------------------------
+
+const kHazeTintColor = Color(0xFFCFE6F0);
+const kSceneryHazeStartZ = 260.0;
+const kSceneryHazeFullZ = 2200.0;
+
+/// How far the wash goes at the horizon. Full white would erase the scenery.
+const kSceneryHazeMax = 0.66;
+
+/// Quantised so the filters can be built once instead of every frame.
+const kSceneryHazeSteps = 14;
 
 // ---------------------------------------------------------------------------
 // Dust, sparkles, shards
@@ -382,6 +489,14 @@ const kWallEdgeWidth = 10.0;
 
 const kSlimeInset = 0.94;
 const kSlimeStroke = 6.0;
+
+/// The radius the runner's shading is tuned at.
+///
+/// Outlines, rims and gloss blurs are absolute numbers picked against this. The
+/// app icon draws the same body several times larger, so it scales them by how
+/// far it is from here - which keeps the icon and the runner identical at the
+/// runner's own size rather than merely similar.
+const kSlimeRefRadius = kPlayerHalf * kSlimeInset;
 const kBackTuftRatio = 0.3;
 
 const kShieldRingWidth = 11.0;
@@ -390,12 +505,14 @@ const kShardRadius = 8.0;
 const kSkyTop = Color(0xFF8FD8F5);
 const kSkyBottom = Color(0xFFDFF3FF);
 const kCloudColor = Color(0xFFFFFFFF);
-const kHillsFarColor = Color(0xFFA8D8B0);
-const kHillsMidColor = Color(0xFF74C084);
+// Distant hills go blue, not green. That shift is the whole reason a range of
+// hills reads as miles away rather than as a green shape behind the trees.
+const kHillsFarColor = Color(0xFFB2D2CB);
+const kHillsMidColor = Color(0xFF83BC90);
 const kCastleColor = Color(0xFFCBB8E8);
 const kCastleRoofColor = Color(0xFF8A6FC4);
-const kTreeTrunkColor = Color(0xFF8A5A3B);
-const kTreeLeafColor = Color(0xFF43A05A);
+const kTreeTrunkColor = Color(0xFF8A6242);
+const kTreeLeafColor = Color(0xFF4B9450);
 const kGrassColor = Color(0xFF64C46E);
 const kGrassDarkColor = Color(0xFF4FAE5B);
 const kPathColor = Color(0xFFE0C594);
@@ -534,6 +651,7 @@ const kSlimeCoreShadow = Color(0x33194E73);
 
 /// Fraction of the body radius taken by the gloss highlight.
 const kGlossRatio = 0.30;
+const kGlossBlur = 9.0;
 const kRimWidth = 5.0;
 
 /// Brick, lit face through to the shaded underside.
@@ -560,21 +678,96 @@ const kSunCentre = Offset(0.74, 0.17);
 const kSunRadius = 132.0;
 const kHazeColor = Color(0x4DEAF7FF);
 
+/// Shafts of light leaning away from the sun. Barely there on purpose: they
+/// should read as weather, not as a lens effect.
+const kSunShafts = 4;
+const kSunShaftColor = Color(0x12FFF6D8);
+const kSunShaftLength = 620.0;
+const kSunShaftWidth = 54.0;
+const kSunShaftSpread = 0.22;
+const kSunShaftBlur = 26.0;
+
+// ---------------------------------------------------------------------------
+// Weather
+//
+// Clouds live in their own band rather than in the sky image, because a cloud
+// that never moves is a wallpaper pattern. They drift very slowly - they are
+// the furthest thing in the scene, so they should barely shift.
+// ---------------------------------------------------------------------------
+
+const kCloudBandH = 290.0;
+const kCloudBandY = 8.0;
+
+/// Fraction of the world speed the cloud band drifts at.
+const kCloudDriftFactor = 0.03;
+
+const kCloudCount = 6;
+
+/// Cumulus are wider than they are tall, and sit on a flat base.
+const kCloudAspect = 0.52;
+const kCloudMinW = 84.0;
+const kCloudMaxW = 140.0;
+
+/// Where in the band they sit, top to bottom. Kept in the upper part of it:
+/// clouds that hang down onto the hills read as fog.
+const kCloudHighest = 0.2;
+const kCloudLowest = 0.46;
+
+/// Puffs per cloud, and how far they may wander from the centre line.
+const kCloudPuffs = 7;
+const kCloudPuffSpread = 0.46;
+
+/// Lit crown, shaded belly. A cloud with a single flat white is a sticker.
+const kCloudLitColor = Color(0xFFFFFFFF);
+const kCloudMidColor = Color(0xFFF0F7FD);
+const kCloudShadeColor = Color(0xFFC9DCEB);
+const kCloudBaseShadow = Color(0x33A9C6DC);
+
+/// The high thin stuff, well above the cumulus.
+const kCirrusCount = 6;
+const kCirrusColor = Color(0x40FFFFFF);
+const kCirrusW = 300.0;
+const kCirrusH = 13.0;
+const kCirrusBlur = 9.0;
+
+/// Clouds are kept clear of the tile edges by this fraction of the width, so
+/// two copies of the band can be laid end to end without cutting one in half.
+const kCloudEdgeGuard = 0.16;
+const kCloudSeed = 4;
+
 /// How far down from the horizon the haze reaches.
 const kHazeDepth = 70.0;
 
 /// Grass, near the camera through to the horizon. Distance washes colour out;
 /// keeping the far end flatter is what gives the ground depth.
-const kGrassNearColor = Color(0xFF4FB65F);
-const kGrassFarColor = Color(0xFF8FD49A);
+///
+/// Three stops, not two: real ground goes warm and yellow where the light hits
+/// it flat in the middle distance, and only cools again close to the camera. A
+/// straight ramp between two greens is the colour of a golf simulator.
+const kGrassNearColor = Color(0xFF56A85E);
+const kGrassMidColor = Color(0xFF7FBC65);
+const kGrassFarColor = Color(0xFF9CCBA1);
+const kGrassMidStop = 0.34;
+
+/// Patches of longer and shorter grass, laid over the ramp. Low alpha, because
+/// they are meant to be felt as texture rather than seen as shapes.
+const kGrassPatchDeepColor = Color(0x5A2A6339);
+const kGrassPatchLitColor = Color(0x5AC9E394);
+const kVergeBladeColor = Color(0xFF3F8A4A);
+const kVergeBladeLitColor = Color(0xFF7CB85C);
+
 const kPathNearColor = Color(0xFFE7CE9F);
 const kPathFarColor = Color(0xFFD8C4A2);
 
 /// Tree and bush shading.
-const kTreeLeafLightColor = Color(0xFF6FC47F);
-const kTreeLeafDeepColor = Color(0xFF2E7A44);
-const kTrunkDarkColor = Color(0xFF6B4229);
-const kBushLightColor = Color(0xFF56A96B);
+///
+/// Foliage in sunlight goes yellow, foliage in its own shade goes blue. Using
+/// a lighter and a darker version of one green instead is what makes painted
+/// trees look like cut paper.
+const kTreeLeafLightColor = Color(0xFF8CC162);
+const kTreeLeafDeepColor = Color(0xFF23603C);
+const kTrunkDarkColor = Color(0xFF5A3823);
+const kBushLightColor = Color(0xFF77B45C);
 
 // ---------------------------------------------------------------------------
 // UI. Logical pixels, not world units: a landscape phone gives about
@@ -719,6 +912,56 @@ const kMenuMoteSeconds = 7;
 const kMenuMoteOpacity = 0.55;
 
 const kMenuSparkleCount = 16;
+
+// ---------------------------------------------------------------------------
+// App icon
+//
+// The home screen's sky and hills with the runner in front of them, drawn from
+// the same palette and the same character code. All fractions of the icon box,
+// so one set of numbers covers everything from a 48 pixel launcher tile to the
+// 1024 store icon.
+// ---------------------------------------------------------------------------
+
+const kIconSunRadius = 0.072;
+const kIconHillFarY = 0.70;
+const kIconHillNearY = 0.82;
+
+/// Where the runner's body centre sits. High enough that the feet land on the
+/// near hill rather than below it.
+const kIconRunnerY = 0.46;
+
+/// Body width as a fraction of the icon.
+///
+/// On the composed icon it can be generous; the adaptive foreground has to
+/// stay inside the launcher's safe circle, which is why that one is smaller.
+const kIconRunnerWidth = 0.48;
+const kIconRunnerWidthAdaptive = 0.44;
+
+// Limbs, as multiples of the body radius. They start inside the body and are
+// drawn behind it, so what shows is only the part past its edge - which is why
+// the reach numbers are near 1 rather than 0.
+const kIconLegLength = 0.62;
+const kIconLegSpread = 0.34;
+const kIconLegTop = 0.78;
+const kIconArmLength = 0.56;
+const kIconArmReach = 0.86;
+const kIconArmDrop = 0.06;
+
+/// The three shapes, drifting in the sky. The runner alone is a blue ball;
+/// these are what say the game is about shapes. Kept few and small - an icon
+/// has to survive being 48 pixels wide.
+const kIconMoteCount = 3;
+const kIconMoteSize = 0.062;
+const kIconMoteOpacity = 0.88;
+const kIconMoteRadius = 0.35;
+
+/// Corner rounding of the legacy Android tile, as a fraction of its width.
+/// iOS and adaptive Android mask their own, so they get none.
+const kIconCorner = 0.22;
+
+/// Android adaptive icons are 108dp with only the middle 72 guaranteed
+/// visible: the launcher crops the rest to whatever shape it likes.
+const kIconAdaptiveDp = 108.0;
 const kMenuCloudCount = 4;
 
 /// A setting is a row, not a line of text with a control stranded on the far
@@ -735,6 +978,14 @@ const kSettingBadge = 32.0;
 const kLevelBarH = 10.0;
 const kLevelThumb = 12.0;
 const kLevelSteps = 5;
+
+/// The same bar, squeezed for the pause panel: badge and slider on one line,
+/// no label. A paused landscape phone has about 360 points of height, and a
+/// panel a child has to scroll to reach KEEP GOING is a broken pause.
+const kLevelBadgeCompact = 26.0;
+const kLevelIconCompact = 17.0;
+const kLevelRowCompactH = 30.0;
+
 const kSwitchOffFill = Color(0xFFCBD6CF);
 const kSwitchThumbColor = Color(0xFFFFFFFF);
 

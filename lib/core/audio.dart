@@ -44,6 +44,15 @@ class Audio {
 
   static bool _sfxReady = false;
   static bool _musicReady = false;
+
+  /// Whether the track is parked rather than stopped.
+  ///
+  /// Needed because a paused player reports itself as not playing, and "not
+  /// playing" is otherwise indistinguishable from "never started" - so turning
+  /// the music up during a pause would start the loop again over the top of a
+  /// paused game.
+  static bool _paused = false;
+
   static Timer? _duckTimer;
 
   static Future<void> init() async {
@@ -114,12 +123,24 @@ class Audio {
     unawaited(_sfx(_gameOver));
   }
 
+  /// A sample of the sound effects, for when the Sound bar moves.
+  ///
+  /// Without it the bar is silent until the next wall arrives, and a child
+  /// dragging it has no way to tell what it did.
+  static void preview() => unawaited(_sfx(_pass));
+
   /// Applies the player's music level to whatever is already playing, and
   /// starts or stops the track if they have just crossed zero.
   static Future<void> applyMusicLevel() async {
     if (!_musicReady) return;
     if (Prefs.musicLevel <= 0) {
       await stopMusic();
+      return;
+    }
+    // Parked, not stopped: set the volume the track will come back at, and
+    // leave it parked. Starting it here would play music over a paused game.
+    if (_paused) {
+      await _setMusicVolume(_musicVolume);
       return;
     }
     if (!FlameAudio.bgm.isPlaying) {
@@ -135,12 +156,14 @@ class Audio {
     }
     try {
       await FlameAudio.bgm.play(_music, volume: _musicVolume);
+      _paused = false;
     } catch (_) {
       _musicReady = false;
     }
   }
 
   static Future<void> stopMusic() async {
+    _paused = false;
     // Check readiness first: touching FlameAudio.bgm builds a platform-backed
     // player, which must not happen when audio never came up.
     if (!_musicReady || !FlameAudio.bgm.isPlaying) return;
@@ -153,6 +176,7 @@ class Audio {
 
   static Future<void> pauseMusic() async {
     if (!_musicReady || !FlameAudio.bgm.isPlaying) return;
+    _paused = true;
     try {
       await FlameAudio.bgm.pause();
     } catch (_) {
@@ -161,13 +185,25 @@ class Audio {
   }
 
   static Future<void> resumeMusic() async {
-    if (!_musicReady || Prefs.musicLevel <= 0) return;
+    if (!_musicReady) return;
+    // Turned off while the game was parked: there is nothing to come back to,
+    // and the level is what decides that, not the pause.
+    if (Prefs.musicLevel <= 0) {
+      await stopMusic();
+      return;
+    }
+    _paused = false;
     try {
       await FlameAudio.bgm.resume();
+      await _setMusicVolume(_musicVolume);
     } catch (_) {
       // Nothing to resume.
     }
   }
+
+  /// Whether the track is parked. Exposed for the pause panel's tests: turning
+  /// the music up mid-pause must not start it playing over the panel.
+  static bool get isMusicParked => _paused;
 
   /// Dips the music under a sound effect, then lifts it back.
   static void _duck() {

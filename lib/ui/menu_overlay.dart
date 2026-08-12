@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../core/audio.dart';
 import '../core/constants.dart';
 import '../core/lane.dart';
-import '../core/prefs.dart';
 import '../core/shape_kind.dart';
 import '../game/shape_shifter_game.dart';
 import 'menu_background.dart';
 import 'menu_widgets.dart';
 import 'shape_glyph.dart';
+import 'sound_levels.dart';
 
 /// The home screen: a title card and two slabs, over the live world.
 ///
@@ -74,32 +73,11 @@ class _MenuOverlayState extends State<MenuOverlay> {
     );
   }
 
+  // The same bars the pause panel carries, so the two can never disagree.
   Widget _settingsSheet() => MenuSheet(
     title: 'Settings',
     onClose: _close,
-    children: <Widget>[
-      MenuLevel(
-        label: 'Sound',
-        icon: Icons.volume_up_rounded,
-        mutedIcon: Icons.volume_off_rounded,
-        tint: kTitleLetterColors[6],
-        value: Prefs.soundLevel,
-        onChanged: (value) => _set(() => Prefs.setSoundLevel(value)),
-      ),
-      MenuLevel(
-        label: 'Music',
-        icon: Icons.music_note_rounded,
-        mutedIcon: Icons.music_off_rounded,
-        tint: kTitleLetterColors[2],
-        value: Prefs.musicLevel,
-        onChanged: (value) => _set(() {
-          Prefs.setMusicLevel(value);
-          // Applied straight away, so dragging the bar is audible while the
-          // finger is still on it.
-          Audio.applyMusicLevel();
-        }),
-      ),
-    ],
+    children: const <Widget>[SoundLevels()],
   );
 
   Widget _howToSheet() => MenuSheet(
@@ -116,11 +94,6 @@ class _MenuOverlayState extends State<MenuOverlay> {
   void _open(_Sheet sheet) => setState(() => _sheet = sheet);
 
   void _close() => setState(() => _sheet = _Sheet.none);
-
-  void _set(VoidCallback action) {
-    action();
-    setState(() {});
-  }
 }
 
 class _Home extends StatelessWidget {

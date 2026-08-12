@@ -1,8 +1,11 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flame_test/flame_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flexirun/components/clouds.dart';
 import 'package:flexirun/components/player.dart';
+import 'package:flexirun/core/art_canvas.dart';
 import 'package:flexirun/components/wall.dart';
 import 'package:flexirun/core/constants.dart';
 import 'package:flexirun/core/lane.dart';
@@ -628,6 +631,60 @@ void main() {
       game.morph(wanted);
 
       expect(game.player.shape, wanted);
+    });
+  });
+
+  group('scenery', () {
+    test('the verge is not lined with the same tree over and over', () async {
+      final game = await boot();
+
+      expect(
+        game.art.trees.length,
+        greaterThan(1),
+        reason: 'one silhouette repeated is what makes scenery read as '
+            'wallpaper',
+      );
+      expect(
+        game.scenery.map((item) => item.sprite).toSet().length,
+        greaterThan(1),
+        reason: 'the pool should be drawing on more than one of them',
+      );
+    });
+
+    test('distance washes scenery toward the sky, and only distance', () {
+      expect(hazeAt(0), isNull);
+      expect(hazeAt(kSceneryHazeStartZ), isNull);
+      expect(hazeAt(kSceneryHazeStartZ + 1), isNotNull);
+      // Quantised, so the same filters are reused rather than rebuilt.
+      expect(hazeAt(kSceneryHazeFullZ), same(hazeAt(kSceneryHazeFullZ * 2)));
+    });
+
+    test('a prop is hazed by where it is, not by what it is', () async {
+      final game = await boot();
+      final item = game.scenery.first;
+
+      item
+        ..z = kSceneryHazeFullZ
+        ..project();
+      expect(item.paint.colorFilter, isNotNull);
+
+      item
+        ..z = 0
+        ..project();
+      expect(item.paint.colorFilter, isNull);
+    });
+
+    test('the cloud band wraps instead of running off the sky', () async {
+      final game = await boot();
+      final clouds = Clouds(game.art.clouds);
+
+      // Far more drift than a whole tile, in one go.
+      clouds.advance(kWorldW * 20 / kCloudDriftFactor, 1);
+      clouds.render(Canvas(PictureRecorder()));
+
+      clouds.reset();
+      clouds.advance(kWorldW / kCloudDriftFactor, 1);
+      clouds.render(Canvas(PictureRecorder()));
     });
   });
 }

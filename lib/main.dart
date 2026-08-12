@@ -12,7 +12,7 @@ import 'game/shape_shifter_game.dart';
 import 'ui/game_over_overlay.dart';
 import 'ui/hud.dart';
 import 'ui/menu_overlay.dart';
-import 'ui/panel.dart';
+import 'ui/pause_overlay.dart';
 import 'ui/shape_pad.dart';
 
 Future<void> main() async {
@@ -144,33 +144,7 @@ class _GameHostState extends State<GameHost> with WidgetsBindingObserver {
                     Overlays.gameOver: (_, game) => GameOverOverlay(game: game),
                   },
             ),
-            ValueListenableBuilder<bool>(
-              valueListenable: _game.pauseNotifier,
-              builder: (_, paused, _) => paused
-                  ? GamePanel(
-                      children: <Widget>[
-                        const PanelTitle('Paused'),
-                        const SizedBox(height: kMenuButtonGap * 0.6),
-                        ValueListenableBuilder<int>(
-                          valueListenable: _game.score,
-                          builder: (_, score, _) => PanelScore(
-                            label: 'Score',
-                            value: score
-                                .toString()
-                                .padLeft(kScoreDigits, '0'),
-                          ),
-                        ),
-                        const SizedBox(height: kMenuButtonGap),
-                        BigButton(
-                          label: 'KEEP GOING',
-                          onPressed: _game.resumePlay,
-                        ),
-                        const SizedBox(height: kMenuButtonGap * 0.6),
-                        MenuButton(onPressed: _game.goToMenu),
-                      ],
-                    )
-                  : const SizedBox.shrink(),
-            ),
+            PausePanel(game: _game),
             // Last, so it stays above the pause panel and can be the thing
             // that unpauses.
             PauseToggle(game: _game),
