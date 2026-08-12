@@ -93,6 +93,13 @@ class _LevelTile extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: selected ? kPlayEdge : kLevelTileEdge,
                     borderRadius: BorderRadius.circular(kLevelTileRadius),
+                    boxShadow: const <BoxShadow>[
+                      BoxShadow(
+                        color: kMenuShadow,
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -108,7 +115,20 @@ class _LevelTile extends StatelessWidget {
                 height: kLevelTileH,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: selected ? kPlayFill : kLevelTileFill,
+                    // Same top-lit moulding as the big slabs, so the picker
+                    // belongs to the same set of controls.
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        Color.lerp(
+                          selected ? kPlayFill : kLevelTileFill,
+                          Colors.white,
+                          kSlabSheen,
+                        )!,
+                        selected ? kPlayFill : kLevelTileFill,
+                      ],
+                    ),
                     borderRadius: BorderRadius.circular(kLevelTileRadius),
                   ),
                   child: Column(

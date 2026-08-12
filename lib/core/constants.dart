@@ -975,25 +975,53 @@ const kMenuShadow = Color(0x38102A18);
 // The menu's own scene: a storybook meadow, painted rather than played. Same
 // palette as the game so the two are obviously one place, but nothing in it
 // moves under its own steam and there is no runner in it.
-const kMenuSkyTop = Color(0xFF5FC3EE);
-const kMenuSkyMid = Color(0xFF9FDDF6);
-const kMenuSkyLow = Color(0xFFE3F5FD);
-const kMenuHillFar = Color(0xFF8ED09A);
+const kMenuSkyTop = Color(0xFF3FA9DF);
+const kMenuSkyMid = Color(0xFF8AD4F2);
+const kMenuSkyLow = Color(0xFFD8F1FB);
+
+/// The last band before the hills, warm rather than blue. A sky that goes pale
+/// blue all the way down reads as overcast; the warmth is the sun reaching the
+/// horizon, and it is what makes the light in the picture come from somewhere.
+const kMenuSkyWarm = Color(0xFFFDF0D2);
+
+const kMenuHillFar = Color(0xFF9AD7A6);
 const kMenuHillMid = Color(0xFF5FBE72);
 const kMenuHillNear = Color(0xFF3FA557);
-const kMenuHillRim = Color(0xFF7ACB8C);
+const kMenuHillRim = Color(0xFF86D398);
 const kMenuSun = Color(0xFFFFE9A3);
 const kMenuSunCore = Color(0xFFFFF6D8);
 const kMenuSparkle = Color(0xB3FFFFFF);
 const kMenuCloud = Color(0xF2FFFFFF);
 
+/// Corners taken down a little, so the middle of the picture is the brightest
+/// part of it and the cards read against a settled background instead of a
+/// flat wash. Barely visible on its own, which is the point.
+const kMenuVignette = Color(0x2E0B3247);
+const kMenuVignetteStart = 0.52;
+
+/// Flowers scattered over the near hill. Cheap, and they are the difference
+/// between a green shape and a meadow.
+const kMenuFlowerCount = 30;
+const kMenuFlowerSize = 2.6;
+const kMenuFlowerSeed = 31;
+const kMenuFlowerColors = <Color>[
+  Color(0xCCFFFFFF),
+  Color(0xB3FFE9A3),
+  Color(0x99FFC7E0),
+];
+
 /// The drifting shape motifs, in place of the coins a collecting game would
 /// float here. Slow enough to be scenery, not decoration that demands the eye.
+///
+/// Small and faint. They used to be pushed out to the edges where the layout
+/// half hid them, and at that size they were fine; brought into the open air
+/// in the middle they turned into a row of large coloured blobs competing with
+/// the buttons. Scenery has to stay behind.
 const kMenuMoteCount = 7;
-const kMenuMoteSize = 26.0;
+const kMenuMoteSize = 15.0;
 const kMenuMoteBob = 9.0;
 const kMenuMoteSeconds = 7;
-const kMenuMoteOpacity = 0.55;
+const kMenuMoteOpacity = 0.34;
 
 const kMenuSparkleCount = 16;
 
@@ -1134,6 +1162,87 @@ const kHowToEdge = Color(0xFF3169AC);
 const kSheetFill = Color(0xFFFFFFFF);
 const kSheetEdge = Color(0xFFD9E2DC);
 
+// ---------------------------------------------------------------------------
+// The home screen's composition.
+//
+// Landscape is wide and short, so the menu is laid out across it rather than
+// stacked down the middle: the name up in the top left, the runner standing on
+// the hill below it, and everything you can press gathered in a column on the
+// right where a thumb already is. A single centred column left two thirds of
+// the screen as empty field and made the menu read as a form rather than a
+// place.
+// ---------------------------------------------------------------------------
+
+/// Below either of these the screen cannot hold the spread layout and the menu
+/// falls back to one centred, scrollable column.
+const kMenuWideW = 620.0;
+const kMenuWideH = 290.0;
+
+/// How far the name and the runner are held off the left edge.
+const kMenuBrandInset = 10.0;
+
+/// The runner takes at most this much of the height, so a short landscape
+/// phone shrinks it rather than pushing it off the bottom.
+///
+/// Generous on purpose. Small, it read as a sticker someone had left in the
+/// corner; at this size it is the second thing on the screen after the name,
+/// which is what it should be - it is the game.
+const kMenuRunnerShare = 0.62;
+const kMenuRunnerBox = 250.0;
+const kMenuRunnerWidth = 0.46;
+
+/// How far along the free half of the screen the runner stands, -1 at the left
+/// edge and 1 at the right. Off the corner, but well clear of the buttons.
+const kMenuRunnerAcross = -0.52;
+
+/// Where the feet land: the crest of the near hill, so the runner is standing
+/// on the scenery and not hovering over it.
+const kMenuRunnerY = 0.42;
+const kMenuRunnerBob = 5.0;
+const kMenuRunnerSeconds = 3;
+
+// ---------------------------------------------------------------------------
+// The logo.
+//
+// The name used to sit in a cream card with a gold rim, which is the shape of
+// a heading on a form. A game's name is a logo, and what makes it read as one
+// is weight: a dark outline and a shadow under it, so the letters sit on the
+// sky rather than float in front of it. Then it needs no box at all.
+// ---------------------------------------------------------------------------
+
+const kLogoSize = 46.0;
+const kLogoSizeNarrow = 33.0;
+const kLogoSpacing = 0.5;
+
+/// Outline and shadow, both as fractions of the font size so the logo is the
+/// same drawing at either size.
+const kLogoOutline = Color(0xFF1E4C6E);
+const kLogoOutlineWidth = 0.115;
+const kLogoShadow = Color(0x59123246);
+const kLogoShadowDrop = 0.085;
+const kLogoShadowBlur = 0.06;
+
+/// Letters ride a shallow wave and lean alternately, so the name bounces along
+/// the way the runner does. Small numbers: past about a tenth of the font size
+/// it stops reading as bounce and starts reading as broken kerning.
+const kLogoBounce = 0.09;
+const kLogoWaveStep = 1.05;
+const kLogoTilt = 0.04;
+
+/// The tagline sits on a translucent lozenge. Plain text over sky is legible
+/// until a cloud drifts under it.
+const kTaglinePill = Color(0xD9FFFFFF);
+const kTaglinePillRadius = 18.0;
+const kTaglinePadX = 13.0;
+const kTaglinePadY = 7.0;
+const kTaglineGlyph = 11.0;
+const kTaglineGlyphGap = 4.0;
+
+/// A slab's face is lit from the top, like everything else in the game: the
+/// fill is the bottom of the gradient and this much white is mixed in at the
+/// top. Enough to look moulded, not enough to look faded.
+const kSlabSheen = 0.18;
+
 /// One colour per letter of the title. Cycled, so a longer name still works.
 const kTitleLetterColors = <Color>[
   Color(0xFFF2724B),
@@ -1144,13 +1253,6 @@ const kTitleLetterColors = <Color>[
   Color(0xFF41C275),
   Color(0xFFF0A93B),
 ];
-
-const kMenuTitleSize = 32.0;
-const kMenuTitleSpacing = 1.5;
-
-/// The three shapes, small, beside the tagline.
-const kMenuRuleGlyph = 12.0;
-const kMenuRuleGap = 5.0;
 
 const kMenuColumnW = 330.0;
 const kMenuButtonH = 50.0;

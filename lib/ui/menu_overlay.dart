@@ -1,20 +1,26 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../core/audio.dart';
 import '../core/constants.dart';
-import '../core/shape_kind.dart';
 import '../game/shape_shifter_game.dart';
 import 'level_picker.dart';
 import 'menu_background.dart';
+import 'menu_logo.dart';
+import 'menu_runner.dart';
 import 'menu_widgets.dart';
-import 'shape_glyph.dart';
 import 'sound_levels.dart';
 
-/// The home screen: a title card and two slabs, over the live world.
+/// The home screen: a name, a character, and the things you can press.
 ///
-/// No background of its own. The sky, the path and the scenery keep drifting
-/// behind it, so pressing PLAY looks like stepping into somewhere that was
-/// already there rather than loading a new screen.
+/// Laid out across the screen rather than stacked down the middle of it. The
+/// phone is held sideways, which makes the screen wide and short, and a single
+/// 330 point column in the centre of that left two thirds of the picture as
+/// empty field - the menu read as a form someone had dropped onto a landscape.
+/// So: the name up in the top left, the runner standing on the hill below it,
+/// and everything pressable gathered in one column on the right, where the
+/// thumb holding the phone already is.
 class MenuOverlay extends StatefulWidget {
   const MenuOverlay({required this.game, super.key});
 
@@ -25,6 +31,8 @@ class MenuOverlay extends StatefulWidget {
 }
 
 enum _Sheet { none, settings, howTo }
+
+const _kTagline = 'Match the shape and slip through the wall!';
 
 class _MenuOverlayState extends State<MenuOverlay> {
   _Sheet _sheet = _Sheet.none;
@@ -37,18 +45,34 @@ class _MenuOverlayState extends State<MenuOverlay> {
           children: <Widget>[
             const Positioned.fill(child: MenuBackground()),
             SafeArea(
-              minimum: const EdgeInsets.all(kOverlayPad / 2),
-              child: Center(
-                child: SingleChildScrollView(
-                  child: SizedBox(
-                    width: kMenuColumnW,
-                    child: _Home(
-                      game: widget.game,
-                      onPlay: widget.game.startRun,
-                      onHowTo: () => _open(_Sheet.howTo),
-                    ),
-                  ),
-                ),
+              minimum: const EdgeInsets.symmetric(
+                horizontal: kOverlayPad,
+                vertical: kOverlayPad / 2,
+              ),
+              child: LayoutBuilder(
+                builder: (_, box) {
+                  // Both dimensions have to be there: a short landscape phone
+                  // is wide enough for the spread but cannot hold the runner
+                  // and the buttons at the same time.
+                  final spread =
+                      box.maxWidth >= kMenuWideW && box.maxHeight >= kMenuWideH;
+                  return spread
+                      ? _Spread(
+                          game: widget.game,
+                          height: box.maxHeight,
+                          onPlay: widget.game.startRun,
+                          onHowTo: () => _open(_Sheet.howTo),
+                        )
+                      : Center(
+                          child: SingleChildScrollView(
+                            child: _Stacked(
+                              game: widget.game,
+                              onPlay: widget.game.startRun,
+                              onHowTo: () => _open(_Sheet.howTo),
+                            ),
+                          ),
+                        );
+                },
               ),
             ),
             Positioned(
@@ -97,8 +121,114 @@ class _MenuOverlayState extends State<MenuOverlay> {
   void _close() => setState(() => _sheet = _Sheet.none);
 }
 
-class _Home extends StatelessWidget {
-  const _Home({
+/// The landscape layout: name top left, runner bottom left, controls right.
+class _Spread extends StatelessWidget {
+  const _Spread({
+    required this.game,
+    required this.height,
+    required this.onPlay,
+    required this.onHowTo,
+  });
+
+  final ShapeShifterGame game;
+  final double height;
+  final VoidCallback onPlay;
+  final VoidCallback onHowTo;
+
+  @override
+  Widget build(BuildContext context) {
+    // Sized off the height rather than fixed, so a short phone gets a smaller
+    // runner instead of one with its feet off the bottom of the screen.
+    final runner = min(kMenuRunnerBox, height * kMenuRunnerShare);
+    return SizedBox(
+      height: height,
+      child: Stack(
+        children: <Widget>[
+          const Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: EdgeInsets.only(left: kMenuBrandInset),
+              child: _Brand(),
+            ),
+          ),
+          Align(
+            alignment: const Alignment(kMenuRunnerAcross, 1),
+            child: MenuRunner(size: runner),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: SizedBox(
+              width: kMenuColumnW,
+              child: _Controls(
+                game: game,
+                onPlay: onPlay,
+                onHowTo: onHowTo,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The fallback: one centred column, for anything too small for the spread.
+class _Stacked extends StatelessWidget {
+  const _Stacked({
+    required this.game,
+    required this.onPlay,
+    required this.onHowTo,
+  });
+
+  final ShapeShifterGame game;
+  final VoidCallback onPlay;
+  final VoidCallback onHowTo;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: kMenuColumnW,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          const Center(child: _Brand(compact: true)),
+          const SizedBox(height: kMenuButtonGap),
+          _Controls(game: game, onPlay: onPlay, onHowTo: onHowTo),
+        ],
+      ),
+    );
+  }
+}
+
+/// The name and what the game is.
+class _Brand extends StatelessWidget {
+  const _Brand({this.compact = false});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: compact
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
+      children: <Widget>[
+        GameLogo(
+          'FLEXI RUN',
+          fontSize: compact ? kLogoSizeNarrow : kLogoSize,
+        ),
+        const SizedBox(height: kMenuButtonGap * 0.6),
+        const TaglinePill(_kTagline),
+      ],
+    );
+  }
+}
+
+/// Everything that can be pressed, in one column.
+class _Controls extends StatelessWidget {
+  const _Controls({
     required this.game,
     required this.onPlay,
     required this.onHowTo,
@@ -114,22 +244,13 @@ class _Home extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        MenuCard(
-          padding: kOverlayPad * 0.7,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const RainbowTitle('FLEXI RUN'),
-              const SizedBox(height: kMenuButtonGap * 0.6),
-              const _Tagline(),
-            ],
-          ),
-        ),
-        const SizedBox(height: kMenuButtonGap * 0.7),
         // Above PLAY, because this is what a parent comes to the menu to set,
         // and PLAY is unmissable wherever it sits.
         LevelPicker(game: game),
-        const SizedBox(height: kMenuButtonGap * 0.7),
+        // Wider than the gap between the two slabs: the pills cast a shadow of
+        // their own and PLAY casts one upwards onto them, so a tight gap here
+        // leaves the pills looking smudged along the bottom.
+        const SizedBox(height: kMenuButtonGap * 1.5),
         ChunkyButton(
           label: 'PLAY',
           icon: Icons.play_arrow_rounded,
@@ -150,50 +271,9 @@ class _Home extends StatelessWidget {
   }
 }
 
-/// The shapes, then what to do with them.
-class _Tagline extends StatelessWidget {
-  const _Tagline();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            for (final kind in ShapeKind.values)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: kMenuRuleGap),
-                child: ShapeGlyph(
-                  kind: kind,
-                  // Each shape in its own title colour, so the mark and the
-                  // name are visibly the same family.
-                  color: kTitleLetterColors[kind.index %
-                      kTitleLetterColors.length],
-                  size: kMenuRuleGlyph,
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: kMenuButtonGap * 0.5),
-        const Text(
-          'Match the shape and slip through the wall!',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: kMenuTaglineSize,
-            fontWeight: FontWeight.w600,
-            color: kMenuTagline,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 // The stats pill that used to sit under the buttons is gone. The best score
-// still has a home: the game over panel names it, per level, at the moment it
-// actually means something.
+// still has a home: each level button carries its own, and the game over panel
+// names it at the moment it actually means something.
 
 class _GearButton extends StatelessWidget {
   const _GearButton({required this.onPressed});

@@ -68,6 +68,15 @@ class _ChunkyButtonState extends State<ChunkyButton> {
                   decoration: BoxDecoration(
                     color: widget.edge,
                     borderRadius: BorderRadius.circular(kMenuButtonRadius),
+                    // Cast onto the meadow, so the slab sits above the scene
+                    // rather than being printed on it.
+                    boxShadow: const <BoxShadow>[
+                      BoxShadow(
+                        color: kMenuShadow,
+                        blurRadius: 12,
+                        offset: Offset(0, 5),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -109,7 +118,14 @@ class _Face extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: fill,
+        // Lit from the top like everything else in the game. A flat fill reads
+        // as a coloured rectangle; a few percent of white at the top edge is
+        // what makes the same rectangle read as a moulded piece of plastic.
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: <Color>[Color.lerp(fill, Colors.white, kSlabSheen)!, fill],
+        ),
         borderRadius: BorderRadius.circular(kMenuButtonRadius),
       ),
       child: Row(
@@ -166,38 +182,8 @@ class MenuCard extends StatelessWidget {
   }
 }
 
-/// The game name, a different colour on every letter.
-class RainbowTitle extends StatelessWidget {
-  const RainbowTitle(this.text, {super.key});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    var colour = 0;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        for (final letter in text.split(''))
-          Text(
-            letter,
-            style: TextStyle(
-              fontSize: kMenuTitleSize,
-              fontWeight: FontWeight.w900,
-              letterSpacing: kMenuTitleSpacing,
-              height: 1,
-              // Spaces keep their slot but do not take a colour, so the two
-              // words do not restart the sequence.
-              color: letter == ' '
-                  ? const Color(0x00000000)
-                  : kTitleLetterColors[colour++ % kTitleLetterColors.length],
-            ),
-          ),
-      ],
-    );
-  }
-}
+// The flat rainbow title that used to live here is gone: the home screen sets
+// the name as a proper logo now, outlined and shadowed, in ui/menu_logo.dart.
 
 /// A white card over the world, for settings and the how-to.
 class MenuSheet extends StatelessWidget {

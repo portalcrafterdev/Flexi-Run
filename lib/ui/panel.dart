@@ -126,7 +126,7 @@ class PanelScore extends StatelessWidget {
               size: kMenuIconSize,
               color: kMenuCardEdge,
             ),
-            const SizedBox(width: kMenuRuleGap),
+            const SizedBox(width: kMenuButtonGap * 0.5),
           ],
           Text(
             label,

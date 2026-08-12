@@ -59,8 +59,17 @@ class _ScenePainter extends CustomPainter {
     _clouds(canvas, size);
     _hills(canvas, size);
     _motes(canvas, size);
+    // Last, over everything: it is the light in the room, not part of the
+    // scenery.
+    _vignette(canvas, size);
   }
 
+  /// Deep blue overhead down to warm cream at the horizon.
+  ///
+  /// The warm band is what makes the light in the picture come from somewhere.
+  /// A sky that stays blue all the way down to the hills is an overcast one,
+  /// however bright the blue is, and the sun drawn on top of it then looks
+  /// stuck on rather than lighting anything.
   void _sky(Canvas canvas, Size size) {
     canvas.drawRect(
       Offset.zero & size,
@@ -68,18 +77,40 @@ class _ScenePainter extends CustomPainter {
         ..shader = ui.Gradient.linear(
           Offset(size.width / 2, 0),
           Offset(size.width / 2, size.height),
-          const <Color>[kMenuSkyTop, kMenuSkyMid, kMenuSkyLow],
-          const <double>[0, 0.55, 1],
+          const <Color>[kMenuSkyTop, kMenuSkyMid, kMenuSkyLow, kMenuSkyWarm],
+          const <double>[0, 0.42, 0.72, 1],
         ),
     );
   }
 
-  /// Up on the left, with soft rays. Same corner the world is lit from, so
-  /// the menu and the game agree about where the light comes from. Kept well
-  /// clear of the hills: a sun half swallowed by a ridge reads as a mistake.
+  /// Corners taken down, so the middle of the picture is the brightest part of
+  /// it and the cards read against a settled background rather than a wash.
+  void _vignette(Canvas canvas, Size size) {
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()
+        ..shader = ui.Gradient.radial(
+          Offset(size.width / 2, size.height * 0.45),
+          size.width * 0.62,
+          const <Color>[Color(0x00000000), kMenuVignette],
+          const <double>[kMenuVignetteStart, 1],
+        ),
+    );
+  }
+
+  /// Up in the open middle of the picture, with soft rays.
+  ///
+  /// It used to sit in the top left corner, which is where the world is lit
+  /// from - but that corner is also where the name and the tagline go, and a
+  /// translucent white lozenge laid over a sun's rays reads as a mistake. Out
+  /// here it has clear sky around it and it fills the gap between the runner
+  /// and the buttons, which was the emptiest part of the screen.
+  ///
+  /// Kept well clear of the hills: a sun half swallowed by a ridge looks like
+  /// one that was positioned by accident.
   void _sun(Canvas canvas, Size size) {
-    final at = Offset(size.width * 0.09, size.height * 0.21);
-    final r = size.height * 0.11;
+    final at = Offset(size.width * 0.48, size.height * 0.17);
+    final r = size.height * 0.10;
 
     canvas.drawCircle(
       at,
@@ -132,9 +163,13 @@ class _ScenePainter extends CustomPainter {
   void _clouds(Canvas canvas, Size size) {
     final rng = Random(5);
     for (var i = 0; i < kMenuCloudCount; i++) {
+      // High, and starting past the name rather than under it. A cloud half
+      // covered by the tagline, or rising out from behind a level button, is
+      // the one thing on the screen that looks unfinished - so they are kept
+      // in the strip of sky above everything the layout puts on top of them.
       final at = Offset(
-        size.width * (0.08 + i * 0.27) + rng.nextDouble() * 30,
-        size.height * (0.08 + rng.nextDouble() * 0.3),
+        size.width * (0.24 + i * 0.19) + rng.nextDouble() * 30,
+        size.height * (0.05 + rng.nextDouble() * 0.15),
       );
       final w = size.width * (0.07 + rng.nextDouble() * 0.05);
       final paint = Paint()..color = kMenuCloud;
@@ -179,6 +214,35 @@ class _ScenePainter extends CustomPainter {
           ..strokeWidth = size.height * 0.03,
       )
       ..restore();
+
+    _flowers(canvas, size, near);
+  }
+
+  /// Specks of colour scattered over the near rise.
+  ///
+  /// Clipped to the hill, so the ones that land above its crest simply are not
+  /// there rather than floating in the sky. Three colours and no stems: at this
+  /// size a flower is a dot, and drawing more of one only makes it muddy.
+  void _flowers(Canvas canvas, Size size, Path near) {
+    final rng = Random(kMenuFlowerSeed);
+    canvas
+      ..save()
+      ..clipPath(near);
+    for (var i = 0; i < kMenuFlowerCount; i++) {
+      final at = Offset(
+        rng.nextDouble() * size.width,
+        size.height * (0.9 + rng.nextDouble() * 0.1),
+      );
+      final r = kMenuFlowerSize * (0.6 + rng.nextDouble() * 0.7);
+      canvas.drawCircle(
+        at,
+        r,
+        Paint()
+          ..color =
+              kMenuFlowerColors[rng.nextInt(kMenuFlowerColors.length)],
+      );
+    }
+    canvas.restore();
   }
 
   void _ridge(
@@ -217,12 +281,13 @@ class _ScenePainter extends CustomPainter {
   void _motes(Canvas canvas, Size size) {
     final rng = Random(21);
     for (var i = 0; i < kMenuMoteCount; i++) {
-      // Kept out of the middle where the cards are, off the top right where
-      // the gear is, and below the sun.
-      final side = i.isEven ? 0.04 : 0.82;
+      // Two bands either side of the sun, up in the top half: the name holds
+      // the left, the runner holds the bottom, the buttons hold the right, and
+      // this is the air left over.
+      final side = i.isEven ? 0.25 : 0.58;
       final at = Offset(
-        size.width * (side + rng.nextDouble() * 0.13),
-        size.height * (0.38 + rng.nextDouble() * 0.36),
+        size.width * (side + rng.nextDouble() * 0.09),
+        size.height * (0.12 + rng.nextDouble() * 0.32),
       );
       final bob = sin((phase + i / kMenuMoteCount) * 2 * pi) * kMenuMoteBob;
       final kind = ShapeKind.values[i % ShapeKind.values.length];

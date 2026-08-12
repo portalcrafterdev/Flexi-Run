@@ -87,12 +87,16 @@ Path _ridge(Size size, double baseline, double amp, double cycles) {
 ///
 /// Round, because the circle is the shape it starts every run as, and because
 /// a star or a square at icon size fights the rounded frame it sits in.
+///
+/// [bob] lifts the character without moving the shadow, for the home screen
+/// where it is alive rather than printed. The shadow belongs to the ground.
 void paintIconRunner(
   Canvas canvas,
   Size size, {
   required double bodyWidth,
   double centreY = kIconRunnerY,
   bool shadow = true,
+  double bob = 0,
 }) {
   final radius = size.width * bodyWidth / 2;
   final centre = Offset(size.width / 2, size.height * centreY);
@@ -112,6 +116,10 @@ void paintIconRunner(
       radius * 0.12,
     );
   }
+
+  canvas
+    ..save()
+    ..translate(0, bob);
 
   // Limbs first: they tuck behind the body, same as the runner does going
   // through a hole.
@@ -148,6 +156,7 @@ void paintIconRunner(
 
   drawSlimeBody(canvas, ShapeKind.circle, centre, radius);
   _face(canvas, centre, radius);
+  canvas.restore();
 }
 
 /// Two eyes and a smile, on top of the finished body.
