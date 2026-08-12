@@ -203,10 +203,10 @@ class _Score extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedText(
-      score.toString().padLeft(kScoreDigits, '0'),
-      size: kScoreFontSize,
-    );
+    // Plain, not padded out to five digits. A run that ends at 400 never
+    // needed the two zeros in front of it, and 00400 tells a child their score
+    // is small when it is not.
+    return OutlinedText(score.toString(), size: kScoreFontSize);
   }
 }
 

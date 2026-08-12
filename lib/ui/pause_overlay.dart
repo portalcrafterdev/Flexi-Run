@@ -35,10 +35,8 @@ class PausePanel extends StatelessWidget {
       const SizedBox(height: kMenuButtonGap * 0.5),
       ValueListenableBuilder<int>(
         valueListenable: game.score,
-        builder: (_, score, _) => PanelScore(
-          label: 'Score',
-          value: score.toString().padLeft(kScoreDigits, '0'),
-        ),
+        builder: (_, score, _) =>
+            PanelScore(label: 'Score', value: score.toString()),
       ),
       const SizedBox(height: kMenuButtonGap * 0.7),
       const SoundLevels(compact: true),

@@ -896,7 +896,11 @@ const kActiveLift = 1.08;
 const kHudPad = 18.0;
 const kHeartSize = 26.0;
 const kHeartGap = 4.0;
-const kScoreDigits = 5;
+// The score used to be padded to five digits everywhere it appeared. It is
+// shown plainly now: this game's scores live in the hundreds, and 00400 both
+// promised a scale the game does not have and read as a smaller number than it
+// was. Section 14 of the build document still says zero-padded; this overrides
+// it deliberately.
 const kScoreFontSize = 27.0;
 
 /// Lane arrows, in the bottom corners.

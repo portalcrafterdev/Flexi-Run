@@ -21,8 +21,11 @@ class GameOverOverlay extends StatelessWidget {
         const SizedBox(height: kMenuButtonGap * 0.6),
         ValueListenableBuilder<int>(
           valueListenable: game.score,
-          builder: (_, score, _) =>
-              PanelScore(label: 'Score', value: _pad(score), highlight: beatIt),
+          builder: (_, score, _) => PanelScore(
+            label: 'Score',
+            value: score.toString(),
+            highlight: beatIt,
+          ),
         ),
         ValueListenableBuilder<int>(
           valueListenable: game.highScore,
@@ -40,6 +43,4 @@ class GameOverOverlay extends StatelessWidget {
       ],
     );
   }
-
-  String _pad(int value) => value.toString().padLeft(kScoreDigits, '0');
 }
