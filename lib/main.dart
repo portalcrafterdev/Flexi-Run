@@ -87,10 +87,16 @@ class _GameHostState extends State<GameHost> with WidgetsBindingObserver {
         state == AppLifecycleState.hidden ||
         state == AppLifecycleState.inactive) {
       _game.requestPause();
-      Audio.pauseMusic();
-    } else if (state == AppLifecycleState.resumed &&
-        !_game.pauseNotifier.value) {
-      Audio.resumeMusic();
+      // Everything, not just the music. A sound effect is a platform side
+      // player that runs to the end of its clip on its own, so a coin taken
+      // in the last moment before the home button used to chime over the
+      // launcher after the game was gone.
+      unawaited(Audio.suspend());
+    } else if (state == AppLifecycleState.resumed) {
+      // Let sound back in whatever happens: a player coming back to a game
+      // they left parked still has a pause panel with two volume bars on it.
+      Audio.wake();
+      if (!_game.pauseNotifier.value) Audio.resumeMusic();
     }
   }
 

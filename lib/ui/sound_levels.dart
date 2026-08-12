@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/audio.dart';
 import '../core/constants.dart';
 import '../core/prefs.dart';
-import 'menu_widgets.dart';
+import 'volume_row.dart';
 
 /// The Sound and Music bars.
 ///
@@ -31,7 +31,7 @@ class _SoundLevelsState extends State<SoundLevels> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          MenuLevel(
+          VolumeRow(
             label: 'Sound',
             icon: _soundIcon,
             mutedIcon: Icons.volume_off_rounded,
@@ -39,7 +39,7 @@ class _SoundLevelsState extends State<SoundLevels> {
             value: Prefs.soundLevel,
             onChanged: _setSound,
           ),
-          MenuLevel(
+          VolumeRow(
             label: 'Music',
             icon: _musicIcon,
             mutedIcon: Icons.music_off_rounded,

@@ -975,23 +975,130 @@ const kMenuShadow = Color(0x38102A18);
 // The menu's own scene: a storybook meadow, painted rather than played. Same
 // palette as the game so the two are obviously one place, but nothing in it
 // moves under its own steam and there is no runner in it.
-const kMenuSkyTop = Color(0xFF3FA9DF);
-const kMenuSkyMid = Color(0xFF8AD4F2);
-const kMenuSkyLow = Color(0xFFD8F1FB);
+// The sky. Four stops rather than three, and the top one is a proper blue
+// instead of a pale one: a sky that starts washed out has nowhere left to go,
+// which is why the old one read as a flat sheet of colour with a sun stuck on
+// it. Deep overhead, bright in the middle, warm where it meets the ground.
+const kMenuSkyTop = Color(0xFF3D7CD6);
+const kMenuSkyMid = Color(0xFF5FC0EC);
+const kMenuSkyLow = Color(0xFFAEE5F3);
 
-/// The last band before the hills, warm rather than blue. A sky that goes pale
-/// blue all the way down reads as overcast; the warmth is the sun reaching the
-/// horizon, and it is what makes the light in the picture come from somewhere.
-const kMenuSkyWarm = Color(0xFFFDF0D2);
+/// The last band before the ground, warm rather than blue. This is the sun
+/// reaching the horizon, and it is what makes the light in the picture come
+/// from somewhere.
+const kMenuSkyWarm = Color(0xFFFFE6C4);
+
+/// Broad wedges of light thrown across the whole sky from the sun.
+///
+/// Faint enough to be atmosphere rather than decoration, but they are what
+/// stops the sky being an empty gradient: they give it a direction, and they
+/// reach into the corners the gradient leaves bare.
+const kMenuBurstCount = 18;
+const kMenuBurstColor = Color(0x1FFFFFFF);
+const kMenuBurstTurn = 0.16;
+
+/// A hot air balloon, drifting. The sky needs one thing in it with a size you
+/// already know, because that is what gives everything behind it a distance.
+///
+/// One, not two. The second had nowhere to be: the right of the sky belongs to
+/// the buttons, the middle belongs to the sun, and putting it in the middle
+/// anyway parked it squarely over the sun's face.
+const kMenuBalloons = <(double, double, double, int)>[
+  (0.085, 0.38, 1.0, 0),
+];
+const kMenuBalloonH = 0.19;
+const kMenuBalloonBob = 7.0;
+const kMenuBalloonBasket = Color(0xFF9A6B3F);
 
 const kMenuHillFar = Color(0xFF9AD7A6);
-const kMenuHillMid = Color(0xFF5FBE72);
-const kMenuHillNear = Color(0xFF3FA557);
-const kMenuHillRim = Color(0xFF86D398);
+const kMenuHillMid = Color(0xFF6FC583);
+const kMenuHillNear = Color(0xFF4FAE5B);
+const kMenuHillRim = Color(0xFF8CD79C);
 const kMenuSun = Color(0xFFFFE9A3);
 const kMenuSunCore = Color(0xFFFFF6D8);
 const kMenuSparkle = Color(0xB3FFFFFF);
 const kMenuCloud = Color(0xF2FFFFFF);
+
+/// Where the ground starts. Everything above it is sky and mountains,
+/// everything below is meadow.
+const kMenuHorizon = 0.60;
+
+/// The mountain range behind the hills.
+///
+/// It is what turns a backdrop into a distance. Three green ridges stacked on
+/// a blue wash gave the picture nothing beyond about a hundred metres, so the
+/// menu had no distance for a path to run into.
+/// Their feet are below the horizon and hidden by the meadow, so the height
+/// here is the whole mountain and only the top of it is ever seen. Cut these
+/// and the range turns into a row of bumps on the skyline.
+///
+/// Set out by hand rather than rolled: the fourth peak is the one behind the
+/// sun, and a random height there would put a mountain in front of it. A range
+/// is a composition, not a random walk - the tall ones belong left of centre,
+/// where nothing else in the layout is competing.
+const kMenuPeakHeights = <double>[0.20, 0.28, 0.31, 0.145, 0.26, 0.22, 0.175];
+const kMenuPeakBase = 0.645;
+const kMenuPeakSeed = 13;
+const kMenuPeakColor = Color(0xFFA0B9E1);
+const kMenuPeakShade = Color(0x333E5C8C);
+const kMenuSnowColor = Color(0xFFF6FBFF);
+
+/// A peak shorter than this keeps its head bare: snow on every one of them
+/// reads as a pattern rather than as height.
+const kMenuSnowFrom = 0.235;
+const kMenuSnowDrop = 0.26;
+
+/// The horizon, softened. Distance puts air between you and the ground, and
+/// without it the meadow meets the sky along a drawn line.
+const kMenuHazeDepth = 0.06;
+const kMenuHazeAlpha = 0.85;
+
+/// The two rolling rises between the horizon and the foreground.
+const kMenuRidgeFarY = 0.665;
+const kMenuRidgeMidY = 0.775;
+
+/// The path, winding out of the distance to the runner's feet.
+///
+/// This is the road the game is actually run down. Having it start on the
+/// menu, with the character standing on it, is what makes PLAY read as setting
+/// off rather than as opening a screen.
+const kMenuPathTopX = 0.40;
+const kMenuPathTopHalf = 0.007;
+const kMenuPathFootX = 0.30;
+
+/// Half the road's width where it leaves the bottom of the frame. Modest: a
+/// road wide enough to be generous in the middle distance swallows the entire
+/// foreground by the time it reaches you.
+const kMenuPathFootHalf = 0.115;
+
+/// The castle, up on the far ridge.
+///
+/// Small, and off to the left where the range is tallest. At the head of the
+/// road, which is where it wants to go, it sits directly behind the runner and
+/// all that shows is a lilac slab either side of the character.
+const kMenuCastleX = 0.235;
+const kMenuCastleW = 0.055;
+const kMenuCastleH = 0.10;
+const kMenuCastleStone = Color(0xFFC9B4EA);
+const kMenuCastleRoof = Color(0xFF9078CC);
+
+/// Trees along the two ridges, as (across, which ridge, size). Kept off the
+/// path and out of the middle, where the runner and the sun are.
+const kMenuTrees = <(double, double, double)>[
+  (0.03, kMenuRidgeFarY, 0.9),
+  (0.09, kMenuRidgeFarY, 1.15),
+  (0.15, kMenuRidgeFarY, 0.8),
+  (0.55, kMenuRidgeFarY, 1.0),
+  (0.63, kMenuRidgeFarY, 0.85),
+  (0.72, kMenuRidgeFarY, 1.2),
+  (0.86, kMenuRidgeFarY, 0.95),
+  (0.94, kMenuRidgeFarY, 1.1),
+  (0.02, kMenuRidgeMidY, 1.5),
+  (0.66, kMenuRidgeMidY, 1.35),
+  (0.79, kMenuRidgeMidY, 1.6),
+  (0.97, kMenuRidgeMidY, 1.45),
+];
+const kMenuTreeH = 0.10;
 
 /// Corners taken down a little, so the middle of the picture is the brightest
 /// part of it and the cards read against a settled background instead of a
@@ -999,10 +1106,10 @@ const kMenuCloud = Color(0xF2FFFFFF);
 const kMenuVignette = Color(0x2E0B3247);
 const kMenuVignetteStart = 0.52;
 
-/// Flowers scattered over the near hill. Cheap, and they are the difference
-/// between a green shape and a meadow.
-const kMenuFlowerCount = 30;
-const kMenuFlowerSize = 2.6;
+/// Flowers scattered over the meadow. Cheap, and they are the difference
+/// between a green shape and somewhere things grow.
+const kMenuFlowerCount = 54;
+const kMenuFlowerSize = 2.4;
 const kMenuFlowerSeed = 31;
 const kMenuFlowerColors = <Color>[
   Color(0xCCFFFFFF),
@@ -1010,20 +1117,36 @@ const kMenuFlowerColors = <Color>[
   Color(0x99FFC7E0),
 ];
 
-/// The drifting shape motifs, in place of the coins a collecting game would
-/// float here. Slow enough to be scenery, not decoration that demands the eye.
-///
-/// Small and faint. They used to be pushed out to the edges where the layout
-/// half hid them, and at that size they were fine; brought into the open air
-/// in the middle they turned into a row of large coloured blobs competing with
-/// the buttons. Scenery has to stay behind.
-const kMenuMoteCount = 7;
-const kMenuMoteSize = 15.0;
-const kMenuMoteBob = 9.0;
-const kMenuMoteSeconds = 7;
-const kMenuMoteOpacity = 0.34;
+// The game's three shapes used to float loose in the sky here, and later in an
+// arc over the runner's head. Both are gone. Wherever they were put they
+// landed on something - half behind a cloud, half behind a level button, or
+// stuck to a mountain peak directly above the character - and around the head
+// they competed with the one part of the picture that has a face in it. The
+// tagline carries the three shapes now, next to the sentence that explains
+// them, which is the only place on this screen they have to earn.
+
+/// One full drift of everything on the menu that moves.
+const kMenuDriftSeconds = 7;
 
 const kMenuSparkleCount = 16;
+
+/// Where the sun sits, and how big it is.
+///
+/// Low, and off to the right of the name. It started up in the corner the
+/// world is lit from, but that corner is where the title goes; every place it
+/// was tried after that put it behind something - the cloud band, the tagline,
+/// or its own mountains. Here it has open sky above it and a deliberately low
+/// peak behind it.
+const kMenuSunX = 0.52;
+const kMenuSunY = 0.36;
+const kMenuSunR = 0.085;
+
+/// Cloud positions, set out by hand rather than spaced evenly: an even spread
+/// put one squarely on the sun, and the sun is the thing the whole sky is lit
+/// from. The gap in the middle is its.
+const kMenuCloudXs = <double>[0.15, 0.30, 0.68, 0.87];
+const kMenuCloudTop = 0.04;
+const kMenuCloudBand = 0.13;
 
 /// The level picker: three pills in a row, the chosen one filled green like
 /// the PLAY slab so it reads as the thing that is switched on.
@@ -1192,8 +1315,9 @@ const kMenuRunnerBox = 250.0;
 const kMenuRunnerWidth = 0.46;
 
 /// How far along the free half of the screen the runner stands, -1 at the left
-/// edge and 1 at the right. Off the corner, but well clear of the buttons.
-const kMenuRunnerAcross = -0.52;
+/// edge and 1 at the right. Set so the feet land on the path rather than in the
+/// grass beside it.
+const kMenuRunnerAcross = -0.42;
 
 /// Where the feet land: the crest of the near hill, so the runner is standing
 /// on the scenery and not hovering over it.

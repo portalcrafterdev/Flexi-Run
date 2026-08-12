@@ -46,6 +46,22 @@ class Audio {
   static bool _sfxReady = false;
   static bool _musicReady = false;
 
+  /// Effect players that are currently making a noise.
+  ///
+  /// Tracked so they can be silenced the instant the app leaves the screen.
+  /// Every one of these is a platform-side player that carries on to the end
+  /// of its clip on its own; nothing about the Flutter side going away stops
+  /// it. Players remove themselves when their clip finishes, so this holds at
+  /// most the handful of sounds actually in the air.
+  static final Set<AudioPlayer> _effects = <AudioPlayer>{};
+
+  /// Whether the app is off the screen.
+  ///
+  /// Backgrounding used to pause the music and leave the effects alone, which
+  /// is how a coin taken in the last moment before the home button ended up
+  /// chiming over the launcher. Nothing starts while this is set.
+  static bool _offScreen = false;
+
   /// A ring of pre-built players for the tap click.
   ///
   /// Every other sound here creates a player when it fires, which is fine a
@@ -108,12 +124,56 @@ class Audio {
   }
 
   static Future<void> _sfx(String clip, {double rate = 1.0}) async {
-    if (!_sfxReady || Prefs.soundLevel <= 0) return;
+    if (!_sfxReady || _offScreen || Prefs.soundLevel <= 0) return;
     try {
       final player = await FlameAudio.play(clip, volume: Prefs.soundLevel);
+      // This await is the other half of the problem. Starting a sound is a
+      // round trip to the platform, so a coin taken in the last frame before
+      // the home button lands here after the app has already gone - and would
+      // start playing over whatever the player is looking at now.
+      if (_offScreen) {
+        await _silence(player);
+        return;
+      }
+      _effects.add(player);
+      // Release mode disposes the player itself when the clip ends; this is
+      // only so the set does not grow for the length of a run.
+      unawaited(
+        player.onPlayerComplete.first
+            .then((_) => _effects.remove(player))
+            .catchError((_) => false),
+      );
       if (rate != 1.0) await player.setPlaybackRate(rate);
     } catch (_) {
       // A missing or unplayable clip must never interrupt the run.
+    }
+  }
+
+  /// Stops everything and refuses anything new, for when the app leaves the
+  /// screen. The music is parked by the same call, so a backgrounded game
+  /// cannot be making any noise at all.
+  static Future<void> suspend() async {
+    _offScreen = true;
+    final playing = List<AudioPlayer>.of(_effects);
+    _effects.clear();
+    for (final player in playing) {
+      await _silence(player);
+    }
+    await pauseMusic();
+  }
+
+  /// Lets sound back in. Separate from resuming the music, which depends on
+  /// whether the player left the game parked.
+  static void wake() => _offScreen = false;
+
+  /// Whether sound is currently refused because the app is off the screen.
+  static bool get isOffScreen => _offScreen;
+
+  static Future<void> _silence(AudioPlayer player) async {
+    try {
+      await player.stop();
+    } catch (_) {
+      // Already finished, already released, or never really started.
     }
   }
 
@@ -157,7 +217,7 @@ class Audio {
   /// must never compete with the chime for getting a wall right.
   static void tap() {
     final pool = _tapPool;
-    if (pool == null || Prefs.soundLevel <= 0) return;
+    if (pool == null || _offScreen || Prefs.soundLevel <= 0) return;
     final now = DateTime.now().millisecondsSinceEpoch;
     if (now - _lastTapMs < kTapMinGapMs) return;
     _lastTapMs = now;
