@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/audio.dart';
 import '../core/constants.dart';
 import '../core/shape_kind.dart';
 import '../game/shape_shifter_game.dart';
@@ -206,7 +207,10 @@ class _GearButton extends StatelessWidget {
       label: 'Settings',
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onPressed,
+        onTap: () {
+          Audio.tap();
+          onPressed();
+        },
         child: Container(
           width: kMinTapTarget / 2,
           height: kMinTapTarget / 2,

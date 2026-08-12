@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/audio.dart';
 import '../core/constants.dart';
 import '../core/shape_kind.dart';
 import '../game/shape_shifter_game.dart';
@@ -168,6 +169,7 @@ class _TapLayer extends StatelessWidget {
       onHorizontalDragEnd: (details) {
         final velocity = details.velocity.pixelsPerSecond.dx;
         if (velocity.abs() < 1) return;
+        Audio.tap();
         game.stepLane(velocity < 0 ? -1 : 1);
       },
       child: Row(
@@ -176,7 +178,12 @@ class _TapLayer extends StatelessWidget {
             Expanded(
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTapDown: (_) => game.morph(kind),
+                // Clicks like a button, because to a child this is one: they
+                // aimed at the screen and something had to answer.
+                onTapDown: (_) {
+                  Audio.tap();
+                  game.morph(kind);
+                },
               ),
             ),
         ],

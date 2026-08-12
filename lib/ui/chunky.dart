@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../core/audio.dart';
 import '../core/constants.dart';
 
 /// An in-game control: a pale face lifted off the world by a soft shadow,
@@ -58,6 +59,9 @@ class _ChunkyTileState extends State<ChunkyTile> {
         behavior: HitTestBehavior.opaque,
         onTapDown: (_) {
           setState(() => _down = true);
+          // Clicked here rather than at each call site, so no control in the
+          // game can be added without it.
+          Audio.tap();
           widget.onPressed();
         },
         onTapUp: (_) => _release(),

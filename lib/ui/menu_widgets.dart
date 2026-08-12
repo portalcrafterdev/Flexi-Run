@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/audio.dart';
 import '../core/constants.dart';
 
 /// A solid slab with a darker lip under it, which sinks onto the lip when
@@ -40,7 +41,12 @@ class _ChunkyButtonState extends State<ChunkyButton> {
       label: widget.label,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTapDown: (_) => setState(() => _down = true),
+        // Clicked on the way down, with the press, rather than on release:
+        // the sound is confirmation that the button took the touch.
+        onTapDown: (_) {
+          setState(() => _down = true);
+          Audio.tap();
+        },
         onTapCancel: () => setState(() => _down = false),
         onTap: () {
           setState(() => _down = false);

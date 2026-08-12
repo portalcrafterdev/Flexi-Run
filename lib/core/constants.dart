@@ -729,6 +729,28 @@ const kHoleBevelWidth = 9.0;
 const kBrickJitter = 0.10;
 const kBrickSpeckles = 3;
 
+// ---------------------------------------------------------------------------
+// The tap click
+//
+// Every control in the game makes it: the shape pad, the lane arrows, the
+// pause button, and every slab on every menu. A press with no sound reads as a
+// press that did not register, and a child's answer to that is to press again.
+// ---------------------------------------------------------------------------
+
+/// Well under the game's own sounds. This confirms a press; it is not an
+/// event, and it must never talk over the chime for getting a wall right.
+const kTapVolume = 0.35;
+
+/// Presses closer together than this are one press to the ear, and every extra
+/// click is a platform call for nothing.
+const kTapMinGapMs = 45;
+
+/// Players kept ready. A child drumming on the shape pad can have several
+/// clicks overlapping, and building a player per press is what makes UI sound
+/// stutter on a phone.
+const kTapPoolMin = 2;
+const kTapPoolMax = 4;
+
 /// The sun, and the haze that sits on the horizon under it.
 const kSunColor = Color(0x59FFF8DC);
 const kSunCoreColor = Color(0x8CFFFDF0);

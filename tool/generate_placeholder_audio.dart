@@ -34,6 +34,7 @@ void main() {
   _write('shield.wav', _shield());
   _write('smash.wav', _smash());
   _write('gameover.wav', _gameOver());
+  _write('tap.wav', _tap());
 }
 
 void _write(String name, Float64List samples) {
@@ -111,6 +112,18 @@ Float64List _gameOver() {
   for (var i = 0; i < notes.length; i++) {
     _mix(out, _pluck(notes[i], 0.5, 0.26), (_rate * 0.26 * i).round());
   }
+  return out;
+}
+
+/// The click a control makes when it is pressed.
+///
+/// Very short and very quiet on purpose. It fires on every button in the game,
+/// including the shape pad during a run, so anything with a tail or a pitch of
+/// its own would turn a fast passage into a tune nobody asked for.
+Float64List _tap() {
+  final out = Float64List((_rate * 0.07).round());
+  _mix(out, _tone(1180, 0.05, 0.2, decay: 70), 0);
+  _mix(out, _noise(0.03, 0.05, decay: 90, seed: 7), 0);
   return out;
 }
 

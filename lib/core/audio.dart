@@ -20,6 +20,7 @@ class Audio {
   static const _shield = 'shield.wav';
   static const _smash = 'smash.wav';
   static const _gameOver = 'gameover.wav';
+  static const _tapClip = 'tap.wav';
   static const _music = 'music_loop.wav';
 
   static const _clips = <String>[_pass, _hit, _shield, _smash, _gameOver];
@@ -44,6 +45,19 @@ class Audio {
 
   static bool _sfxReady = false;
   static bool _musicReady = false;
+
+  /// A ring of pre-built players for the tap click.
+  ///
+  /// Every other sound here creates a player when it fires, which is fine a
+  /// couple of times a second. The tap fires on every button in the game and a
+  /// child will happily drum on the shape pad, so it gets a pool: the players
+  /// are made once and reused, instead of a new one per press.
+  static AudioPool? _tapPool;
+
+  /// When the last click was allowed through, in milliseconds since the epoch.
+  /// Drumming faster than [kTapMinGapMs] is one press as far as the ear is
+  /// concerned, and every extra click is a platform call for nothing.
+  static int _lastTapMs = 0;
 
   /// Whether the track is parked rather than stopped.
   ///
@@ -70,6 +84,19 @@ class Audio {
       await AudioPlayer.global.setAudioContext(context);
     } catch (_) {
       // Not every platform implements a global context.
+    }
+    try {
+      // Given the same context as everything else, or the pool would build its
+      // own players with the default one and the tap click would be the one
+      // sound in the game that ignored a silenced iPhone.
+      _tapPool = await FlameAudio.createPool(
+        _tapClip,
+        minPlayers: kTapPoolMin,
+        maxPlayers: kTapPoolMax,
+        audioContext: context,
+      );
+    } catch (_) {
+      _tapPool = null;
     }
     try {
       await FlameAudio.bgm.initialize(audioContext: context);
@@ -121,6 +148,20 @@ class Audio {
   static void gameOver() {
     _duck();
     unawaited(_sfx(_gameOver));
+  }
+
+  /// The click a control makes when it is pressed.
+  ///
+  /// Fires on every button in the game. Deliberately quieter than the game's
+  /// own sounds: it is confirmation that a press landed, not an event, and it
+  /// must never compete with the chime for getting a wall right.
+  static void tap() {
+    final pool = _tapPool;
+    if (pool == null || Prefs.soundLevel <= 0) return;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (now - _lastTapMs < kTapMinGapMs) return;
+    _lastTapMs = now;
+    unawaited(pool.start(volume: Prefs.soundLevel * kTapVolume));
   }
 
   /// A sample of the sound effects, for when the Sound bar moves.

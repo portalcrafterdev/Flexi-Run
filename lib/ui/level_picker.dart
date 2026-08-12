@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/audio.dart';
 import '../core/constants.dart';
 import '../core/level.dart';
 import '../core/prefs.dart';
@@ -75,7 +76,10 @@ class _LevelTile extends StatelessWidget {
       label: label,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onPressed,
+        onTap: () {
+          Audio.tap();
+          onPressed();
+        },
         child: SizedBox(
           height: kLevelTileH + kLevelTileDepth,
           child: Stack(
