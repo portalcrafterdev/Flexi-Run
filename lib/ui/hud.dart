@@ -30,7 +30,9 @@ class Hud extends StatelessWidget {
         children: <Widget>[
           ValueListenableBuilder<int>(
             valueListenable: game.lives,
-            builder: (_, lives, _) => _Hearts(lives: lives),
+            builder: (_, lives, _) =>
+                // The level decides how many there are, so Easy shows five.
+                _Hearts(lives: lives, of: game.level.value.lives),
           ),
           const SizedBox(width: kHudPad / 2),
           ValueListenableBuilder<int>(
@@ -120,16 +122,19 @@ class PauseToggle extends StatelessWidget {
 /// Hearts, with the spent ones left in place as hollow outlines rather than
 /// removed: a child should be able to see how many they started with.
 class _Hearts extends StatelessWidget {
-  const _Hearts({required this.lives});
+  const _Hearts({required this.lives, required this.of});
 
   final int lives;
+
+  /// How many the run started with. Varies by level.
+  final int of;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        for (var i = 0; i < kLives; i++)
+        for (var i = 0; i < of; i++)
           Padding(
             padding: const EdgeInsets.only(right: kHeartGap),
             child: AnimatedScale(

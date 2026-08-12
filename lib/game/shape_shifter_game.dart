@@ -17,6 +17,7 @@ import '../components/wall.dart';
 import '../core/audio.dart';
 import '../core/constants.dart';
 import '../core/lane.dart';
+import '../core/level.dart';
 import '../core/placeholder_art.dart';
 import '../core/prefs.dart';
 import '../core/shape_kind.dart';
@@ -35,9 +36,15 @@ class ShapeShifterGame extends FlameGame {
 
   // Everything the UI layer watches.
   final ValueNotifier<int> score = ValueNotifier<int>(0);
-  final ValueNotifier<int> lives = ValueNotifier<int>(kLives);
+  final ValueNotifier<int> lives = ValueNotifier<int>(kStartLevel.lives);
   final ValueNotifier<bool> shielded = ValueNotifier<bool>(false);
+
+  /// The best on the level currently chosen, not across all of them.
   final ValueNotifier<int> highScore = ValueNotifier<int>(0);
+
+  /// How hard the game is set to play. Chosen on the menu and fixed for the
+  /// length of a run: changing it mid-run would make the score meaningless.
+  final ValueNotifier<Level> level = ValueNotifier<Level>(kStartLevel);
 
   /// Coins taken this run. Counted apart from [score] deliberately: the score
   /// drives the difficulty ramp, so paying score for coins would tighten the
@@ -134,7 +141,8 @@ class ShapeShifterGame extends FlameGame {
     ]);
 
     camera.viewfinder.position = _cameraHome();
-    highScore.value = Prefs.highScore;
+    level.value = Prefs.level;
+    highScore.value = Prefs.highScore(level.value);
     // The menu shows the world, not the runner: a character jogging on the
     // spot behind the title cards reads as something left running by mistake.
     _player.isVisible = false;
@@ -175,15 +183,31 @@ class ShapeShifterGame extends FlameGame {
 
     if (_state != GameState.running) return;
 
-    _field.advance(speed: v, dt: dt, score: score.value, into: world);
+    _field.advance(
+      speed: v,
+      dt: dt,
+      score: score.value,
+      level: level.value,
+      into: world,
+    );
     _resolve(dt);
+  }
+
+  /// Switches level. Only legal outside a run, so a score can never be set
+  /// under one set of rules and recorded under another.
+  void chooseLevel(Level value) {
+    if (_state == GameState.running || _state == GameState.hit) return;
+    if (value == level.value) return;
+    level.value = value;
+    highScore.value = Prefs.highScore(value);
+    unawaited(Prefs.setLevel(value));
   }
 
   void startRun() {
     _clearPause();
     score.value = 0;
     coins.value = 0;
-    lives.value = kLives;
+    lives.value = level.value.lives;
     shielded.value = false;
     activeShape.value = kStartShape;
     activeLane.value = kStartLane;
@@ -307,7 +331,7 @@ class ShapeShifterGame extends FlameGame {
           sparkleBurst(Vector2(_player.position.x, kPlayerCentreY)),
         );
         Audio.pass(_streak);
-        if (_cleanPasses % kShieldEveryPasses == 0) {
+        if (_cleanPasses % level.value.shieldEvery == 0) {
           _player.grantShield();
           shielded.value = true;
           Audio.shieldGranted();
@@ -315,11 +339,11 @@ class ShapeShifterGame extends FlameGame {
         continue;
       }
 
-      // Wrong shape or wrong lane. Hold the verdict open for
-      // [kForgiveSeconds]: small hands are late, and a tap or a nudge inside
-      // that window still counts as a clean pass.
+      // Wrong shape or wrong lane. Hold the verdict open for the level's
+      // forgiveness window: small hands are late, and a tap or a nudge inside
+      // it still counts as a clean pass.
       wall.graceT += dt;
-      if (wall.graceT < kForgiveSeconds) continue;
+      if (wall.graceT < level.value.forgiveSeconds) continue;
       wall.resolved = true;
       _applyPenalty(wall);
     }
@@ -352,7 +376,7 @@ class ShapeShifterGame extends FlameGame {
   void _gameOver() {
     _streak = 0;
     if (score.value > highScore.value) highScore.value = score.value;
-    unawaited(Prefs.setHighScore(score.value));
+    unawaited(Prefs.setHighScore(level.value, score.value));
     Audio.gameOver();
     // The music keeps going under the game over screen; it only ducks for the
     // closing phrase. Cutting it dead reads as punishment.

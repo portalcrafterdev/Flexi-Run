@@ -6,6 +6,7 @@ import '../components/coin.dart';
 import '../components/wall.dart';
 import '../core/constants.dart';
 import '../core/lane.dart';
+import '../core/level.dart';
 import '../core/placeholder_art.dart';
 import '../core/shape_kind.dart';
 import 'difficulty.dart';
@@ -52,6 +53,7 @@ class WallField {
     required double speed,
     required double dt,
     required int score,
+    required Level level,
     required Component into,
   }) {
     for (final wall in _walls) {
@@ -68,17 +70,19 @@ class WallField {
 
     _spawnT -= dt;
     if (_spawnT <= 0) {
-      _spawn(into);
-      _spawnT = gapFor(score);
+      _spawn(into, level);
+      _spawnT = gapFor(score, level);
     }
 
     _cull();
   }
 
-  void _spawn(Component into) {
+  void _spawn(Component into, Level level) {
     final wall = Wall(
       shape: _picker.next(),
-      lane: _lanes.next(),
+      // On the easiest level every hole opens on the middle track, where the
+      // runner starts, so the only thing left to solve is the shape.
+      lane: level.centreLaneOnly ? kStartLane : _lanes.next(),
       art: _art,
       z: kWallSpawnZ,
     );

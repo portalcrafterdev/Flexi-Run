@@ -154,7 +154,52 @@ const kSpeedPerPoint = (kSpeedMax - kSpeedStart) / kRampScore;
 const kGapDecay = (kGapStart - kGapMin) / kRampScore;
 
 /// Two walls must never arrive stacked on top of each other.
-const kMinWallSeparationZ = 300.0;
+///
+/// At a fixed 265 this is the real floor under [kHardGapMin]: 265 x 1.0 leaves
+/// 265 units between walls, so the separation rule is what decides how tight
+/// the hardest level is allowed to get, not the gap number on its own.
+const kMinWallSeparationZ = 260.0;
+
+// ---------------------------------------------------------------------------
+// Levels
+//
+// The speed is 265 on all three. A child who has learned the timing on Easy
+// should not have to learn it again to move up, so what changes is how close
+// together the walls arrive, how much else there is to think about, and how
+// much room there is to get it wrong.
+//
+// Medium is the game exactly as it was tuned before levels existed.
+// ---------------------------------------------------------------------------
+
+/// Easy opens every wall on the middle track.
+///
+/// The biggest single change of the three, and not a number. Normally a child
+/// solves two things at once - which shape, and which track - and at six that
+/// is the difference between playing and being played at. On Easy the arrows
+/// still work but are never needed, so it is a pure shape-matching game.
+const kEasyGapStart = 2.4;
+const kEasyGapMin = 1.9;
+const kEasyRampScore = 700.0;
+const kEasyLives = 5;
+const kEasyShieldEvery = 3;
+const kEasyForgiveSeconds = 0.25;
+
+const kMediumGapStart = kGapStart;
+const kMediumGapMin = kGapMin;
+const kMediumRampScore = kRampScore;
+const kMediumLives = kLives;
+const kMediumShieldEvery = kShieldEveryPasses;
+const kMediumForgiveSeconds = kForgiveSeconds;
+
+/// Hard is tighter, not meaner: it keeps three lives and the same penalty. A
+/// life lost to something a child did not understand is what makes them stop
+/// playing, so the squeeze is on the reaction window instead.
+const kHardGapStart = 1.5;
+const kHardGapMin = 1.0;
+const kHardRampScore = 300.0;
+const kHardLives = 3;
+const kHardShieldEvery = 8;
+const kHardForgiveSeconds = 0.08;
 
 /// The world drifts forward behind the title.
 const kMenuSpeed = 90.0;
@@ -912,6 +957,17 @@ const kMenuMoteSeconds = 7;
 const kMenuMoteOpacity = 0.55;
 
 const kMenuSparkleCount = 16;
+
+/// The level picker: three pills in a row, the chosen one filled green like
+/// the PLAY slab so it reads as the thing that is switched on.
+const kLevelTileH = 44.0;
+const kLevelTileRadius = 13.0;
+const kLevelTileDepth = 4.0;
+const kLevelTileGap = 6.0;
+const kLevelTileFontSize = 14.0;
+const kLevelTileFill = Color(0xFFF2F7F3);
+const kLevelTileEdge = Color(0xFFDCE7E0);
+const kLevelTileInk = Color(0xFF7B8A82);
 
 // ---------------------------------------------------------------------------
 // App icon

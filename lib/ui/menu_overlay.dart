@@ -4,6 +4,7 @@ import '../core/constants.dart';
 import '../core/lane.dart';
 import '../core/shape_kind.dart';
 import '../game/shape_shifter_game.dart';
+import 'level_picker.dart';
 import 'menu_background.dart';
 import 'menu_widgets.dart';
 import 'shape_glyph.dart';
@@ -124,7 +125,11 @@ class _Home extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: kMenuButtonGap),
+        const SizedBox(height: kMenuButtonGap * 0.7),
+        // Above PLAY, because this is what a parent comes to the menu to set,
+        // and PLAY is unmissable wherever it sits.
+        LevelPicker(game: game),
+        const SizedBox(height: kMenuButtonGap * 0.7),
         ChunkyButton(
           label: 'PLAY',
           icon: Icons.play_arrow_rounded,
@@ -211,10 +216,12 @@ class _Stats extends StatelessWidget {
             const SizedBox(width: kMenuRuleGap),
             Text(
               // Counted, not written in: a fourth shape is a v2 unlock and
-              // this line should not need editing when it lands.
+              // this line should not need editing when it lands. The track
+              // count follows the level, which is how Easy explains itself.
               'Best ${high.toString().padLeft(kScoreDigits, '0')}'
               '   ·   ${ShapeKind.values.length} shapes'
-              '   ·   ${Lane.values.length} tracks',
+              '   ·   ${game.level.value.centreLaneOnly ? 1 : Lane.values.length}'
+              ' ${game.level.value.centreLaneOnly ? 'track' : 'tracks'}',
               style: const TextStyle(
                 fontSize: kMenuStatSize,
                 fontWeight: FontWeight.w700,
