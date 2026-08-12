@@ -137,6 +137,46 @@ void _bevel(Canvas canvas, Path hole) {
     ..drawPath(hole, strokeWith(kHoleRimColor, kHoleRimWidth));
 }
 
+/// A gold coin, seen face on.
+///
+/// Shaded like everything else - lit from the upper left, dark on the far
+/// edge - with a raised rim and a struck face, so it reads as metal rather
+/// than as a yellow circle.
+Future<ui.Image> paintCoin() {
+  return rasterize(kCoinSize, kCoinSize, kArtScaleSprite, (canvas, size) {
+    final centre = Offset(size.width / 2, size.height / 2);
+    final r = size.width / 2;
+
+    canvas
+      // The rim, standing proud of the face.
+      ..drawCircle(centre, r, volumeShade(centre, r, kCoinLight, kCoinRim,
+          kCoinDeep))
+      ..drawCircle(
+        centre,
+        r * 0.78,
+        volumeShade(centre, r * 0.78, kCoinLight, kCoinFace, kCoinRim),
+      )
+      // A struck ring on the face, the way a real coin carries a border.
+      ..drawCircle(
+        centre,
+        r * 0.55,
+        strokeWith(kCoinDeep.withValues(alpha: 0.35), r * 0.06),
+      );
+
+    // The catch of light, in the same place as on every other round form.
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: centre.translate(r * kLightOffsetX, r * kLightOffsetY),
+        width: r * 0.5,
+        height: r * 0.3,
+      ),
+      Paint()
+        ..color = kCoinShine
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+    );
+  });
+}
+
 /// A single brick, thrown when a wall shatters.
 Future<ui.Image> paintShard() {
   const box = kShardSize;

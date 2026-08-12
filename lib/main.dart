@@ -171,6 +171,9 @@ class _GameHostState extends State<GameHost> with WidgetsBindingObserver {
                     )
                   : const SizedBox.shrink(),
             ),
+            // Last, so it stays above the pause panel and can be the thing
+            // that unpauses.
+            PauseToggle(game: _game),
           ],
         ),
       ),

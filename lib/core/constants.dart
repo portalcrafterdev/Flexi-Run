@@ -402,11 +402,11 @@ const kPathColor = Color(0xFFE0C594);
 const kPathDarkColor = Color(0xFFCBA871);
 const kPathEdgeColor = Color(0xFFB9995E);
 const kBushColor = Color(0xFF3C8E51);
-const kSlimeColor = Color(0xFF5CD98A);
-const kSlimeDarkColor = Color(0xFF34B368);
+const kSlimeColor = Color(0xFF7FD8F7);
+const kSlimeDarkColor = Color(0xFF3EA6DC);
 const kSlimeEyeColor = Color(0xFF20323C);
-const kSlimeFootColor = Color(0xFF1F7A46);
-const kSlimeShineColor = Color(0x99FFFFFF);
+const kSlimeFootColor = Color(0xFF2E86C8);
+const kSlimeShineColor = Color(0xB3FFFFFF);
 const kShieldColor = Color(0xFF5BE8C8);
 const kBrickColor = Color(0xFFC4644E);
 const kBrickDarkColor = Color(0xFF9C4838);
@@ -414,6 +414,71 @@ const kMortarColor = Color(0xFFE8D9C8);
 const kHoleRimColor = Color(0xFF6E2E22);
 const kDustColor = Color(0xFFE6D6BC);
 const kSparkleColor = Color(0xFFFFE27A);
+
+// ---------------------------------------------------------------------------
+// Coins.
+//
+// Laid in a short trail down the lane the next wall's hole is over, so they
+// are not a distraction from the wall but a breadcrumb toward it: follow the
+// gold and you are already standing in the right track when the wall arrives.
+// A child who cannot yet read the hole still ends up in the right place.
+//
+// They are counted separately from the score on purpose. The score drives the
+// difficulty ramp, so paying score for coins would tighten the wall spacing
+// several times faster than it is tuned for.
+// ---------------------------------------------------------------------------
+
+/// How many rows in a trail, and how far apart in depth.
+const kCoinsPerTrail = 4;
+const kCoinSpacingZ = 95.0;
+
+/// How many of those rows carry a coin in every track rather than only in the
+/// one the hole is over.
+///
+/// The rows that arrive first are spread across all three, so there is gold to
+/// chase wherever the runner happens to be standing. The last rows before the
+/// wall narrow to the hole's own track, so the trail still ends by walking the
+/// runner into the right place.
+const kCoinSpreadRows = 2;
+
+/// Where the trail starts relative to its wall. Negative is nearer the runner,
+/// so the coins arrive first and the wall follows.
+const kCoinLeadZ = -120.0;
+
+/// Coin size at the runner's own plane.
+const kCoinSize = 72.0;
+
+/// Draw distance.
+///
+/// A trail has to be *laid* far up the path - it lives in the gap between one
+/// wall and the next, or it would stop leading to the right one - but at that
+/// range each coin is a few pixels of glitter on the horizon, which reads as
+/// noise. They stay invisible beyond [kCoinAppearZ] and fade up to solid by
+/// [kCoinSolidZ], so they arrive into view at a size worth looking at.
+const kCoinAppearZ = 840.0;
+const kCoinSolidZ = 620.0;
+
+/// Height above the ground the trail floats at, so coins sit at chest height
+/// rather than being hidden under the runner's feet.
+const kCoinRiseY = 96.0;
+
+/// A coin is taken if the runner is in its lane when it arrives.
+const kCoinCatchZ = 0.0;
+
+/// Turns per second. Purely cosmetic, but a still coin looks like a sticker.
+const kCoinSpinHz = 0.55;
+
+/// How narrow the coin gets edge on. Never zero, or it vanishes entirely.
+const kCoinEdgeScale = 0.16;
+
+/// How long a taken coin takes to rise and fade.
+const kCoinCollectSeconds = 0.32;
+
+const kCoinFace = Color(0xFFF7C948);
+const kCoinLight = Color(0xFFFFE9A0);
+const kCoinDeep = Color(0xFFC98A15);
+const kCoinRim = Color(0xFFE0A21F);
+const kCoinShine = Color(0xCCFFFFFF);
 
 // ---------------------------------------------------------------------------
 // Light and shading.
@@ -443,16 +508,29 @@ const kContactShadowHeight = 0.17;
 const kShadowLiftScale = 0.16;
 const kShadowLiftFade = 0.28;
 
-/// Slime, lit side through to the shadow side.
-const kSlimeLightColor = Color(0xFFA6F5C0);
-const kSlimeMidColor = Color(0xFF55D287);
-const kSlimeDeepColor = Color(0xFF1C8449);
-const kSlimeRimColor = Color(0x7AEFFFF4);
-const kSlimeGlossColor = Color(0xCCFFFFFF);
-const kSlimeGlossSmall = Color(0x8CFFFFFF);
+// The runner is jelly: light passes through it, so it is pale in the middle
+// where it is thin and saturated at the edges where you are looking through
+// more of it. That inversion - dark rim, bright core - is what separates
+// something translucent from something solid, and it is most of what makes
+// the reference character read as jelly rather than as a coloured ball.
+
+const kSlimeLightColor = Color(0xFFDFF6FF);
+const kSlimeMidColor = Color(0xFF7FD8F7);
+const kSlimeDeepColor = Color(0xFF2E9BD6);
+const kSlimeRimColor = Color(0xA6FFFFFF);
+const kSlimeGlossColor = Color(0xF2FFFFFF);
+const kSlimeGlossSmall = Color(0xA6FFFFFF);
+
+/// The body is see-through. Below about 0.8 the legs behind it show through
+/// and it stops reading as one creature.
+const kSlimeBodyAlpha = 0.88;
+
+/// A darker band just inside the outline: the long way through the jelly.
+const kSlimeEdgeTint = Color(0x593E86B8);
+const kSlimeEdgeWidth = 0.22;
 
 /// Occlusion under the belly, where the light cannot reach.
-const kSlimeCoreShadow = Color(0x40064523);
+const kSlimeCoreShadow = Color(0x33194E73);
 
 /// Fraction of the body radius taken by the gloss highlight.
 const kGlossRatio = 0.30;
@@ -503,24 +581,81 @@ const kBushLightColor = Color(0xFF56A96B);
 // 800 x 360 of those.
 // ---------------------------------------------------------------------------
 
-const kShapeButton = 96.0;
-const kShapeButtonGap = 20.0;
+// In-game controls, in the same language as the menu: a cream face sitting on
+// a darker lip, which sinks when pressed. Translucent rather than solid, so
+// the path the runner is on is never fully hidden by its own buttons.
+
+// Frosted glass: pale, translucent, with a bright edge. The world shows
+// through, which keeps the bottom of the screen from turning into a solid bar
+// of furniture, and the white glyph stays legible over anything.
+
+const kPadFace = Color(0x8FE8F6FF);
+const kPadFaceActive = Color(0xC7FFFFFF);
+const kPadEdge = Color(0x99FFFFFF);
+const kPadEdgeWidth = 2.5;
+const kGameInk = Color(0xFF2B4A5C);
+
+/// The worn shape is ringed in green and glows, the way the reference marks
+/// its selection. Green means "this is the one you are" everywhere else too.
+const kPadActiveRing = Color(0xFF56E08A);
+const kPadActiveGlow = Color(0x8056E08A);
+const kPadGlowBlur = 14.0;
+
+/// A soft shadow, not the menu's hard lip.
+///
+/// The lip reads as thickness on a wide opaque slab. Shrunk onto a small round
+/// control and made translucent, it renders as a second offset circle sitting
+/// below the button - a smudge rather than a side. A blurred shadow lifts
+/// these off the world without drawing a shape of its own.
+const kPadShadow = Color(0x2E102A18);
+const kPadShadowBlur = 12.0;
+const kPadShadowDrop = 3.0;
+
+/// How far a control shrinks while held, in place of sinking onto a lip.
+const kPadPressScale = 0.93;
+
+// The HUD has to read on grass, on sky and on brick. A backing card solves
+// that but eats screen and hides the world; a heavy outline solves it for
+// nothing, which is what game HUDs have always done.
+
+const kHudInk = Color(0xFFFFFFFF);
+const kHudOutline = Color(0xFF2B4A5C);
+const kHudOutlineWidth = 6.0;
+
+/// Hearts, pink rather than red: it sits better against the grass, and reads
+/// as a game heart rather than as a warning.
+const kHeartFill = Color(0xFFFF5E9C);
+
+const kGameCard = Color(0xF0FFFDF5);
+const kHudPillRadius = 24.0;
+const kHudPillPadX = 14.0;
+const kHudPillPadY = 5.0;
+
+const kShapeButton = 92.0;
+const kShapeButtonGap = 16.0;
 const kMinTapTarget = 88.0;
-const kShapeButtonRadius = 22.0;
-const kShapeGlyphInset = 24.0;
-const kActiveRingWidth = 5.0;
-const kPadBottomInset = 18.0;
+const kShapeButtonRadius = 24.0;
+const kShapeGlyphInset = 26.0;
+const kActiveRingWidth = 4.0;
+const kPadBottomInset = 14.0;
+
+/// How much the active shape stands up over the other two.
+const kActiveLift = 1.08;
 
 const kHudPad = 18.0;
-const kHeartSize = 34.0;
-const kHeartGap = 6.0;
+const kHeartSize = 26.0;
+const kHeartGap = 4.0;
 const kScoreDigits = 5;
-const kScoreFontSize = 34.0;
+const kScoreFontSize = 27.0;
 
-/// Lane arrows, in the bottom corners. As big as the shape buttons: changing
-/// lane matters just as much as changing shape.
-const kLaneArrow = 96.0;
-const kLaneArrowIcon = 56.0;
+/// Lane arrows, in the bottom corners.
+///
+/// Smaller than the shape buttons on purpose. Both matter, but the shape is
+/// the thing being read off the wall, and a lane nudge can also be made with
+/// a swipe anywhere on the screen. The tap target stays at the minimum even
+/// though the face is smaller than it.
+const kLaneArrow = 72.0;
+const kLaneArrowIcon = 36.0;
 
 /// How far controls stay clear of the top edge, where the system claims the
 /// pull-down gesture even in immersive mode.
@@ -529,8 +664,6 @@ const kEdgeGestureInset = 26.0;
 const kPauseButton = 54.0;
 const kPauseIcon = 32.0;
 
-const kShieldPillH = 40.0;
-const kShieldPillRadius = 20.0;
 
 /// Pause and game over: the title, and the score under it.
 const kPanelTitleSize = 26.0;
@@ -541,11 +674,11 @@ const kOverlayPad = 18.0;
 const kUiScrim = Color(0x66000000);
 const kUiInk = Color(0xFF2A3A44);
 const kUiAccent = Color(0xFF3FBF6E);
-const kUiAccentInk = Color(0xFFFFFFFF);
 const kUiHeart = Color(0xFFE8554E);
-const kUiHeartEmpty = Color(0x66FFFFFF);
-const kUiButtonFill = Color(0x59FFFFFF);
-const kUiButtonBorder = Color(0x8CFFFFFF);
+
+/// A spent life. Left on screen as an outline rather than removed, so a child
+/// can always see how many they started with.
+const kHeartSpent = Color(0x40E8554E);
 
 /// Panels and buttons are lit like everything else: a brighter top edge, a
 /// slightly deeper bottom, and a shadow underneath.
@@ -650,6 +783,3 @@ const kMenuIconSize = 20.0;
 const kMenuTaglineSize = 13.0;
 const kMenuStatSize = 12.5;
 
-const kUiDropShadow = Color(0x40101C22);
-const kUiAccentDeep = Color(0xFF2E9E58);
-const kUiButtonGloss = Color(0x33FFFFFF);

@@ -7,6 +7,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/foundation.dart';
 
 import '../components/burst.dart';
+import '../components/coin.dart';
 import '../components/dust_emitter.dart';
 import '../components/player.dart';
 import '../components/road.dart';
@@ -36,6 +37,11 @@ class ShapeShifterGame extends FlameGame {
   final ValueNotifier<int> lives = ValueNotifier<int>(kLives);
   final ValueNotifier<bool> shielded = ValueNotifier<bool>(false);
   final ValueNotifier<int> highScore = ValueNotifier<int>(0);
+
+  /// Coins taken this run. Counted apart from [score] deliberately: the score
+  /// drives the difficulty ramp, so paying score for coins would tighten the
+  /// wall spacing several times faster than it is tuned for.
+  final ValueNotifier<int> coins = ValueNotifier<int>(0);
   final ValueNotifier<ShapeKind> activeShape = ValueNotifier<ShapeKind>(
     kStartShape,
   );
@@ -44,6 +50,12 @@ class ShapeShifterGame extends FlameGame {
   /// Whether the player has parked the run. Separate from Flame's own
   /// [paused] flag, which is the engine state this drives.
   final ValueNotifier<bool> pauseNotifier = ValueNotifier<bool>(false);
+
+  /// What the game is doing, for widgets that live outside the Flame overlays
+  /// and so cannot be switched on and off by the overlay manager.
+  final ValueNotifier<GameState> stateNotifier = ValueNotifier<GameState>(
+    GameState.menu,
+  );
 
   final ScreenShake _shake = ScreenShake(_cameraHome());
 
@@ -67,11 +79,16 @@ class ShapeShifterGame extends FlameGame {
   /// Walls in play, furthest first.
   List<Wall> get walls => _field.walls;
 
+  /// Coins in play, furthest first. Named apart from [coins], which is the
+  /// running count the HUD watches.
+  List<Coin> get coinsInPlay => _field.coins;
+
   GameState get state => _state;
 
   set state(GameState value) {
     if (value == _state) return;
     _state = value;
+    stateNotifier.value = value;
     _syncOverlays();
   }
 
@@ -157,6 +174,7 @@ class ShapeShifterGame extends FlameGame {
   void startRun() {
     _clearPause();
     score.value = 0;
+    coins.value = 0;
     lives.value = kLives;
     shielded.value = false;
     activeShape.value = kStartShape;
@@ -236,9 +254,26 @@ class ShapeShifterGame extends FlameGame {
   /// Where the camera sits when nothing is shaking it.
   static Vector2 _cameraHome() => Vector2(kWorldW / 2, kCameraCentreY);
 
+  /// Coins are settled the moment they reach the runner's plane: taken if the
+  /// runner is standing in that lane, missed otherwise. Missing costs nothing,
+  /// so a coin trail is never a trap.
+  void _collectCoins() {
+    for (final coin in _field.coins) {
+      if (coin.resolved || coin.z > kCoinCatchZ) continue;
+      if (coin.lane != _player.lane) {
+        coin.resolved = true;
+        continue;
+      }
+      coin.collect();
+      coins.value += 1;
+      Audio.coin(coins.value);
+    }
+  }
+
   /// One test on depth, resolved exactly once per wall: a wall is settled the
   /// moment it reaches the runner's plane.
   void _resolve(double dt) {
+    _collectCoins();
     for (final wall in _field.walls) {
       if (wall.resolved || wall.z > kWallHitZ) continue;
 

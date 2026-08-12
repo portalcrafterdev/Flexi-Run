@@ -10,7 +10,7 @@ import 'shape_kind.dart';
 // shade for the body, a gloss where the light lands, a rim along the shaded
 // edge to lift it off the background, and occlusion where it meets the ground.
 
-/// The runner, from behind: a shape-shaped body with a little tuft.
+/// The runner, from behind: a shape-shaped blob of jelly.
 ///
 /// No face, because you are following it up the path. The silhouette is the
 /// whole point - it is what the player matches to the hole - so all of the
@@ -27,17 +27,22 @@ Future<ui.Image> paintSlime(ShapeKind kind) {
     canvas
       ..drawPath(
         body,
+        // See-through: the ground and the dust read faintly through the body,
+        // which is the whole difference between jelly and plastic. The alpha
+        // has to be baked into the gradient stops - a shader ignores the
+        // paint's own colour, so setting it there would do nothing.
         volumeShade(
           centre,
           radius,
-          kSlimeLightColor,
-          kSlimeMidColor,
-          kSlimeDeepColor,
+          kSlimeLightColor.withValues(alpha: kSlimeBodyAlpha),
+          kSlimeMidColor.withValues(alpha: kSlimeBodyAlpha),
+          kSlimeDeepColor.withValues(alpha: kSlimeBodyAlpha),
         ),
       )
       ..save()
       ..clipPath(body);
 
+    _edgeTint(canvas, body, radius);
     _occlusion(canvas, centre, radius);
     _gloss(canvas, centre, radius);
     _rim(canvas, body, centre, radius);
@@ -46,9 +51,19 @@ Future<ui.Image> paintSlime(ShapeKind kind) {
       ..restore()
       // Outside the clip, so the outline stays crisp at the silhouette edge.
       ..drawPath(body, strokeWith(kSlimeDeepColor, kSlimeStroke));
-
-    _tuft(canvas, centre, radius);
   });
+}
+
+/// A darker band just inside the outline.
+///
+/// Light travelling through jelly has furthest to go at the edges, so that is
+/// where the colour piles up. Shading it the other way round - bright edge,
+/// dark middle - is what makes a translucent thing look solid.
+void _edgeTint(Canvas canvas, Path body, double radius) {
+  canvas.drawPath(
+    body,
+    strokeWith(kSlimeEdgeTint, radius * kSlimeEdgeWidth * 2),
+  );
 }
 
 /// Darkening where the body curves away at the bottom. Light does not reach
@@ -106,33 +121,6 @@ void _rim(Canvas canvas, Path body, Offset centre, double radius) {
     ..translate(radius * kLightOffsetX * 0.2, radius * kLightOffsetY * 0.2)
     ..drawPath(body, strokeWith(kSlimeRimColor, kRimWidth))
     ..restore();
-}
-
-/// A little sprout on top, so the runner has an up and a facing.
-void _tuft(Canvas canvas, Offset centre, double radius) {
-  final tuftR = radius * kBackTuftRatio;
-  final top = centre.dy - radius;
-  final stem = Rect.fromCenter(
-    center: Offset(centre.dx, top + tuftR * 0.1),
-    width: tuftR * 0.42,
-    height: tuftR * 1.1,
-  );
-  canvas
-    ..drawRRect(
-      RRect.fromRectXY(stem, tuftR * 0.21, tuftR * 0.21),
-      faceShade(stem, kSlimeMidColor, kSlimeDeepColor),
-    )
-    ..drawCircle(
-      Offset(centre.dx, top - tuftR * 0.45),
-      tuftR * 0.34,
-      volumeShade(
-        Offset(centre.dx, top - tuftR * 0.45),
-        tuftR * 0.34,
-        kSlimeLightColor,
-        kSlimeMidColor,
-        kSlimeDeepColor,
-      ),
-    );
 }
 
 /// The shadow the runner casts on the path.

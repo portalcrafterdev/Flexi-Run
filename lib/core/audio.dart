@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flame_audio/flame_audio.dart';
 
+import 'constants.dart';
 import 'prefs.dart';
 
 /// Sound effect and music front end.
@@ -26,6 +27,9 @@ class Audio {
   /// Pitch rise per clean pass in a row, and the ceiling it stops at.
   static const _pitchStep = 0.06;
   static const _pitchMax = 1.6;
+
+  /// Coins start above the pass chime so the two are never confused.
+  static const _coinBaseRate = 1.25;
 
   /// The loudest the music is ever played, before the player's own level is
   /// applied. Music sits under the effects, never level with them.
@@ -87,6 +91,15 @@ class Audio {
   static void hit() {
     _duck();
     unawaited(_sfx(_hit));
+  }
+
+  /// A coin, pitched up a step for each one taken in the current trail so a
+  /// run of them climbs. Uses the pass chime for now; a coin of its own is on
+  /// the list for when the real audio is commissioned.
+  static void coin(int taken) {
+    final rate = (_coinBaseRate + (taken % kCoinsPerTrail) * _pitchStep * 2)
+        .clamp(1.0, _pitchMax);
+    unawaited(_sfx(_pass, rate: rate));
   }
 
   static void shieldGranted() => unawaited(_sfx(_shield));

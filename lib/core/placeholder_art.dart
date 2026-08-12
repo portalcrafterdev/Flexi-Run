@@ -23,6 +23,7 @@ class ArtPack {
     required this.shard,
     required this.leg,
     required this.arm,
+    required this.coin,
     required this.contactShadow,
     required this.slimeSprites,
     required this.wallSprites,
@@ -37,6 +38,7 @@ class ArtPack {
   final Sprite shard;
   final Sprite leg;
   final Sprite arm;
+  final Sprite coin;
 
   /// The blob of shade the runner stands on.
   final Sprite contactShadow;
@@ -71,6 +73,7 @@ Future<ArtPack> buildPlaceholderArt() async {
     shard: Sprite(await paintShard()),
     leg: Sprite(await paintLeg()),
     arm: Sprite(await paintArm()),
+    coin: Sprite(await paintCoin()),
     contactShadow: Sprite(await paintContactShadow()),
     slimeSprites: slimes,
     wallSprites: walls,

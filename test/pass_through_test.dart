@@ -67,8 +67,13 @@ void main() {
     );
   }
 
-  // Channels are 0..1, so this is a 25/255 margin.
-  bool isRunner(Color c) => c.g > c.r + 0.098 && c.g > c.b + 0.098;
+  /// The runner: blue over green over red, and translucent, so the samples are
+  /// the body blended with whatever is behind it.
+  ///
+  /// Nothing else at these sample points is blue dominant - they sit below the
+  /// horizon, on path and grass, both of which lead with red or green.
+  /// Channels are 0..1, so this is a 25/255 margin.
+  bool isRunner(Color c) => c.b > c.r + 0.098 && c.b > c.g;
 
   /// Any part of the barrier: brick, mortar, the lit lip along a course, or
   /// the bevel inside the opening.

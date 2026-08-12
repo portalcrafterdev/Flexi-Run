@@ -396,6 +396,125 @@ void main() {
     });
   });
 
+  group('coins', () {
+    test('a trail reaches every track', () async {
+      final game = await boot();
+      game.startRun();
+      step(game, 0);
+
+      // There is gold to chase wherever the runner happens to be standing.
+      expect(
+        game.coinsInPlay.map((coin) => coin.lane).toSet(),
+        Lane.values.toSet(),
+      );
+    });
+
+    test('a trail arrives ahead of its wall and ends over the hole', () async {
+      final game = await boot();
+      game.startRun();
+      step(game, 0);
+
+      final wall = game.walls.single;
+      for (final coin in game.coinsInPlay) {
+        expect(
+          coin.z,
+          lessThan(wall.z),
+          reason: 'coins must arrive before the wall they lead to',
+        );
+      }
+
+      // The rows nearest the wall - the ones arriving last - narrow to the
+      // hole's own track, so the trail still walks the runner into place.
+      final nearest = game.coinsInPlay.where(
+        (coin) => coin.z > wall.z + kCoinLeadZ - kCoinSpacingZ * 1.5,
+      );
+      expect(nearest, isNotEmpty);
+      for (final coin in nearest) {
+        expect(coin.lane, wall.lane, reason: 'the trail is the hint');
+      }
+    });
+
+    // The trail is furthest first, so `last` is the coin that arrives soonest.
+    test('a trail is not drawn until it is close enough to see', () async {
+      final game = await boot();
+      game.startRun();
+      step(game, 0);
+
+      // Laid far up the path, where a coin is a few pixels of glitter.
+      for (final coin in game.coinsInPlay) {
+        expect(coin.z, greaterThan(kCoinAppearZ));
+        expect(coin.opacity, 0);
+      }
+
+      final coin = game.coinsInPlay.last
+        ..z = kCoinSolidZ
+        ..project();
+      expect(coin.opacity, 1);
+    });
+
+    test('a coin in the runner\'s lane is taken', () async {
+      final game = await boot();
+      game.startRun();
+      step(game, 0);
+
+      final coin = game.coinsInPlay.last;
+      game.moveToLane(coin.lane);
+      for (var i = 0; i < _maxFrames && !coin.resolved; i++) {
+        step(game);
+      }
+
+      expect(coin.taken, isTrue);
+      expect(game.coins.value, 1);
+    });
+
+    test('a whole trail is worth its own length', () async {
+      final game = await boot();
+      game.startRun();
+      step(game, 0);
+
+      final furthest = game.coinsInPlay.first;
+      game.moveToLane(furthest.lane);
+      for (var i = 0; i < _maxFrames && !furthest.resolved; i++) {
+        step(game);
+      }
+
+      expect(game.coins.value, kCoinsPerTrail);
+    });
+
+    test('a coin in another lane is missed and costs nothing', () async {
+      final game = await boot();
+      game.startRun();
+      step(game, 0);
+
+      final coin = game.coinsInPlay.last;
+      game.moveToLane(otherLaneThan(coin.lane));
+      for (var i = 0; i < _maxFrames && !coin.resolved; i++) {
+        step(game);
+      }
+
+      expect(coin.resolved, isTrue);
+      expect(coin.taken, isFalse);
+      expect(game.lives.value, kLives, reason: 'a missed coin is not a hit');
+    });
+
+    test('coins never touch the score', () async {
+      final game = await boot();
+      game.startRun();
+      step(game, 0);
+
+      final coin = game.coinsInPlay.last;
+      game.moveToLane(coin.lane);
+      for (var i = 0; i < _maxFrames && !coin.resolved; i++) {
+        step(game);
+      }
+
+      // The score drives the difficulty ramp. If coins paid into it, the wall
+      // spacing would tighten several times faster than it is tuned for.
+      expect(game.coins.value, greaterThan(0));
+      expect(game.score.value, 0);
+    });
+  });
+
   group('run cycle', () {
     test('a foot is always planted on the ground', () async {
       final game = await boot();
@@ -474,6 +593,29 @@ void main() {
 
       expect(game.player.shape, kStartShape);
       expect(game.player.lane, kStartLane);
+    });
+
+    test('the pause flag flips both ways, so one button can do both', () async {
+      final game = await boot();
+      game.startRun();
+
+      expect(game.pauseNotifier.value, isFalse);
+      game.requestPause();
+      expect(game.pauseNotifier.value, isTrue);
+      game.resumePlay();
+      expect(game.pauseNotifier.value, isFalse);
+    });
+
+    test('the state notifier follows the run, for widgets outside the overlays',
+        () async {
+      final game = await boot();
+      expect(game.stateNotifier.value, GameState.menu);
+
+      game.startRun();
+      expect(game.stateNotifier.value, GameState.running);
+
+      game.goToMenu();
+      expect(game.stateNotifier.value, GameState.menu);
     });
 
     test('input comes back when the run is resumed', () async {

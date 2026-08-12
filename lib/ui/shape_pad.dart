@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/constants.dart';
 import '../core/shape_kind.dart';
 import '../game/shape_shifter_game.dart';
+import 'chunky.dart';
 import 'shape_glyph.dart';
 
 /// The three shape buttons, the two lane arrows, and the optional
@@ -83,6 +84,9 @@ class _ShapeRow extends StatelessWidget {
   }
 }
 
+/// One shape. The worn one stands up, keeps its colour and takes a ring; the
+/// other two sit back and go pale, so which shape the runner is wearing is
+/// legible at a glance without reading anything.
 class _ShapeButton extends StatelessWidget {
   const _ShapeButton({
     required this.kind,
@@ -96,51 +100,23 @@ class _ShapeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: kind.label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: (_) => onTap(),
-        // Never smaller than kMinTapTarget. This is a game for six year olds.
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: kMinTapTarget,
-            minHeight: kMinTapTarget,
-          ),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 140),
-            width: kShapeButton,
-            height: kShapeButton,
-            decoration: BoxDecoration(
-              // Glass: brighter along the top edge where the light catches,
-              // with a shadow under it so it floats over the world.
-              gradient: const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: <Color>[kUiButtonGloss, kUiButtonFill],
-              ),
-              borderRadius: BorderRadius.circular(kShapeButtonRadius),
-              border: Border.all(
-                color: active ? kUiAccent : kUiButtonBorder,
-                width: active ? kActiveRingWidth : 2,
-              ),
-              boxShadow: const <BoxShadow>[
-                BoxShadow(
-                  color: kUiDropShadow,
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Center(
-              child: ShapeGlyph(
-                kind: kind,
-                color: Colors.white,
-                size: kShapeButton - kShapeGlyphInset * 2,
-              ),
-            ),
-          ),
+    return AnimatedScale(
+      duration: const Duration(milliseconds: 140),
+      curve: Curves.easeOut,
+      scale: active ? kActiveLift : 1,
+      child: ChunkyTile(
+        size: kShapeButton,
+        semanticLabel: kind.label,
+        onPressed: onTap,
+        face: active ? kPadFaceActive : kPadFace,
+        ring: active ? kPadActiveRing : null,
+        // White on glass, as in the reference. The shape carries the meaning
+        // on its own: the holes in the walls have no colour either, so a
+        // coloured button would be teaching a cue the wall cannot answer.
+        child: ShapeGlyph(
+          kind: kind,
+          color: active ? kHudInk : kHudInk.withValues(alpha: 0.8),
+          size: kShapeButton - kShapeGlyphInset * 2,
         ),
       ),
     );
@@ -161,33 +137,16 @@ class _LaneArrow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: (_) => onPressed(),
-        child: Container(
-          width: kLaneArrow,
-          height: kLaneArrow,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: <Color>[kUiButtonGloss, kUiButtonFill],
-            ),
-            borderRadius: BorderRadius.circular(kLaneArrow / 2),
-            border: Border.all(color: kUiButtonBorder, width: 2),
-            boxShadow: const <BoxShadow>[
-              BoxShadow(
-                color: kUiDropShadow,
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Icon(icon, color: Colors.white, size: kLaneArrowIcon),
-        ),
+    return ChunkyTile(
+      size: kLaneArrow,
+      circle: true,
+      semanticLabel: label,
+      onPressed: onPressed,
+      child: OutlinedGlyph(
+        icon: icon,
+        size: kLaneArrowIcon,
+        fill: kHudInk,
+        outline: kGameInk,
       ),
     );
   }

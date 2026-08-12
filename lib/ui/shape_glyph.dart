@@ -3,6 +3,15 @@ import 'package:flutter/widgets.dart';
 import '../core/constants.dart';
 import '../core/shape_kind.dart';
 
+/// The colour that stands for [kind], everywhere it appears.
+///
+/// One source, so the mark under the title on the menu and the buttons in the
+/// game always agree. Colour is a second cue on top of the shape, not a
+/// replacement for it: the holes in the walls have no colour, so the
+/// silhouette has to carry the matching on its own.
+Color colourFor(ShapeKind kind) =>
+    kTitleLetterColors[kind.index % kTitleLetterColors.length];
+
 /// Draws a [ShapeKind] using the same path the wall holes are cut with, so a
 /// button always looks like the opening it stands for.
 ///
