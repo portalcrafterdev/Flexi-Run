@@ -947,6 +947,34 @@ const kIconArmLength = 0.56;
 const kIconArmReach = 0.86;
 const kIconArmDrop = 0.06;
 
+// The face. Icon only.
+//
+// The runner has no face in the game, on purpose: you follow it up the path,
+// so you are looking at its back. An icon is a portrait though - it is the
+// thing that has to say "someone lives in here" from across a home screen -
+// so this one turns round and looks at you.
+//
+// All fractions of the body radius. Kept low on the face and well clear of the
+// gloss, which sits up and to the left where the light lands.
+const kIconEyeX = 0.29;
+const kIconEyeY = -0.02;
+const kIconEyeR = 0.135;
+
+/// Taller than wide, which reads as awake rather than surprised.
+const kIconEyeSquash = 1.16;
+
+/// A speck of white in each eye. Without it they are two holes.
+const kIconCatchlight = 0.36;
+
+const kIconSmileY = 0.3;
+const kIconSmileW = 0.46;
+const kIconSmileDrop = 0.17;
+const kIconSmileStroke = 0.062;
+
+/// Deep enough to hold against the pale gloss, blue enough to belong to the
+/// jelly rather than being painted on it.
+const kIconFaceInk = Color(0xFF1E4C6E);
+
 /// The three shapes, drifting in the sky. The runner alone is a blue ball;
 /// these are what say the game is about shapes. Kept few and small - an icon
 /// has to survive being 48 pixels wide.

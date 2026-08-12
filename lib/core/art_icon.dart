@@ -147,6 +147,50 @@ void paintIconRunner(
   canvas.restore();
 
   drawSlimeBody(canvas, ShapeKind.circle, centre, radius);
+  _face(canvas, centre, radius);
+}
+
+/// Two eyes and a smile, on top of the finished body.
+///
+/// Only ever drawn here. The runner in the game is seen from behind and stays
+/// blank; giving it a face would mean drawing the back of a head.
+void _face(Canvas canvas, Offset centre, double radius) {
+  final ink = fillWith(kIconFaceInk);
+  final eyeR = radius * kIconEyeR;
+  for (final side in <double>[-1, 1]) {
+    final at = centre.translate(side * radius * kIconEyeX, radius * kIconEyeY);
+    canvas
+      ..drawOval(
+        Rect.fromCenter(
+          center: at,
+          width: eyeR * 2,
+          height: eyeR * 2 * kIconEyeSquash,
+        ),
+        ink,
+      )
+      // Up and to the left, where the light is coming from, so both eyes
+      // catch it from the same place the body does.
+      ..drawCircle(
+        at.translate(eyeR * kLightOffsetX, eyeR * kLightOffsetY),
+        eyeR * kIconCatchlight,
+        fillWith(kSlimeGlossColor),
+      );
+  }
+
+  final half = radius * kIconSmileW / 2;
+  final top = centre.dy + radius * kIconSmileY;
+  canvas.drawPath(
+    Path()
+      ..moveTo(centre.dx - half, top)
+      ..quadraticBezierTo(
+        centre.dx,
+        top + radius * kIconSmileDrop * 2,
+        centre.dx + half,
+        top,
+      ),
+    strokeWith(kIconFaceInk, radius * kIconSmileStroke)
+      ..strokeCap = StrokeCap.round,
+  );
 }
 
 /// Scene and runner together: the whole icon, for iOS and for Android's
