@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:morphorun/core/constants.dart';
-import 'package:morphorun/game/difficulty.dart';
+import 'package:flexirun/core/constants.dart';
+import 'package:flexirun/game/difficulty.dart';
 
 void main() {
   group('speedFor', () {

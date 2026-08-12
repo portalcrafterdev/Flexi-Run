@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:morphorun/core/shape_kind.dart';
+import 'package:flexirun/core/shape_kind.dart';
 
 void main() {
   test('never repeats the same shape more than twice in a row', () {

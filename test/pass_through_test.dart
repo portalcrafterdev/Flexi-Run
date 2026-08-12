@@ -5,11 +5,11 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame_test/flame_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:morphorun/components/wall.dart';
-import 'package:morphorun/core/constants.dart';
-import 'package:morphorun/core/lane.dart';
-import 'package:morphorun/core/shape_kind.dart';
-import 'package:morphorun/game/shape_shifter_game.dart';
+import 'package:flexirun/components/wall.dart';
+import 'package:flexirun/core/constants.dart';
+import 'package:flexirun/core/lane.dart';
+import 'package:flexirun/core/shape_kind.dart';
+import 'package:flexirun/game/shape_shifter_game.dart';
 
 // The core visual rule, checked against actual pixels rather than by eye: a
 // wall that has reached the runner draws in front of it, the hole is a real

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:morphorun/core/constants.dart';
-import 'package:morphorun/game/projection.dart';
+import 'package:flexirun/core/constants.dart';
+import 'package:flexirun/game/projection.dart';
 
 void main() {
   group('scaleAt', () {

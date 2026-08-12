@@ -2,12 +2,12 @@ import 'dart:math';
 
 import 'package:flame_test/flame_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:morphorun/components/player.dart';
-import 'package:morphorun/components/wall.dart';
-import 'package:morphorun/core/constants.dart';
-import 'package:morphorun/core/lane.dart';
-import 'package:morphorun/core/shape_kind.dart';
-import 'package:morphorun/game/shape_shifter_game.dart';
+import 'package:flexirun/components/player.dart';
+import 'package:flexirun/components/wall.dart';
+import 'package:flexirun/core/constants.dart';
+import 'package:flexirun/core/lane.dart';
+import 'package:flexirun/core/shape_kind.dart';
+import 'package:flexirun/game/shape_shifter_game.dart';
 
 const _frame = 1 / 60;
 const _maxFrames = 3000;
