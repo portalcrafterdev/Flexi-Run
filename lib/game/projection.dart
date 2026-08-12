@@ -31,7 +31,10 @@ double sideXAt(double lateral, double z) =>
 /// what makes a wall occlude the runner as it goes through the hole.
 int depthPriority(double z) {
   if (z > kWallHitZ) {
-    final steps = ((kWallSpawnZ - z) / kDepthPriorityStep).round();
+    // Measured from the furthest thing drawn, not from the wall spawn: the
+    // scenery starts further back than the walls, and anything past the
+    // reference point clamps to the same priority with no order between them.
+    final steps = ((kDepthPriorityFarZ - z) / kDepthPriorityStep).round();
     return kPrioFarBase + steps.clamp(0, kPrioFarSpan);
   }
   final steps = ((kWallHitZ - z) / kDepthPriorityStep).round();
