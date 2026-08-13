@@ -1212,7 +1212,7 @@ const kMenuCloudBand = 0.13;
 
 /// The level picker: three pills in a row, the chosen one filled green like
 /// the PLAY slab so it reads as the thing that is switched on.
-const kLevelTileH = 60.0;
+const kLevelTileH = 52.0;
 const kLevelTileRadius = 13.0;
 const kLevelTileDepth = 4.0;
 const kLevelTileGap = 11.0;
@@ -1347,6 +1347,18 @@ const kPlayEdge = Color(0xFF2C8B51);
 /// button that carries on - it is the one that costs something first.
 const kRewardFill = Color(0xFFF0A93B);
 const kRewardEdge = Color(0xFFB87A1E);
+
+/// The sign-in slab. Pale, with dark ink: it belongs to the platform rather
+/// than to the game, and it is the last thing in the column - nothing about it
+/// should pull the eye away from PLAY.
+const kSignInFill = Color(0xFFFFFFFF);
+const kSignInEdge = Color(0xFFD3DDD6);
+const kSignInInk = Color(0xFF46564E);
+
+/// Shown under the button when a sign-in did not work, so a press that failed
+/// does not just look like a button that does nothing.
+const kSignInFailInk = Color(0xFFC2564F);
+const kSignInNoteSize = 11.5;
 const kHowToFill = Color(0xFF4A93E8);
 const kHowToEdge = Color(0xFF3169AC);
 const kSheetFill = Color(0xFFFFFFFF);
@@ -1446,12 +1458,33 @@ const kTitleLetterColors = <Color>[
 ];
 
 const kMenuColumnW = 330.0;
-const kMenuButtonH = 50.0;
+
+/// The slabs, trimmed from 50 to make room for a fourth button.
+///
+/// The column centres itself in the screen, so every point of height it gains
+/// costs half a point of clearance at the top - and the top is where the gear
+/// sits. On a 360 point landscape phone, four buttons at the old size put the
+/// level row underneath the gear. Smaller buttons are the fix that keeps both
+/// the gear where it belongs and the spread layout on small phones.
+const kMenuButtonH = 44.0;
 const kMenuCardRadius = 22.0;
 const kMenuButtonRadius = 25.0;
 
 /// The lip under a slab, and how far it sinks when pressed.
-const kChunkyDepth = 6.0;
+const kChunkyDepth = 5.0;
+
+/// The gear, a little smaller than a full tap target. It is the one control on
+/// this screen aimed at a parent rather than a child, and it is competing for
+/// the same corner as the buttons.
+const kGearSize = 38.0;
+
+/// How far the gear sits from the top edge.
+///
+/// Its own value rather than [kEdgeGestureInset], which the HUD also uses for
+/// the hearts and the pause button: moving the gear up should not drag those
+/// with it. Still a real gap - right against the edge, a tap aimed at the gear
+/// pulls the notification shade down instead.
+const kGearTopInset = 14.0;
 
 const kMenuButtonFontSize = 17.0;
 const kMenuButtonSpacing = 1.6;

@@ -2,8 +2,10 @@ import 'package:flame_test/flame_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flexirun/core/games.dart';
 import 'package:flexirun/core/prefs.dart';
 import 'package:flexirun/game/shape_shifter_game.dart';
+import 'package:flexirun/ui/level_picker.dart';
 import 'package:flexirun/ui/menu_logo.dart';
 import 'package:flexirun/ui/menu_overlay.dart';
 import 'package:flexirun/ui/menu_runner.dart';
@@ -24,6 +26,12 @@ void main() {
   Future<ShapeShifterGame> boot() => initializeGame(ShapeShifterGame.new);
 
   Future<void> pumpAt(WidgetTester tester, Size size) async {
+    // The sign-in button is the whole reason the column got tall enough to
+    // slide under the gear, and it renders as nothing on a desktop test host.
+    // Without this the layout tests measure a column that is one button
+    // shorter than the real one and miss exactly the case they exist for.
+    Games.debugSupported = true;
+    addTearDown(Games.reset);
     final game = await boot();
     tester.view
       ..physicalSize = size
@@ -43,6 +51,37 @@ void main() {
     testWidgets('fits a tablet', (tester) async {
       await pumpAt(tester, const Size(1180, 820));
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('the gear never sits on top of the buttons', (tester) async {
+      // The bug this pins: the gear sits in the screen's own corner, outside
+      // the menu's layout, while the column of buttons centres itself in the
+      // whole screen. Every button added to that column therefore grows it
+      // upwards as well as down, and the fourth one - sign in - pushed the
+      // Hard tile up underneath the gear.
+      //
+      // Written as "do these overlap" rather than "is the gear above them", so
+      // it keeps holding wherever the gear is moved to next.
+      for (final size in <Size>[Size(900, 430), Size(800, 360)]) {
+        await pumpAt(tester, size);
+        final gear = tester.getRect(find.bySemanticsLabel('Settings'));
+
+        // The whole picker, not the word "Hard": the label is inset inside its
+        // tile, so measuring the text passes while the tile it is printed on
+        // is still tucked under the gear.
+        expect(
+          gear.overlaps(tester.getRect(find.byType(LevelPicker))),
+          isFalse,
+          reason: 'gear on the level picker at $size',
+        );
+        for (final label in <String>['PLAY', 'HOW TO PLAY']) {
+          expect(
+            gear.overlaps(tester.getRect(find.text(label))),
+            isFalse,
+            reason: 'gear on $label at $size',
+          );
+        }
+      }
     });
 
     testWidgets('spreads across a landscape screen', (tester) async {

@@ -33,6 +33,14 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-8244651657160773~9771201312" />
 
+        <!-- Google Play Games. Filled in from playGamesAppId in
+             android/local.properties by app/build.gradle.kts, so the project
+             ID is configuration rather than source. Empty until it is set:
+             sign-in then fails and the menu says so. -->
+        <meta-data
+            android:name="com.google.android.gms.games.APP_ID"
+            android:value="${playGamesAppId}" />
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

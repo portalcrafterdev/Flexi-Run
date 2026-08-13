@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'core/ads.dart';
 import 'core/audio.dart';
 import 'core/constants.dart';
+import 'core/games.dart';
 import 'core/prefs.dart';
 import 'core/shape_kind.dart';
 import 'game/shape_shifter_game.dart';
@@ -32,6 +33,9 @@ Future<void> main() async {
   // ad; none of that may sit between launching and the menu appearing, and
   // nothing needs an ad until a run has already been played.
   unawaited(Ads.init());
+  // Only listens for a session that already exists. It never prompts, so this
+  // cannot put a sign-in sheet in front of a child who just opened the game.
+  unawaited(Games.init());
   runApp(const ShapeShifterApp());
 }
 

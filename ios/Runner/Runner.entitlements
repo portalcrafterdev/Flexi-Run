@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Game Center. This file exists so the capability is in source control
+	  rather than only in someone's Xcode, but it is not wired up on its own:
+	  the Runner target needs CODE_SIGN_ENTITLEMENTS set to
+	  Runner/Runner.entitlements, which is what Xcode does for you when you add
+	  the Game Center capability under Signing & Capabilities.
+
+	  Adding it there is the whole iOS setup - Game Center needs no app ID in
+	  the project, unlike Play Games on Android. The app also has to exist in
+	  App Store Connect with Game Center enabled before sign-in will succeed on
+	  a real device.
+	-->
+	<key>com.apple.developer.game-center</key>
+	<true/>
+</dict>
+</plist>

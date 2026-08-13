@@ -13,6 +13,7 @@ import 'menu_background.dart';
 import 'menu_logo.dart';
 import 'menu_runner.dart';
 import 'menu_widgets.dart';
+import 'sign_in_button.dart';
 import 'sound_levels.dart';
 
 /// The home screen: a name, a character, and the things you can press.
@@ -62,12 +63,12 @@ class _MenuOverlayState extends State<MenuOverlay> {
               top: 0,
               right: 0,
               child: SafeArea(
-                // Held well clear of the top edge. Right against it, a tap
-                // aimed at the gear drags the system notification shade down
-                // instead, which on a phone in immersive mode is most of the
-                // top strip.
+                // Still clear of the top edge, where a tap aimed at the gear
+                // drags the notification shade down instead - just less of a
+                // gap than the HUD keeps, so the gear tucks further into the
+                // corner and further out of the buttons' way.
                 minimum: const EdgeInsets.only(
-                  top: kEdgeGestureInset,
+                  top: kGearTopInset,
                   right: kHudPad / 2,
                 ),
                 child: _GearButton(onPressed: () => _open(_Sheet.settings)),
@@ -241,7 +242,7 @@ class _Brand extends StatelessWidget {
           'FLEXI RUN',
           fontSize: compact ? kLogoSizeNarrow : kLogoSize,
         ),
-        const SizedBox(height: kMenuButtonGap * 0.6),
+        const SizedBox(height: kMenuButtonGap * 0.5),
         const TaglinePill(_kTagline),
       ],
     );
@@ -269,10 +270,10 @@ class _Controls extends StatelessWidget {
         // Above PLAY, because this is what a parent comes to the menu to set,
         // and PLAY is unmissable wherever it sits.
         LevelPicker(game: game),
-        // Wider than the gap between the two slabs: the pills cast a shadow of
-        // their own and PLAY casts one upwards onto them, so a tight gap here
+        // Still wider than the gap between the slabs below - the pills cast a
+        // shadow and PLAY casts one upwards onto them, so a tight gap here
         // leaves the pills looking smudged along the bottom.
-        const SizedBox(height: kMenuButtonGap * 1.5),
+        const SizedBox(height: kMenuButtonGap),
         ChunkyButton(
           label: 'PLAY',
           icon: Icons.play_arrow_rounded,
@@ -280,7 +281,7 @@ class _Controls extends StatelessWidget {
           edge: kPlayEdge,
           onPressed: onPlay,
         ),
-        const SizedBox(height: kMenuButtonGap * 0.6),
+        const SizedBox(height: kMenuButtonGap * 0.5),
         ChunkyButton(
           label: 'HOW TO PLAY',
           icon: Icons.lightbulb_rounded,
@@ -288,6 +289,11 @@ class _Controls extends StatelessWidget {
           edge: kHowToEdge,
           onPressed: onHowTo,
         ),
+        const SizedBox(height: kMenuButtonGap * 0.5),
+        // Last, and pale. An account is worth having but it is not what a
+        // child opened the game for, and nothing down here should compete with
+        // PLAY. Takes no room at all where there is nothing to sign in to.
+        const SignInButton(),
       ],
     );
   }
@@ -314,8 +320,8 @@ class _GearButton extends StatelessWidget {
           onPressed();
         },
         child: Container(
-          width: kMinTapTarget / 2,
-          height: kMinTapTarget / 2,
+          width: kGearSize,
+          height: kGearSize,
           decoration: const BoxDecoration(
             color: kMenuCard,
             shape: BoxShape.circle,

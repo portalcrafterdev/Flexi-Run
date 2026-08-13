@@ -133,13 +133,20 @@ class _Face extends StatelessWidget {
         children: <Widget>[
           Icon(icon, size: kMenuIconSize, color: ink),
           const SizedBox(width: kMenuButtonGap),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: kMenuButtonFontSize,
-              fontWeight: FontWeight.w800,
-              letterSpacing: kMenuButtonSpacing,
-              color: ink,
+          // Flexible, so a long label shortens instead of overflowing the
+          // slab. Labels are written to fit, but one of them naming a platform
+          // service is not under this app's control.
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: kMenuButtonFontSize,
+                fontWeight: FontWeight.w800,
+                letterSpacing: kMenuButtonSpacing,
+                color: ink,
+              ),
             ),
           ),
         ],
