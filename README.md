@@ -1,4 +1,4 @@
-# Morphorun
+# Flexi Run
 
 A 2D endless runner plus shape-matching puzzle for kids aged 6 to 10.
 
