@@ -32,6 +32,12 @@
 	<string>flexirun</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<!-- What iOS treats this app as. Game Mode, which holds frame rates
+	     steady and cuts Bluetooth latency for controllers and headphones,
+	     is offered only to apps in the games category - and the category
+	     comes from here as well as from App Store Connect. -->
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.games</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>

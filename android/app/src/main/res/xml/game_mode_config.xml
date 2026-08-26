@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What the system may do to this game when the player picks a Game Mode
+     from the Game Dashboard (Android 13 and up).
+
+     Performance and battery are both allowed, because neither can hurt a game
+     built like this one: everything is drawn procedurally at a fixed virtual
+     resolution and the loop is not tied to the frame rate, so a capped or
+     downscaled frame costs nothing a child would notice.
+
+     The ANGLE driver is not opted into. It is a graphics driver swap, and
+     there is nothing to gain from it here - the game has no shaders and no
+     native rendering, only Flutter and Flame on Skia. -->
+<game-mode-config
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:supportsBatteryGameMode="true"
+    android:supportsPerformanceGameMode="true"
+    android:allowGameDownscaling="true"
+    android:allowGameFpsOverride="true"
+    android:allowGameAngleDriver="false" />
