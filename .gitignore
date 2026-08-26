@@ -48,3 +48,19 @@ app.*.map.json
 # not part of the game. Matched anywhere, which also catches the stray
 # "CLAUDE (6).md" copy sitting in test/.
 CLAUDE*.md
+
+# Signing material. android/.gitignore already catches these inside android/,
+# but a keystore left at the repo root would not be, and this is the one
+# secret in the project that cannot be rotated after it leaks: whoever holds
+# it can sign builds as us, forever.
+key.properties
+*.jks
+*.keystore
+*.p12
+
+# Store upload bundles. Built by hand from tool/play_games/ and uploaded to
+# Play Console; nothing reads them back.
+/flexirun-*.zip
+
+# Scratch output from the icon generators - contact sheets and the like.
+/tool/_*

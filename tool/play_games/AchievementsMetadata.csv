@@ -1,0 +1,12 @@
+First Run,Finish your first run.,False,,Revealed,5,10
+Shape Shifter,Use all three shapes in a single run.,False,,Revealed,5,20
+Down the Path,Score 50 in a single run.,False,,Revealed,10,30
+Past the Trees,Score 100 in a single run.,False,,Revealed,15,40
+Over the Hills,Score 200 in a single run.,False,,Revealed,25,50
+The Long Run,Score 500 in a single run.,False,,Revealed,50,60
+Ten in a Row,Pass ten walls in a row without a bump.,False,,Revealed,15,70
+Not a Scratch,Clear 25 walls in one run without losing a life.,False,,Revealed,25,80
+Shield Stack,Earn five shields in a single run.,False,,Revealed,20,90
+Stepping Up,Score 100 on Medium.,False,,Revealed,25,100
+Top of the Hill,Score 100 on Hard.,False,,Revealed,50,110
+Coin Hunter,Collect 500 coins altogether.,True,500,Revealed,30,120
