@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../core/audio.dart';
 import '../core/constants.dart';
 import '../core/games.dart';
 import 'menu_widgets.dart';
@@ -58,8 +59,12 @@ class SignInButton extends StatelessWidget {
   }
 }
 
-/// Who is signed in. Not a button any more: there is nothing useful to press,
-/// and a dead button in a column of live ones is worse than a line of text.
+/// Who is signed in, and the way through to their badges.
+///
+/// The only place achievements are reachable from, and it costs the menu
+/// nothing: a fifth slab in that column is what put the settings gear on top
+/// of the level picker the last time, and this row is already on screen for
+/// exactly the players who have anything to look at.
 class _SignedIn extends StatelessWidget {
   const _SignedIn({required this.name});
 
@@ -68,37 +73,49 @@ class _SignedIn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Signed in to ${Games.serviceName} as $name',
-      child: Container(
-        height: kMenuButtonH,
-        padding: const EdgeInsets.symmetric(horizontal: kMenuButtonGap),
-        decoration: BoxDecoration(
-          color: kSignInFill,
-          borderRadius: BorderRadius.circular(kMenuButtonRadius),
-          border: Border.all(color: kSignInEdge, width: 1.5),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Icon(
-              Icons.check_circle_rounded,
-              size: kMenuIconSize,
-              color: kPlayFill,
-            ),
-            const SizedBox(width: kMenuButtonGap * 0.6),
-            Flexible(
-              child: Text(
-                name,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: kMenuTaglineSize,
-                  fontWeight: FontWeight.w800,
-                  color: kSignInInk,
-                ),
+      button: true,
+      label: 'Signed in to ${Games.serviceName} as $name. Show achievements',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          Audio.tap();
+          unawaited(Games.showAchievements());
+        },
+        child: _pill(),
+      ),
+    );
+  }
+
+  Widget _pill() {
+    return Container(
+      height: kMenuButtonH,
+      padding: const EdgeInsets.symmetric(horizontal: kMenuButtonGap),
+      decoration: BoxDecoration(
+        color: kSignInFill,
+        borderRadius: BorderRadius.circular(kMenuButtonRadius),
+        border: Border.all(color: kSignInEdge, width: 1.5),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Icon(
+            Icons.check_circle_rounded,
+            size: kMenuIconSize,
+            color: kPlayFill,
+          ),
+          const SizedBox(width: kMenuButtonGap * 0.6),
+          Flexible(
+            child: Text(
+              name,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: kMenuTaglineSize,
+                fontWeight: FontWeight.w800,
+                color: kSignInInk,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

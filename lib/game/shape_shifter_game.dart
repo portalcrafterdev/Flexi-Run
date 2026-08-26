@@ -15,7 +15,9 @@ import '../components/road.dart';
 import '../components/scenery.dart';
 import '../components/wall.dart';
 import '../core/audio.dart';
+import '../core/awards.dart';
 import '../core/constants.dart';
+import '../core/games.dart';
 import '../core/lane.dart';
 import '../core/level.dart';
 import '../core/placeholder_art.dart';
@@ -80,6 +82,23 @@ class ShapeShifterGame extends FlameGame {
   int _cleanPasses = 0;
   int _streak = 0;
   double _hitT = 0;
+
+  // What the achievements are scored on. Kept here rather than derived at the
+  // end because every one of them is about the shape of the run, not its
+  // final numbers - the longest streak, not the streak left standing, which
+  // is always zero because a run ends by hitting something.
+  int _bestStreak = 0;
+  int _wallsSinceLife = 0;
+  int _bestWallsSinceLife = 0;
+  int _shieldsEarned = 0;
+  final Set<ShapeKind> _shapesUsed = <ShapeKind>{};
+
+  /// Coins already added to the lifetime total this run.
+  ///
+  /// A run can end twice - game over, watch an advert, carry on, end again -
+  /// and both endings report. Without this the coins from the first half
+  /// would be banked a second time.
+  int _coinsBanked = 0;
 
   /// Whether this run has already had its one second chance.
   bool _extraLifeUsed = false;
@@ -251,6 +270,7 @@ class ShapeShifterGame extends FlameGame {
     _cleanPasses = 0;
     _streak = 0;
     _hitT = 0;
+    _resetAwardCounters();
     _shake.reset();
     _field.reset();
     _player.reset();
@@ -352,6 +372,9 @@ class ShapeShifterGame extends FlameGame {
         _player.consumeShield();
         shielded.value = false;
         score.value += kScorePerWall;
+        // A wall got past without costing anything, which is what "Not a
+        // Scratch" is about. Spending a shield is not losing a life.
+        _clearedWall();
         wall.shatter();
         shake(kShakeSmash);
         Audio.shieldSmash();
@@ -363,6 +386,11 @@ class ShapeShifterGame extends FlameGame {
         score.value += kScorePerWall;
         _cleanPasses++;
         _streak++;
+        if (_streak > _bestStreak) _bestStreak = _streak;
+        // Worn through a wall, not merely morphed into on the spot: the badge
+        // is for using all three shapes, not for pressing all three buttons.
+        _shapesUsed.add(_player.shape);
+        _clearedWall();
         _player.squeeze();
         world.add(
           sparkleBurst(Vector2(_player.position.x, kPlayerCentreY)),
@@ -370,6 +398,7 @@ class ShapeShifterGame extends FlameGame {
         Audio.pass(_streak);
         if (_cleanPasses % level.value.shieldEvery == 0) {
           _player.grantShield();
+          _shieldsEarned++;
           shielded.value = true;
           Audio.shieldGranted();
         }
@@ -399,6 +428,9 @@ class ShapeShifterGame extends FlameGame {
     if (_player.isInvulnerable) return;
 
     lives.value -= 1;
+    // Only here, where a life is actually spent. A wall broken during the
+    // blink after a crash is free, and does not end the clean stretch.
+    _wallsSinceLife = 0;
     _player.setInvulnerable(kInvulnSeconds);
     Audio.hit();
 
@@ -410,10 +442,59 @@ class ShapeShifterGame extends FlameGame {
     }
   }
 
+  /// Hands the finished run to the achievements layer.
+  ///
+  /// Fire and forget, and deliberately after the high score is written: a
+  /// store being slow or unreachable must not hold up the game over panel.
+  ///
+  /// Called on every ending, including the one an advert reverses. Unlocking
+  /// twice costs nothing - the awards are a set - and only the coins need
+  /// care, which is what [_coinsBanked] is for.
+  void _reportAwards() {
+    final fresh = coins.value - _coinsBanked;
+    _coinsBanked = coins.value;
+    unawaited(
+      Games.report(
+        RunStats(
+          score: score.value,
+          level: level.value,
+          bestStreak: _bestStreak,
+          bestCleanWalls: _bestWallsSinceLife,
+          shieldsEarned: _shieldsEarned,
+          shapesUsed: _shapesUsed,
+        ),
+        coins: fresh,
+      ),
+    );
+  }
+
+  /// Wipes the achievement counters back to the start of a run.
+  ///
+  /// Not called by [reviveWithExtraLife] on purpose. A continue is the same
+  /// run carrying on, so the streak and the clean stretch it had already
+  /// built stand - the same reasoning that keeps the score.
+  void _resetAwardCounters() {
+    _bestStreak = 0;
+    _wallsSinceLife = 0;
+    _bestWallsSinceLife = 0;
+    _shieldsEarned = 0;
+    _coinsBanked = 0;
+    _shapesUsed.clear();
+  }
+
+  /// One more wall survived without paying for it.
+  void _clearedWall() {
+    _wallsSinceLife++;
+    if (_wallsSinceLife > _bestWallsSinceLife) {
+      _bestWallsSinceLife = _wallsSinceLife;
+    }
+  }
+
   void _gameOver() {
     _streak = 0;
     if (score.value > highScore.value) highScore.value = score.value;
     unawaited(Prefs.setHighScore(level.value, score.value));
+    _reportAwards();
     Audio.gameOver();
     // The music keeps going under the game over screen; it only ducks for the
     // closing phrase. Cutting it dead reads as punishment.

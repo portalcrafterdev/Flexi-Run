@@ -6,27 +6,27 @@
 <!--package_name-->
 <string name="package_name" translatable="false">com.portalcrafter.flexirun</string>
 <!--achievement First Run-->
-<string name="achievement_first_run" translatable="false">CgkIlIeMzOsGEAIQDA</string>
+<string name="achievement_first_run" translatable="false">CgkIlIeMzOsGEAIQGA</string>
 <!--achievement Shape Shifter-->
-<string name="achievement_shape_shifter" translatable="false">CgkIlIeMzOsGEAIQCQ</string>
+<string name="achievement_shape_shifter" translatable="false">CgkIlIeMzOsGEAIQFQ</string>
 <!--achievement Down the Path-->
-<string name="achievement_down_the_path" translatable="false">CgkIlIeMzOsGEAIQAQ</string>
+<string name="achievement_down_the_path" translatable="false">CgkIlIeMzOsGEAIQDQ</string>
 <!--achievement Past the Trees-->
-<string name="achievement_past_the_trees" translatable="false">CgkIlIeMzOsGEAIQCw</string>
+<string name="achievement_past_the_trees" translatable="false">CgkIlIeMzOsGEAIQFw</string>
 <!--achievement Over the Hills-->
-<string name="achievement_over_the_hills" translatable="false">CgkIlIeMzOsGEAIQAg</string>
+<string name="achievement_over_the_hills" translatable="false">CgkIlIeMzOsGEAIQDg</string>
 <!--achievement The Long Run-->
-<string name="achievement_the_long_run" translatable="false">CgkIlIeMzOsGEAIQBQ</string>
+<string name="achievement_the_long_run" translatable="false">CgkIlIeMzOsGEAIQEQ</string>
 <!--achievement Ten in a Row-->
-<string name="achievement_ten_in_a_row" translatable="false">CgkIlIeMzOsGEAIQCA</string>
+<string name="achievement_ten_in_a_row" translatable="false">CgkIlIeMzOsGEAIQFA</string>
 <!--achievement Not a Scratch-->
-<string name="achievement_not_a_scratch" translatable="false">CgkIlIeMzOsGEAIQAw</string>
+<string name="achievement_not_a_scratch" translatable="false">CgkIlIeMzOsGEAIQDw</string>
 <!--achievement Shield Stack-->
-<string name="achievement_shield_stack" translatable="false">CgkIlIeMzOsGEAIQBA</string>
+<string name="achievement_shield_stack" translatable="false">CgkIlIeMzOsGEAIQEA</string>
 <!--achievement Stepping Up-->
-<string name="achievement_stepping_up" translatable="false">CgkIlIeMzOsGEAIQCg</string>
+<string name="achievement_stepping_up" translatable="false">CgkIlIeMzOsGEAIQFg</string>
 <!--achievement Top of the Hill-->
-<string name="achievement_top_of_the_hill" translatable="false">CgkIlIeMzOsGEAIQBw</string>
+<string name="achievement_top_of_the_hill" translatable="false">CgkIlIeMzOsGEAIQEw</string>
 <!--achievement Coin Hunter-->
-<string name="achievement_coin_hunter" translatable="false">CgkIlIeMzOsGEAIQBg</string>
+<string name="achievement_coin_hunter" translatable="false">CgkIlIeMzOsGEAIQEg</string>
 </resources>

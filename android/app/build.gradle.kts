@@ -1,37 +1,16 @@
-import java.io.InputStream
-import java.util.Properties
-
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// Google Play Games project ID, from Play Console > Play Games Services >
-// Configuration. A long number and nothing else - not the package name, not an
-// OAuth client ID.
-//
-// Set it in android/local.properties as:
-//     playGamesAppId=1234567890123
-//
-// Read from there rather than written into the manifest because it is
-// per-project configuration, not source. Empty until it is set, which leaves
-// the Games SDK uninitialised on purpose: signing in then fails cleanly and
-// the menu says so. That is much the better failure - a placeholder or
-// malformed ID makes the Play Games SDK abort, and that takes the game down
-// rather than just the sign-in button.
-//
-// Declared out here rather than inside defaultConfig: `apply` inside the
-// Android DSL resolves to Gradle's own and will not compile.
-val playGamesProperties = Properties()
-val playGamesPropertiesFile = rootProject.file("local.properties")
-if (playGamesPropertiesFile.exists()) {
-    playGamesPropertiesFile.inputStream().use { stream: InputStream ->
-        playGamesProperties.load(stream)
-    }
-}
-val playGamesAppId: String =
-    playGamesProperties.getProperty("playGamesAppId") ?: ""
+// The Play Games project ID used to be read out of local.properties and
+// substituted into the manifest. It now lives in res/values/games-ids.xml,
+// which is the file Play Console exports and which also carries the twelve
+// achievement IDs - one source instead of two that could disagree, and a
+// string resource rather than a manifest literal, which the Games SDK
+// requires: the ID is all digits and a bare numeric value is read as an
+// integer, taking the SDK down on launch.
 
 android {
     namespace = "com.flexirun.game"
@@ -47,7 +26,6 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.flexirun.game"
 
-        manifestPlaceholders["playGamesAppId"] = playGamesAppId
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
