@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../core/ads.dart';
+import '../core/audio.dart';
+import '../core/boards.dart';
 import '../core/constants.dart';
+import '../core/games.dart';
 import '../game/shape_shifter_game.dart';
 import 'menu_widgets.dart';
 import 'panel.dart';
@@ -36,8 +39,7 @@ class _GameOverOverlayState extends State<GameOverOverlay> {
     // Both halves have to hold: the run must not have spent its second chance
     // already, and there must be an ad in hand right now. Offering a reward
     // and then failing to produce one is worse than never offering it.
-    final canRevive =
-        !_busy && game.canOfferExtraLife && Ads.hasExtraLifeAd;
+    final canRevive = !_busy && game.canOfferExtraLife && Ads.hasExtraLifeAd;
 
     return GamePanel(
       children: <Widget>[
@@ -59,8 +61,28 @@ class _GameOverOverlayState extends State<GameOverOverlay> {
           // like an all-time best that Easy has quietly been beating. Not
           // padded, unlike the score above it: that one is a readout holding
           // its width, this is a fact.
-          builder: (_, high, _) =>
-              PanelLine('${game.level.value.label} best  $high'),
+          builder: (_, high, _) {
+            final line = PanelLine('${game.level.value.label} best  $high');
+            // Tappable only where there is a board to open and someone signed
+            // in to appear on it. Nothing is added to the panel otherwise: a
+            // dead control next to a child's score is worse than no control,
+            // and the layout must not move depending on who is signed in.
+            if (!Games.isSignedIn || Board.forLevel(game.level.value) == null) {
+              return line;
+            }
+            return Semantics(
+              button: true,
+              label: 'Show leaderboards',
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  Audio.tap();
+                  unawaited(Games.showLeaderboards());
+                },
+                child: line,
+              ),
+            );
+          },
         ),
         const SizedBox(height: kMenuButtonGap),
         if (canRevive) ...<Widget>[

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:games_services/games_services.dart';
 
 import 'awards.dart';
+import 'boards.dart';
 import 'prefs.dart';
 
 /// Google Play Games on Android, Game Center on iOS.
@@ -115,12 +116,21 @@ class Games {
     await Prefs.addAwardsWon(won);
     final total = await Prefs.addLifetimeCoins(coins);
     await _push(total);
+    await _submit(Board.forLevel(stats.level), stats.score);
   }
 
   /// Sends anything earned but not yet accepted by a store, plus the current
   /// coin total. Called after a sign-in, so a backlog built up while signed
   /// out arrives all at once.
-  static Future<void> flushPending() => _push(Prefs.lifetimeCoins);
+  static Future<void> flushPending() async {
+    await _push(Prefs.lifetimeCoins);
+    // The best on each level, which is exactly the backlog: every run played
+    // signed out is already folded into it, and both stores keep the highest
+    // score anyway, so sending it again costs nothing and corrects everything.
+    for (final board in Board.values) {
+      if (board.isReady) await _submit(board, Prefs.highScore(board.level));
+    }
+  }
 
   /// Whether a store will accept anything right now.
   ///
@@ -193,6 +203,39 @@ class Games {
       }
     } catch (_) {
       // Retried on the next run, from the same absolute total.
+    }
+  }
+
+  /// Sends [score] to [board], if there is one and anyone is listening.
+  ///
+  /// The run's own score, not the stored best. Play and Game Center both keep
+  /// the highest score a player has submitted, so there is nothing to compare
+  /// against here - and submitting every run means a score that failed to send
+  /// once is not lost, it is simply beaten later.
+  static Future<void> _submit(Board? board, int score) async {
+    if (board == null || score <= 0) return;
+    if (!await _authed) return;
+    try {
+      await Leaderboards.submitScore(
+        score: Score(
+          androidLeaderboardID: board.androidId,
+          iOSLeaderboardID: board.iosId,
+          value: score,
+        ),
+      );
+    } catch (_) {
+      // Offline, or the board is not published yet. The next run sends again,
+      // and flushPending sends the stored best after a sign-in.
+    }
+  }
+
+  /// Opens the platform's own leaderboards screen.
+  static Future<void> showLeaderboards() async {
+    if (!isSupported || !isSignedIn) return;
+    try {
+      await Leaderboards.showLeaderboards();
+    } catch (_) {
+      // Same as the achievements screen: nothing useful to say about it.
     }
   }
 

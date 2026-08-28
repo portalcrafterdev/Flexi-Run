@@ -29,4 +29,10 @@
 <string name="achievement_top_of_the_hill" translatable="false">CgkIlIeMzOsGEAIQEw</string>
 <!--achievement Coin Hunter-->
 <string name="achievement_coin_hunter" translatable="false">CgkIlIeMzOsGEAIQEg</string>
+<!--leaderboard Easy Best Score-->
+<string name="leaderboard_easy_best_score" translatable="false">CgkIlIeMzOsGEAIQGQ</string>
+<!--leaderboard Medium Best Score-->
+<string name="leaderboard_medium_best_score" translatable="false">CgkIlIeMzOsGEAIQGg</string>
+<!--leaderboard Hard Best Score-->
+<string name="leaderboard_hard_best_score" translatable="false">CgkIlIeMzOsGEAIQGw</string>
 </resources>

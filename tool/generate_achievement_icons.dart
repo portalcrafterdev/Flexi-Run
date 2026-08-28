@@ -59,7 +59,17 @@ void main() {
     File('$_outDir/AchievementsIconsMappings.csv')
         .writeAsStringSync('${rows.join('\n')}\n');
 
+    // The leaderboards are uploaded one at a time in the console's own form,
+    // so they get files and no mappings row - and must stay out of the import
+    // zip, which accepts only the achievements.
+    for (final entry in boards.entries) {
+      await writeIcon('$_outDir/${fileFor(entry.key)}', entry.value);
+    }
+
     // ignore: avoid_print
-    print('Wrote ${rows.length} icons to $_outDir');
+    print(
+      'Wrote ${rows.length} achievement icons and '
+      '${boards.length} leaderboard icons to $_outDir',
+    );
   });
 }

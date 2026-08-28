@@ -54,6 +54,26 @@ const awards = <String, AwardPainter>{
   'Coin Hunter': _coinHunter,
 };
 
+/// The three leaderboard icons, keyed by the leaderboard Name in Play Console.
+///
+/// Uploaded one at a time in the console's own form rather than imported, so
+/// unlike the achievements these need no mappings CSV - only the files.
+///
+/// Told apart by colour and by a countable number of stars. Same reason the
+/// badges carry no text: no font is loaded when these are rasterised, and a
+/// number would have to be translated anyway.
+const boards = <String, AwardPainter>{
+  'Easy Best Score': _easyBoard,
+  'Medium Best Score': _mediumBoard,
+  'Hard Best Score': _hardBoard,
+};
+
+void _easyBoard(Canvas canvas, Size size) => _board(canvas, size, _green, 1);
+
+void _mediumBoard(Canvas canvas, Size size) => _board(canvas, size, _blue, 2);
+
+void _hardBoard(Canvas canvas, Size size) => _board(canvas, size, _gold, 3);
+
 // ---------------------------------------------------------------- the ground
 
 /// The disc every glyph sits on: a lit sphere rather than a flat fill, so the
@@ -323,6 +343,82 @@ void _coinHunter(Canvas canvas, Size size) {
 }
 
 // ------------------------------------------------------------------- shapes
+
+/// A trophy with [count] stars under it: the leaderboard for one level.
+void _board(Canvas canvas, Size size, List<Color> tier, int count) {
+  _badge(canvas, size, tier);
+  final s = size.width;
+
+  // Handles first, so the cup is drawn over where they meet it and they read
+  // as attached rather than as two rings floating beside it.
+  for (final side in <double>[-1, 1]) {
+    canvas.drawArc(
+      Rect.fromCircle(
+        center: Offset(s * (0.5 + side * 0.185), s * 0.325),
+        radius: s * 0.085,
+      ),
+      side < 0 ? pi * 0.35 : pi * 1.15,
+      pi * 1.5,
+      false,
+      _inkStroke(s * 0.038),
+    );
+  }
+
+  final cup = Path()
+    ..moveTo(s * 0.335, s * 0.225)
+    ..lineTo(s * 0.665, s * 0.225)
+    ..lineTo(s * 0.632, s * 0.42)
+    ..quadraticBezierTo(s * 0.5, s * 0.585, s * 0.368, s * 0.42)
+    ..close();
+
+  final stand = Path()
+    ..addRect(Rect.fromLTRB(s * 0.468, s * 0.575, s * 0.532, s * 0.645))
+    ..addRRect(
+      RRect.fromLTRBXY(
+        s * 0.395,
+        s * 0.645,
+        s * 0.605,
+        s * 0.695,
+        s * 0.02,
+        s * 0.02,
+      ),
+    )
+    ..addRRect(
+      RRect.fromLTRBXY(
+        s * 0.345,
+        s * 0.695,
+        s * 0.655,
+        s * 0.745,
+        s * 0.025,
+        s * 0.025,
+      ),
+    );
+
+  _under(canvas, cup, s * 0.018);
+  canvas
+    ..drawPath(cup, _ink)
+    ..drawPath(stand, _ink)
+    // A lit edge down the left of the cup, from the corner everything else in
+    // this game is lit from.
+    ..save()
+    ..clipPath(cup)
+    ..drawRect(
+      Rect.fromLTWH(s * 0.335, s * 0.225, s * 0.055, s * 0.4),
+      fillWith(tier.last.withValues(alpha: 0.18)),
+    )
+    ..restore();
+
+  // The stars: one for Easy, three for Hard. Countable at a glance, and the
+  // only thing besides the colour that separates the three.
+  final gap = s * 0.115;
+  final first = s * 0.5 - gap * (count - 1) / 2;
+  for (var i = 0; i < count; i++) {
+    canvas.drawPath(
+      shapePath(ShapeKind.star, Offset(first + i * gap, s * 0.83), s * 0.058),
+      _ink,
+    );
+  }
+}
 
 /// [count] stacked chevrons pointing up the path. One glyph serving three
 /// score milestones, told apart by how many and what colour.

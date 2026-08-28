@@ -39,6 +39,19 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+
+            // R8 runs on release builds whether or not this is spelled out, and
+            // it strips anything it cannot see a reference to. Several of our
+            // dependencies find their classes by name at runtime, which R8
+            // cannot follow - without proguard-rules.pro the app died on launch
+            // with "Failed to create an instance of androidx.work.impl.WorkDatabase"
+            // before drawing a frame.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }
