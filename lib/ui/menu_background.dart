@@ -27,15 +27,24 @@ class MenuBackground extends StatefulWidget {
 }
 
 class _MenuBackgroundState extends State<MenuBackground>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _drift = AnimationController(
     vsync: this,
     duration: const Duration(seconds: kMenuDriftSeconds),
   )..repeat();
 
+  /// A second, far slower clock. The balloons bob on a seven second loop; a
+  /// cloud sharing it would tear across the sky. One controller cannot serve
+  /// both, because it is the loop length that sets the speed.
+  late final AnimationController _sky = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: kMenuCloudSeconds),
+  )..repeat();
+
   @override
   void dispose() {
     _drift.dispose();
+    _sky.dispose();
     super.dispose();
   }
 
@@ -45,7 +54,27 @@ class _MenuBackgroundState extends State<MenuBackground>
       children: <Widget>[
         const Positioned.fill(
           child: RepaintBoundary(
-            child: CustomPaint(painter: _ScenePainter(), size: Size.infinite),
+            child: CustomPaint(painter: _SkyPainter(), size: Size.infinite),
+          ),
+        ),
+        // Between the sky and the land, which is where clouds belong. Putting
+        // them on the drift layer would be fewer boundaries and would look
+        // identical today - right up until a cloud is moved low enough to
+        // reach a mountain, and then it is in front of it.
+        Positioned.fill(
+          child: RepaintBoundary(
+            child: AnimatedBuilder(
+              animation: _sky,
+              builder: (_, _) => CustomPaint(
+                painter: _CloudPainter(_sky.value),
+                size: Size.infinite,
+              ),
+            ),
+          ),
+        ),
+        const Positioned.fill(
+          child: RepaintBoundary(
+            child: CustomPaint(painter: _LandPainter(), size: Size.infinite),
           ),
         ),
         Positioned.fill(
@@ -64,9 +93,9 @@ class _MenuBackgroundState extends State<MenuBackground>
   }
 }
 
-/// Everything that never moves.
-class _ScenePainter extends CustomPainter {
-  const _ScenePainter();
+/// Everything above the horizon that never moves.
+class _SkyPainter extends CustomPainter {
+  const _SkyPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -74,7 +103,33 @@ class _ScenePainter extends CustomPainter {
     paintSunburst(canvas, size);
     paintSun(canvas, size);
     paintSparkles(canvas, size);
-    paintClouds(canvas, size);
+  }
+
+  @override
+  bool shouldRepaint(_SkyPainter old) => false;
+}
+
+/// The clouds, crossing the sky.
+class _CloudPainter extends CustomPainter {
+  const _CloudPainter(this.phase);
+
+  /// 0 to 1, one lap of the sky.
+  final double phase;
+
+  @override
+  void paint(Canvas canvas, Size size) => paintClouds(canvas, size, phase);
+
+  @override
+  bool shouldRepaint(_CloudPainter old) => old.phase != phase;
+}
+
+/// Everything below the horizon that never moves. Still the bulk of the paint
+/// work, and still painted exactly once.
+class _LandPainter extends CustomPainter {
+  const _LandPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
     paintMountains(canvas, size);
     paintMeadow(canvas, size);
     paintCastle(canvas, size);
@@ -86,7 +141,7 @@ class _ScenePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_ScenePainter old) => false;
+  bool shouldRepaint(_LandPainter old) => false;
 }
 
 /// The few things that do: balloons, the drifting shapes, and the corner

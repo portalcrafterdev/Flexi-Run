@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif; }
+    a { color: #2F8A3C; } a:hover { color: #21682c; }
+    .row { display: flex; align-items: center; gap: 11px; }
+    .rail { flex: 1; height: 10px; border-radius: 6px; background: #E3EBE6; position: relative; }
+    .fill { position: absolute; inset: 0 auto 0 0; border-radius: 6px; }
+    .thumb { position: absolute; top: 50%; width: 12px; height: 12px; border-radius: 50%;
+             background: #FFFFFF; border: 2.5px solid currentColor; transform: translate(-50%,-50%); }
+    .notch { position: absolute; top: 50%; width: 3px; height: 3px; border-radius: 50%;
+             background: rgba(70,86,78,0.28); transform: translate(-50%,-50%); }
+    .label { font-size: 13px; font-weight: 700; color: #46564E; width: 52px; }
+  </style>
+</helmet>
+
+<div style="position: relative; width: 800px; height: 360px; overflow: hidden; background: linear-gradient(180deg,#3D7CD6 0%,#5FC0EC 55%,#AEE5F3 100%);">
+
+  <svg viewBox="0 0 800 360" style="position: absolute; inset: 0;" aria-hidden="true">
+    <circle cx="416" cy="164" r="34" fill="#FFE9A3"></circle>
+    <g fill="#A0B9E1"><polygon points="118,254 190,150 262,254"></polygon><polygon points="228,254 300,132 372,254"></polygon></g>
+    <path d="M0 248 Q 200 232 420 250 T 800 242 L800 360 L0 360 Z" fill="#9AD7A6"></path>
+    <path d="M0 278 Q 250 260 520 282 T 800 272 L800 360 L0 360 Z" fill="#6FC583"></path>
+    <path d="M0 316 Q 280 300 600 320 T 800 312 L800 360 L0 360 Z" fill="#4FAE5B"></path>
+    <path d="M330 250 L268 360 L438 360 L358 250 Z" fill="#D9BE8E"></path>
+  </svg>
+  <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.4);"></div>
+
+  <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 330px; background: #FFFDF5; border: 2.5px solid #F2C14E; border-radius: 22px; padding: 16px; box-sizing: border-box; box-shadow: 0 8px 20px rgba(16,42,24,0.34);">
+
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <div style="font-size: 26px; font-weight: 800; color: #46564E; line-height: 1.1;">Settings</div>
+      <div style="width: 30px; height: 30px; border-radius: 50%; background: #F0F5F1; display: flex; align-items: center; justify-content: center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6E7D75" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </div>
+    </div>
+
+    <!-- Five steps rather than a free slider. A thumb dragged along a
+         continuous bar gives a child no idea what they have set; five
+         positions can be counted, and each tap is a real change they hear. -->
+    <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 16px;">
+      <div class="row" style="color: #41C275;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#46564E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zM16.5 8.5a5 5 0 0 1 0 7"></path></svg>
+        <span class="label">Sound</span>
+        <div class="rail">
+          <div class="fill" style="width: 80%; background: #41C275;"></div>
+          <div class="notch" style="left: 0%;"></div><div class="notch" style="left: 25%;"></div>
+          <div class="notch" style="left: 50%;"></div><div class="notch" style="left: 75%;"></div>
+          <div class="notch" style="left: 100%;"></div>
+          <div class="thumb" style="left: 80%;"></div>
+        </div>
+      </div>
+
+      <div class="row" style="color: #4A93E8;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#46564E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l10-2v13"></path><circle cx="6.5" cy="18" r="2.6"></circle><circle cx="16.5" cy="16" r="2.6"></circle></svg>
+        <span class="label">Music</span>
+        <div class="rail">
+          <div class="fill" style="width: 40%; background: #4A93E8;"></div>
+          <div class="notch" style="left: 0%;"></div><div class="notch" style="left: 25%;"></div>
+          <div class="notch" style="left: 50%;"></div><div class="notch" style="left: 75%;"></div>
+          <div class="notch" style="left: 100%;"></div>
+          <div class="thumb" style="left: 40%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Room the sheet has and does not use. Tap-anywhere is a real setting in
+         CLAUDE.md that has never had a control, and this is where it belongs. -->
+    <div style="margin-top: 16px; padding: 10px 12px; border-radius: 14px; background: #F2F7F3; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+      <div>
+        <div style="font-size: 13px; font-weight: 800; color: #46564E;">Tap anywhere</div>
+        <div style="font-size: 11px; font-weight: 600; color: #8A968F; margin-top: 1px;">Tap a third of the screen to change shape</div>
+      </div>
+      <div style="width: 44px; height: 26px; border-radius: 13px; background: #41C275; position: relative; flex: none;">
+        <div style="position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: #FFFFFF;"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

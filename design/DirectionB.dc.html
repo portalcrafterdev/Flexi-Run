@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif; }
+    a { color: #E4572E; } a:hover { color: #b8431f; }
+  </style>
+</helmet>
+
+<!-- Toy Box: flat colour, one heavy outline weight everywhere, no gradients.
+     Sticker rules - every object is a shape with a 4px #2B4A5C outline and a
+     hard offset shadow, the way a cut-out toy has a rim. -->
+<div style="position: relative; width: 800px; height: 360px; overflow: hidden; background: #63C4F0;">
+
+  <!-- flat sky band + ground band, no gradient -->
+  <div style="position: absolute; left: 0; right: 0; top: 214px; bottom: 0; background: #6FD98F; border-top: 4px solid #2B4A5C;"></div>
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 46px; background: #4FAE5B;"></div>
+
+  <svg viewBox="0 0 800 360" style="position: absolute; inset: 0;" aria-hidden="true">
+    <g stroke="#2B4A5C" stroke-width="4" stroke-linejoin="round">
+      <circle cx="678" cy="62" r="34" fill="#FFD23F"></circle>
+      <polygon points="96,214 156,126 216,214" fill="#A0B9E1"></polygon>
+      <polygon points="196,214 268,110 340,214" fill="#B9CCE8"></polygon>
+      <circle cx="52" cy="188" r="24" fill="#FFFFFF"></circle>
+      <circle cx="86" cy="188" r="18" fill="#FFFFFF"></circle>
+    </g>
+  </svg>
+
+  <!-- ==== logo, top left, flat fills on one outline ==== -->
+  <div style="position: absolute; left: 26px; top: 18px; display: flex; gap: 2px; font-size: 44px; font-weight: 700; line-height: 1;">
+    <span style="color: #FF5E5E; -webkit-text-stroke: 6px #2B4A5C; paint-order: stroke fill;">F</span>
+    <span style="color: #FFD23F; -webkit-text-stroke: 6px #2B4A5C; paint-order: stroke fill;">L</span>
+    <span style="color: #6FD98F; -webkit-text-stroke: 6px #2B4A5C; paint-order: stroke fill;">E</span>
+    <span style="color: #FF9C3F; -webkit-text-stroke: 6px #2B4A5C; paint-order: stroke fill;">X</span>
+    <span style="color: #B99CF0; -webkit-text-stroke: 6px #2B4A5C; paint-order: stroke fill;">I</span>
+    <span style="width: 16px;"></span>
+    <span style="color: #FF7FB6; -webkit-text-stroke: 6px #2B4A5C; paint-order: stroke fill;">R</span>
+    <span style="color: #59C2F5; -webkit-text-stroke: 6px #2B4A5C; paint-order: stroke fill;">U</span>
+    <span style="color: #FFB03F; -webkit-text-stroke: 6px #2B4A5C; paint-order: stroke fill;">N</span>
+  </div>
+
+  <!-- ==== the three shapes ARE the instructions - no sentence at all ==== -->
+  <div style="position: absolute; left: 30px; top: 86px; display: flex; align-items: center; gap: 9px;">
+    <div style="width: 40px; height: 40px; border-radius: 50%; background: #FF7043; border: 4px solid #2B4A5C;"></div>
+    <div style="width: 40px; height: 40px; border-radius: 9px; background: #EC4899; border: 4px solid #2B4A5C;"></div>
+    <svg width="46" height="46" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,1.5 15,8.8 22.8,8.8 16.5,13.6 18.8,21.4 12,16.6 5.2,21.4 7.5,13.6 1.2,8.8 9,8.8" fill="#A855F7" stroke="#2B4A5C" stroke-width="2.2" stroke-linejoin="round"></polygon></svg>
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2B4A5C" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"></path></svg>
+    <div style="width: 46px; height: 46px; border: 4px dashed #2B4A5C; border-radius: 9px; background: #FFFFFF;"></div>
+  </div>
+
+  <!-- ==== mascot, centre stage and bigger ==== -->
+  <div style="position: absolute; left: 268px; bottom: 4px; width: 176px; height: 196px;">
+    <svg viewBox="0 0 176 196" style="width: 100%; height: 100%;" aria-hidden="true">
+      <g stroke="#2B4A5C" stroke-width="4.5" stroke-linejoin="round">
+        <rect x="64" y="146" width="18" height="30" rx="8" fill="#3FA9E8"></rect>
+        <rect x="94" y="146" width="18" height="30" rx="8" fill="#3FA9E8"></rect>
+        <circle cx="34" cy="118" r="12" fill="#3FA9E8"></circle>
+        <circle cx="142" cy="118" r="12" fill="#3FA9E8"></circle>
+        <circle cx="88" cy="100" r="60" fill="#63C4F0"></circle>
+      </g>
+      <ellipse cx="66" cy="70" rx="20" ry="12" fill="#FFFFFF" opacity="0.6" transform="rotate(-24 66 70)"></ellipse>
+      <circle cx="71" cy="98" r="9" fill="#2B4A5C"></circle>
+      <circle cx="105" cy="98" r="9" fill="#2B4A5C"></circle>
+      <circle cx="74" cy="94.5" r="3.4" fill="#FFFFFF"></circle>
+      <circle cx="108" cy="94.5" r="3.4" fill="#FFFFFF"></circle>
+      <path d="M72 118 Q 88 132 104 118" stroke="#2B4A5C" stroke-width="5.5" fill="none" stroke-linecap="round"></path>
+    </svg>
+  </div>
+
+  <!-- ==== level: three medallions, counted in stars, no words at all ==== -->
+  <div style="position: absolute; right: 20px; top: 20px; display: flex; gap: 12px;">
+    <div style="width: 74px; height: 74px; border-radius: 50%; background: #6FD98F; border: 4px solid #2B4A5C; box-shadow: 0 5px 0 #2B4A5C; display: flex; align-items: center; justify-content: center;">
+      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,2 15,9.2 22.6,9.2 16.4,13.8 18.8,21 12,16.5 5.2,21 7.6,13.8 1.4,9.2 9,9.2" fill="#FFFFFF" stroke="#2B4A5C" stroke-width="1.6" stroke-linejoin="round"></polygon></svg>
+    </div>
+    <div style="width: 74px; height: 74px; border-radius: 50%; background: #FFFDF5; border: 4px solid #2B4A5C; box-shadow: 0 5px 0 #2B4A5C; display: flex; align-items: center; justify-content: center; gap: 2px;">
+      <svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,2 15,9.2 22.6,9.2 16.4,13.8 18.8,21 12,16.5 5.2,21 7.6,13.8 1.4,9.2 9,9.2" fill="#FFD23F" stroke="#2B4A5C" stroke-width="1.8" stroke-linejoin="round"></polygon></svg>
+      <svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,2 15,9.2 22.6,9.2 16.4,13.8 18.8,21 12,16.5 5.2,21 7.6,13.8 1.4,9.2 9,9.2" fill="#FFD23F" stroke="#2B4A5C" stroke-width="1.8" stroke-linejoin="round"></polygon></svg>
+    </div>
+    <div style="width: 74px; height: 74px; border-radius: 50%; background: #FFFDF5; border: 4px solid #2B4A5C; box-shadow: 0 5px 0 #2B4A5C; display: flex; align-items: center; justify-content: center; gap: 1px;">
+      <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,2 15,9.2 22.6,9.2 16.4,13.8 18.8,21 12,16.5 5.2,21 7.6,13.8 1.4,9.2 9,9.2" fill="#FF9C3F" stroke="#2B4A5C" stroke-width="2" stroke-linejoin="round"></polygon></svg>
+      <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,2 15,9.2 22.6,9.2 16.4,13.8 18.8,21 12,16.5 5.2,21 7.6,13.8 1.4,9.2 9,9.2" fill="#FF9C3F" stroke="#2B4A5C" stroke-width="2" stroke-linejoin="round"></polygon></svg>
+      <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,2 15,9.2 22.6,9.2 16.4,13.8 18.8,21 12,16.5 5.2,21 7.6,13.8 1.4,9.2 9,9.2" fill="#FF9C3F" stroke="#2B4A5C" stroke-width="2" stroke-linejoin="round"></polygon></svg>
+    </div>
+  </div>
+
+  <!-- ==== one enormous PLAY, and nothing competing with it ==== -->
+  <div style="position: absolute; right: 20px; top: 116px; width: 274px; display: flex; flex-direction: column; gap: 14px;">
+    <div style="height: 104px; border-radius: 30px; background: #FF9C3F; border: 5px solid #2B4A5C; box-shadow: 0 8px 0 #2B4A5C; display: flex; align-items: center; justify-content: center; gap: 14px;">
+      <svg width="44" height="44" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,4 20,12 7,20" fill="#FFFFFF" stroke="#2B4A5C" stroke-width="1.6" stroke-linejoin="round"></polygon></svg>
+      <span style="font-size: 42px; font-weight: 700; color: #FFFFFF; -webkit-text-stroke: 3px #2B4A5C; paint-order: stroke fill;">PLAY</span>
+    </div>
+    <div style="height: 64px; border-radius: 22px; background: #FFFDF5; border: 4px solid #2B4A5C; box-shadow: 0 6px 0 #2B4A5C; display: flex; align-items: center; justify-content: center; gap: 10px;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2B4A5C" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.4.3.5.7.5 1.1v1h6v-1c0-.4.1-.8.5-1.1A6 6 0 0 0 12 3z"></path></svg>
+      <span style="font-size: 22px; font-weight: 700; color: #2B4A5C;">How to play</span>
+    </div>
+  </div>
+
+  <!-- ==== gear + sign-in, small, outlined like everything else ==== -->
+  <div style="position: absolute; right: 20px; bottom: 14px; display: flex; gap: 10px;">
+    <div style="width: 46px; height: 46px; border-radius: 50%; background: #FFFDF5; border: 4px solid #2B4A5C; box-shadow: 0 4px 0 #2B4A5C; display: flex; align-items: center; justify-content: center;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2B4A5C" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="3.4"></circle><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+    </div>
+    <div style="width: 46px; height: 46px; border-radius: 50%; background: #FFFDF5; border: 4px solid #2B4A5C; box-shadow: 0 4px 0 #2B4A5C; display: flex; align-items: center; justify-content: center;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2B4A5C" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 12h4M8 10v4M15 11h.01M18 13h.01"></path><rect x="2" y="6" width="20" height="12" rx="5"></rect></svg>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

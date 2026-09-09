@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif; }
+    a { color: #2F8A3C; } a:hover { color: #21682c; }
+    .slab { position: relative; border-radius: 22px; border: 3px solid #FFFFFF;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            overflow: hidden; color: #FFFFFF; font-weight: 800; height: 44px; }
+    .slab .gloss { position: absolute; left: 5px; right: 5px; top: 3px; height: 32%;
+                   border-radius: 18px; background: rgba(255,255,255,0.3); }
+    .slab span, .slab svg { position: relative; }
+    .slab .t { text-shadow: 0 1.5px 2px rgba(23,58,42,0.35); letter-spacing: 1.6px; font-size: 17px; }
+    .play { background: linear-gradient(180deg,#8FDD77 0%,#4FB84F 62%,#3E9741 100%);
+            box-shadow: 0 5px 0 #2F8A3C, 0 8px 12px rgba(16,42,24,0.22); }
+    .howto { background: linear-gradient(180deg,#85CFF2 0%,#4A9BD8 62%,#3A83BC 100%);
+             box-shadow: 0 5px 0 #2C6FAE, 0 8px 12px rgba(16,42,24,0.22); }
+    .gold { background: linear-gradient(180deg,#F7C86A 0%,#F0A93B 62%,#D9922B 100%);
+            box-shadow: 0 5px 0 #B87A1E, 0 8px 12px rgba(16,42,24,0.22); }
+  </style>
+</helmet>
+
+<div style="position: relative; width: 800px; height: 360px; overflow: hidden; background: linear-gradient(180deg,#3D7CD6 0%,#5FC0EC 48%,#AEE5F3 62%);">
+
+  <!-- the stopped world behind, then the scrim -->
+  <svg viewBox="0 0 800 360" style="position: absolute; inset: 0;" aria-hidden="true">
+    <path d="M0 214 Q 220 198 460 216 T 800 208 L800 360 L0 360 Z" fill="#9CCBA1"></path>
+    <path d="M0 246 Q 260 230 560 250 T 800 242 L800 360 L0 360 Z" fill="#7FBC65"></path>
+    <path d="M0 290 Q 300 272 620 294 T 800 286 L800 360 L0 360 Z" fill="#56A85E"></path>
+    <polygon points="372,214 428,214 640,360 160,360" fill="#D9BE8E"></polygon>
+    <g fill="#4B9450">
+      <polygon points="86,268 70,242 102,242"></polygon><polygon points="86,252 74,232 98,232"></polygon>
+      <polygon points="712,276 696,250 728,250"></polygon>
+    </g>
+    <g>
+      <rect x="628" y="196" width="46" height="28" fill="#C9B4EA"></rect>
+      <polygon points="640,196 651,180 662,196" fill="#9078CC"></polygon>
+    </g>
+  </svg>
+  <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.4);"></div>
+
+  <!-- the card: 330 wide, cream, gold rim -->
+  <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 330px; background: #FFFDF5; border: 2.5px solid #F2C14E; border-radius: 22px; padding: 15px; box-sizing: border-box; box-shadow: 0 8px 20px rgba(16,42,24,0.34);">
+
+    <!-- Never the words "game over": the run ended, and the next one starts
+         from the button below. Six year olds put the phone down when told
+         they lost. -->
+    <div style="text-align: center; font-size: 26px; font-weight: 800; color: #46564E; line-height: 1.1;">New best!</div>
+
+    <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 8px;">
+      <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,1.5 15,8.8 22.8,8.8 16.5,13.6 18.8,21.4 12,16.6 5.2,21.4 7.5,13.6 1.2,8.8 9,8.8" fill="#F2C14E"></polygon></svg>
+      <span style="font-size: 13px; font-weight: 700; color: #6E7D75;">Score</span>
+      <span style="font-size: 24px; font-weight: 800; color: #41C275;">120</span>
+    </div>
+
+    <!-- Named, not a bare number: the best is per level, and an unlabelled
+         figure could be a score to beat or a level number. -->
+    <div style="text-align: center; font-size: 13px; font-weight: 700; color: #6E7D75; margin-top: 2px;">Easy best  120</div>
+
+    <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 11px;">
+      <!-- Gold, not green. It is not the button that carries on - it is the
+           one that costs something first, and it says the word "ad". -->
+      <div class="slab gold">
+        <div class="gloss"></div>
+        <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.7-9.4-9.2A5.3 5.3 0 0 1 12 6.3a5.3 5.3 0 0 1 9.4 5.5C19.5 16.3 12 21 12 21z" fill="#FFFFFF"></path></svg>
+        <span class="t">WATCH AD FOR A LIFE</span>
+      </div>
+      <div class="slab play">
+        <div class="gloss"></div>
+        <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,4 20,12 7,20" fill="#FFFFFF"></polygon></svg>
+        <span class="t">PLAY AGAIN</span>
+      </div>
+      <div class="slab howto">
+        <div class="gloss"></div>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M6 10v9h12v-9"></path></svg>
+        <span class="t">MENU</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

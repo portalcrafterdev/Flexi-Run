@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif; }
+    a { color: #E4572E; } a:hover { color: #b8431f; }
+  </style>
+</helmet>
+
+<!-- HUD B - Toy Box. Every control is an outlined sticker with a hard offset
+     shadow, so a button reads as a physical thing to press rather than a pane
+     of frosted glass. Solid faces, not translucency: on a bright meadow the
+     shipped translucent pad loses its edge exactly where a child aims. -->
+<div style="position: relative; width: 800px; height: 360px; overflow: hidden; background: #63C4F0;">
+
+  <svg viewBox="0 0 800 360" style="position: absolute; inset: 0;" aria-hidden="true">
+    <path d="M0 208 H800 V360 H0 Z" fill="#6FD98F"></path>
+    <path d="M0 208 H800" stroke="#2B4A5C" stroke-width="4"></path>
+    <polygon points="372,208 428,208 640,360 160,360" fill="#E0C08A" stroke="#2B4A5C" stroke-width="4"></polygon>
+    <g>
+      <rect x="284" y="188" width="232" height="124" rx="8" fill="#E4572E" stroke="#2B4A5C" stroke-width="4.5"></rect>
+      <g stroke="#2B4A5C" stroke-width="3" opacity="0.55">
+        <path d="M284 220 H516 M284 252 H516 M284 284 H516"></path>
+        <path d="M324 188 V220 M400 220 V252 M362 252 V284 M452 284 V312"></path>
+      </g>
+      <polygon points="400,216 411,247 444,247 417,266 428,298 400,278 372,298 383,266 356,247 389,247" fill="#6FD98F" stroke="#2B4A5C" stroke-width="3.5" stroke-linejoin="round"></polygon>
+    </g>
+  </svg>
+
+  <!-- ==== lives as one outlined pill, countable at a glance ==== -->
+  <div style="position: absolute; left: 18px; top: 18px; display: flex; align-items: center; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 5px; padding: 6px 12px; border-radius: 24px; background: #FFFDF5; border: 4px solid #2B4A5C; box-shadow: 0 4px 0 #2B4A5C;">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.7-9.4-9.2A5.3 5.3 0 0 1 12 6.3a5.3 5.3 0 0 1 9.4 5.5C19.5 16.3 12 21 12 21z" fill="#FF5E9C" stroke="#2B4A5C" stroke-width="2.2"></path></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.7-9.4-9.2A5.3 5.3 0 0 1 12 6.3a5.3 5.3 0 0 1 9.4 5.5C19.5 16.3 12 21 12 21z" fill="#FF5E9C" stroke="#2B4A5C" stroke-width="2.2"></path></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.7-9.4-9.2A5.3 5.3 0 0 1 12 6.3a5.3 5.3 0 0 1 9.4 5.5C19.5 16.3 12 21 12 21z" fill="#E4E9E6" stroke="#2B4A5C" stroke-width="2.2"></path></svg>
+    </div>
+    <div style="padding: 4px 16px; border-radius: 24px; background: #FFD23F; border: 4px solid #2B4A5C; box-shadow: 0 4px 0 #2B4A5C;">
+      <span style="font-size: 27px; font-weight: 700; color: #2B4A5C;">120</span>
+    </div>
+  </div>
+
+  <div style="position: absolute; right: 18px; top: 18px; display: flex; align-items: center; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 7px; padding: 5px 14px; border-radius: 24px; background: #FFFDF5; border: 4px solid #2B4A5C; box-shadow: 0 4px 0 #2B4A5C;">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F7C948" stroke="#2B4A5C" stroke-width="2.4"></circle></svg>
+      <span style="font-size: 23px; font-weight: 700; color: #2B4A5C;">8</span>
+    </div>
+    <div style="width: 46px; height: 46px; border-radius: 50%; background: #5BE8C8; border: 4px solid #2B4A5C; box-shadow: 0 4px 0 #2B4A5C; display: flex; align-items: center; justify-content: center;">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3.5v6c0 5-3.4 9.3-8 10.5-4.6-1.2-8-5.5-8-10.5v-6z" fill="none" stroke="#2B4A5C" stroke-width="2.6"></path></svg>
+    </div>
+  </div>
+
+  <!-- ==== controls: opaque stickers, 92pt, gap 16 ==== -->
+  <div style="position: absolute; left: 18px; bottom: 16px; width: 92px; height: 92px; border-radius: 26px; background: #FFFDF5; border: 4px solid #2B4A5C; box-shadow: 0 6px 0 #2B4A5C; display: flex; align-items: center; justify-content: center;">
+    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#2B4A5C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+  </div>
+  <div style="position: absolute; right: 18px; bottom: 16px; width: 92px; height: 92px; border-radius: 26px; background: #FFFDF5; border: 4px solid #2B4A5C; box-shadow: 0 6px 0 #2B4A5C; display: flex; align-items: center; justify-content: center;">
+    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#2B4A5C" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+  </div>
+
+  <div style="position: absolute; left: 50%; transform: translateX(-50%); bottom: 16px; display: flex; gap: 16px;">
+    <div style="width: 92px; height: 92px; border-radius: 26px; background: #FFFDF5; border: 4px solid #2B4A5C; box-shadow: 0 6px 0 #2B4A5C; display: flex; align-items: center; justify-content: center;">
+      <svg width="46" height="46" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#FF7043" stroke="#2B4A5C" stroke-width="2.6"></circle></svg>
+    </div>
+    <!-- the held shape: filled, lifted, pressed-in shadow -->
+    <div style="width: 92px; height: 92px; border-radius: 26px; background: #FFD23F; border: 4px solid #2B4A5C; box-shadow: 0 2px 0 #2B4A5C; transform: translateY(4px); display: flex; align-items: center; justify-content: center;">
+      <svg width="46" height="46" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5" fill="#EC4899" stroke="#2B4A5C" stroke-width="2.6"></rect></svg>
+    </div>
+    <div style="width: 92px; height: 92px; border-radius: 26px; background: #FFFDF5; border: 4px solid #2B4A5C; box-shadow: 0 6px 0 #2B4A5C; display: flex; align-items: center; justify-content: center;">
+      <svg width="48" height="48" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,1.8 15,8.9 22.6,8.9 16.4,13.6 18.7,21 12,16.4 5.3,21 7.6,13.6 1.4,8.9 9,8.9" fill="#A855F7" stroke="#2B4A5C" stroke-width="2.4" stroke-linejoin="round"></polygon></svg>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

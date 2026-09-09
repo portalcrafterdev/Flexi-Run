@@ -118,23 +118,49 @@ void paintSparkles(Canvas canvas, Size size) {
 /// rising out from behind a level button, is the one thing on the screen that
 /// looks unfinished - and one parked over the sun takes the light out of the
 /// whole picture.
-void paintClouds(Canvas canvas, Size size) {
+void paintClouds(Canvas canvas, Size size, double phase) {
   final rng = Random(5);
   for (final across in kMenuCloudXs) {
-    final at = Offset(
-      size.width * across,
-      size.height * (kMenuCloudTop + rng.nextDouble() * kMenuCloudBand),
-    );
+    // Height and width come off the seeded rng in this order, and the order is
+    // what keeps each cloud the shape it has always been. Read the y first.
+    final y = size.height * (kMenuCloudTop + rng.nextDouble() * kMenuCloudBand);
     final w = size.width * (0.07 + rng.nextDouble() * 0.05);
-    final paint = Paint()..color = kMenuCloud;
+
+    // Where this cloud is along its lap. [across] is now a head start rather
+    // than a position, so the three stay spread out as they travel.
+    final t = (across + phase) % 1.0;
+    final at = Offset(
+      size.width * (kMenuCloudFrom + (kMenuCloudTo - kMenuCloudFrom) * t),
+      y,
+    );
+
+    // In at the start of the lap, out at the end. Multiplied rather than
+    // branched, so a cloud at neither end is simply at full strength.
+    final fade =
+        (t / kMenuCloudFade).clamp(0.0, 1.0) *
+        ((1 - t) / kMenuCloudFade).clamp(0.0, 1.0);
+    if (fade <= 0) continue;
+
+    // One path, not four draws.
+    //
+    // Drawn separately, every puff blends with the one under it, so each
+    // overlap comes out denser than the cloud around it and the shape reads as
+    // a heap of circles rather than a cloud. It was always slightly wrong -
+    // this white is 95% opaque, not 100% - and the fade made it obvious.
+    //
+    // Adding the puffs to a single path unions them under the default non-zero
+    // fill, so the alpha lands once across the whole silhouette. No saveLayer,
+    // which would allocate an offscreen every frame for every cloud.
+    final cloud = Path();
     for (final puff in <(double, double)>[(-0.5, 0.55), (0.5, 0.6), (0, 1)]) {
-      canvas.drawCircle(
-        at.translate(w * puff.$1, w * 0.12 * (1 - puff.$2)),
-        w * 0.42 * puff.$2,
-        paint,
+      cloud.addOval(
+        Rect.fromCircle(
+          center: at.translate(w * puff.$1, w * 0.12 * (1 - puff.$2)),
+          radius: w * 0.42 * puff.$2,
+        ),
       );
     }
-    canvas.drawRRect(
+    cloud.addRRect(
       RRect.fromRectXY(
         Rect.fromCenter(
           center: at.translate(0, w * 0.22),
@@ -144,7 +170,11 @@ void paintClouds(Canvas canvas, Size size) {
         w * 0.18,
         w * 0.18,
       ),
-      paint,
+    );
+
+    canvas.drawPath(
+      cloud,
+      Paint()..color = kMenuCloud.withValues(alpha: kMenuCloud.a * fade),
     );
   }
 }

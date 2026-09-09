@@ -55,10 +55,7 @@ class _MenuOverlayState extends State<MenuOverlay> {
             // fell back to one centred column, and the runner disappeared -
             // an advert loading rearranged the home screen. It sits below
             // everything the layout puts on screen, over empty grass.
-            const Align(
-              alignment: Alignment.bottomCenter,
-              child: BannerSlot(),
-            ),
+            const Align(alignment: Alignment.bottomCenter, child: BannerSlot()),
             Positioned(
               top: 0,
               right: 0,
@@ -127,7 +124,10 @@ class _MenuOverlayState extends State<MenuOverlay> {
     title: 'How to play',
     onClose: _close,
     children: const <Widget>[
-      MenuStep(number: 1, text: 'A wall comes down the path with a hole in it.'),
+      MenuStep(
+        number: 1,
+        text: 'A wall comes down the path with a hole in it.',
+      ),
       MenuStep(number: 2, text: 'Tap the shape that matches the hole.'),
       MenuStep(number: 3, text: 'Use the arrows to get onto the right track.'),
       MenuStep(number: 4, text: 'Fit through, and keep going!'),
@@ -182,11 +182,7 @@ class _Spread extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: SizedBox(
               width: kMenuColumnW,
-              child: _Controls(
-                game: game,
-                onPlay: onPlay,
-                onHowTo: onHowTo,
-              ),
+              child: _Controls(game: game, onPlay: onPlay, onHowTo: onHowTo),
             ),
           ),
         ],
@@ -238,10 +234,7 @@ class _Brand extends StatelessWidget {
           ? CrossAxisAlignment.center
           : CrossAxisAlignment.start,
       children: <Widget>[
-        GameLogo(
-          'FLEXI RUN',
-          fontSize: compact ? kLogoSizeNarrow : kLogoSize,
-        ),
+        GameLogo('FLEXI RUN', fontSize: compact ? kLogoSizeNarrow : kLogoSize),
         const SizedBox(height: kMenuButtonGap * 0.5),
         const TaglinePill(_kTagline),
       ],
@@ -278,6 +271,7 @@ class _Controls extends StatelessWidget {
           label: 'PLAY',
           icon: Icons.play_arrow_rounded,
           fill: kPlayFill,
+          top: kPlayTop,
           edge: kPlayEdge,
           onPressed: onPlay,
         ),
@@ -286,6 +280,7 @@ class _Controls extends StatelessWidget {
           label: 'HOW TO PLAY',
           icon: Icons.lightbulb_rounded,
           fill: kHowToFill,
+          top: kHowToTop,
           edge: kHowToEdge,
           onPressed: onHowTo,
         ),
@@ -326,7 +321,11 @@ class _GearButton extends StatelessWidget {
             color: kMenuCard,
             shape: BoxShape.circle,
             boxShadow: <BoxShadow>[
-              BoxShadow(color: kMenuShadow, blurRadius: 8, offset: Offset(0, 3)),
+              BoxShadow(
+                color: kMenuShadow,
+                blurRadius: 8,
+                offset: Offset(0, 3),
+              ),
             ],
           ),
           child: const Icon(

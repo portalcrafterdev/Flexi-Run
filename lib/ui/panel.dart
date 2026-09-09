@@ -59,6 +59,10 @@ class BigButton extends StatelessWidget {
     label: label,
     icon: icon,
     fill: kPlayFill,
+    // The same lit top PLAY carries on the menu. Without it this slab falls
+    // back to lightening the fill, which desaturates - so the two greens sat
+    // side by side in the same game and did not match.
+    top: kPlayTop,
     edge: kPlayEdge,
     onPressed: onPressed,
   );
@@ -75,6 +79,7 @@ class MenuButton extends StatelessWidget {
     label: 'MENU',
     icon: Icons.home_rounded,
     fill: kHowToFill,
+    top: kHowToTop,
     edge: kHowToEdge,
     onPressed: onPressed,
   );

@@ -1206,9 +1206,31 @@ const kMenuSunR = 0.085;
 /// sky is lit from; and nothing sits over the top left corner, where the name
 /// goes - a cloud behind the logo puts white behind white letters and takes
 /// the edge off the one thing on the screen that has to read instantly.
+/// Where each cloud starts in its journey, as a fraction of one lap. Not
+/// screen positions any more - the clouds move.
 const kMenuCloudXs = <double>[0.44, 0.70, 0.89];
 const kMenuCloudTop = 0.04;
 const kMenuCloudBand = 0.13;
+
+/// One lap of the sky. Long: a cloud that visibly travels is a cloud being
+/// watched instead of a menu being read, and a child waiting to press PLAY
+/// should never notice it happening.
+const kMenuCloudSeconds = 150;
+
+/// The band the clouds drift through, in fractions of the width.
+///
+/// It starts right of centre on purpose. The logo sits top left and the clouds
+/// were taken out from behind it deliberately - letting them wrap the whole
+/// width would put them straight back over the name of the game.
+/// 0.46, not 0.36: this is the cloud's CENTRE, and a cloud is up to 0.09 of
+/// the width either side of it. Starting the band where the logo ends put the
+/// left half of a fading cloud straight back over "RUN".
+const kMenuCloudFrom = 0.46;
+const kMenuCloudTo = 1.14;
+
+/// How much of the lap is spent fading in at one end and out at the other.
+/// Without it a cloud vanishes at the right edge and pops back mid-sky.
+const kMenuCloudFade = 0.16;
 
 /// The level picker: three pills in a row, the chosen one filled green like
 /// the PLAY slab so it reads as the thing that is switched on.
@@ -1221,15 +1243,34 @@ const kLevelTileFontSize = 14.0;
 /// Air between the level's name and its best, so the two read as two things
 /// rather than one stacked label.
 const kLevelBestGap = 5.0;
-const kLevelTileFill = Color(0xFFF2F7F3);
-const kLevelTileEdge = Color(0xFFDCE7E0);
+/// The level pills are parchment rather than the slabs' plastic, so the row
+/// reads as a setting and the three below it read as actions.
+const kLevelTileTop = Color(0xFFFDF4E2);
+const kLevelTileFill = Color(0xFFF8EBD2);
+const kLevelTileEdge = Color(0xFFE4CCA4);
 const kLevelTileInk = Color(0xFF7B8A82);
+
+/// One ink per level, warm through to hot. Carried by the label and, when the
+/// level is chosen, by the rim as well - so the choice is legible without the
+/// pill changing colour and breaking the parchment set.
+const kEasyInk = Color(0xFF4F9B45);
+const kMediumInk = Color(0xFFA0703C);
+const kHardInk = Color(0xFFD0504A);
+
+/// The little face on each pill. Gold, because a child reads the expression
+/// long before the word beside it.
+const kLevelFaceColor = Color(0xFFFFC44D);
+const kLevelFaceHard = Color(0xFFFFB03F);
+const kLevelFaceSize = 17.0;
+const kLevelFaceGap = 4.0;
+const kLevelTileRimWidth = 2.0;
+const kLevelTileRimChosen = 2.6;
 
 /// Each level carries its own best under its name, so the three can be
 /// compared at a glance. Smaller and dimmer than the name: it is what you have
 /// done, not what you are choosing.
 const kLevelBestFontSize = 11.0;
-const kLevelBestInk = Color(0xFFA3B0A9);
+const kLevelBestInk = Color(0xFF9C8043);
 const kLevelBestSelectedInk = Color(0xCCFFFFFF);
 
 // ---------------------------------------------------------------------------
@@ -1340,27 +1381,42 @@ const kMenuTagline = Color(0xFF6E7D75);
 const kMenuStat = Color(0xFF46564E);
 const kMenuButtonInk = Color(0xFFFFFFFF);
 
-const kPlayFill = Color(0xFF41C275);
-const kPlayEdge = Color(0xFF2C8B51);
+/// The three slabs are moulded rather than printed: a light top, a saturated
+/// body, a dark lip under them, and a white rim around the whole thing.
+///
+/// [kSlabTop] is the colour the gradient starts at, not a lightening of the
+/// fill. Lerping toward white washes a saturated green out toward grey; a
+/// hand-picked top stop keeps the hue and only raises the value, which is what
+/// makes the slab read as lit plastic instead of a faded rectangle.
+const kPlayTop = Color(0xFF8FDD77);
+const kPlayFill = Color(0xFF4FB84F);
+const kPlayEdge = Color(0xFF2F8A3C);
 
 /// The second chance slab. Gold rather than green, because it is not the
 /// button that carries on - it is the one that costs something first.
 const kRewardFill = Color(0xFFF0A93B);
 const kRewardEdge = Color(0xFFB87A1E);
 
-/// The sign-in slab. Pale, with dark ink: it belongs to the platform rather
-/// than to the game, and it is the last thing in the column - nothing about it
-/// should pull the eye away from PLAY.
-const kSignInFill = Color(0xFFFFFFFF);
-const kSignInEdge = Color(0xFFD3DDD6);
-const kSignInInk = Color(0xFF46564E);
+/// The sign-in slab. Violet: it is the third thing in a set of three now, and
+/// a white slab among two coloured ones read as a hole in the column rather
+/// than as a quiet member of it. Still the coolest and least saturated of the
+/// three, so it stays behind PLAY in the eye.
+const kSignInTop = Color(0xFFCFB4F0);
+const kSignInFill = Color(0xFF9E7ED4);
+const kSignInEdge = Color(0xFF6F52A8);
+const kSignInInk = Color(0xFFFFFFFF);
 
 /// Shown under the button when a sign-in did not work, so a press that failed
 /// does not just look like a button that does nothing.
 const kSignInFailInk = Color(0xFFC2564F);
 const kSignInNoteSize = 11.5;
-const kHowToFill = Color(0xFF4A93E8);
-const kHowToEdge = Color(0xFF3169AC);
+const kHowToTop = Color(0xFF85CFF2);
+const kHowToFill = Color(0xFF4A9BD8);
+const kHowToEdge = Color(0xFF2C6FAE);
+
+/// The gold slab keeps its old moulding: it appears once, on the game over
+/// panel, and has no neighbours to match.
+const kRewardTop = Color(0xFFF7C86A);
 const kSheetFill = Color(0xFFFFFFFF);
 const kSheetEdge = Color(0xFFD9E2DC);
 
@@ -1445,6 +1501,30 @@ const kTaglineGlyphGap = 4.0;
 /// fill is the bottom of the gradient and this much white is mixed in at the
 /// top. Enough to look moulded, not enough to look faded.
 const kSlabSheen = 0.18;
+
+/// The white rim around every slab.
+///
+/// It is what lets a saturated button sit on a saturated meadow without the
+/// two bleeding into each other - the green of PLAY and the green of the hills
+/// behind it are close enough that without a rim the edge of the button goes
+/// soft exactly where a child aims.
+const kSlabRim = Color(0xFFFFFFFF);
+const kSlabRimWidth = 3.0;
+
+/// The gloss: a soft bar across the top of the face, inset from the rim.
+/// Height is a fraction of the face, so it holds its proportion on the tiles
+/// as well as the big slabs.
+const kSlabGloss = Color(0x4DFFFFFF);
+const kSlabGlossShare = 0.32;
+const kSlabGlossInset = 5.0;
+
+/// What the bottom stop of a slab is mixed toward. Not black: darkening a
+/// saturated colour with black turns it muddy, while a deep blue-green keeps
+/// the hue and reads as shade.
+const kSlabShade = Color(0xFF1E4636);
+
+/// Under the label, so white ink survives the lit top of the moulding.
+const kSlabInkShadow = Color(0x59173A2A);
 
 /// One colour per letter of the title. Cycled, so a longer name still works.
 const kTitleLetterColors = <Color>[

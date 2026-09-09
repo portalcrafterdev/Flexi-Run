@@ -1,0 +1,194 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif; }
+    a { color: #2F8A3C; } a:hover { color: #21682c; }
+    /* The slab: lit top, body, shaded lip, white rim, gloss across the top.
+       Shared by every screen so the set cannot drift apart. */
+    .slab { position: relative; border-radius: 22px; border: 3px solid #FFFFFF;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            overflow: hidden; color: #FFFFFF; font-weight: 800; }
+    .slab .gloss { position: absolute; left: 5px; right: 5px; top: 3px;
+                   height: 32%; border-radius: 18px; background: rgba(255,255,255,0.3); }
+    .slab span, .slab svg { position: relative; }
+    .slab .t { text-shadow: 0 1.5px 2px rgba(23,58,42,0.35); letter-spacing: 1.6px; }
+    .play { background: linear-gradient(180deg,#8FDD77 0%,#4FB84F 62%,#3E9741 100%);
+            box-shadow: 0 5px 0 #2F8A3C, 0 8px 12px rgba(16,42,24,0.22); }
+    .howto { background: linear-gradient(180deg,#85CFF2 0%,#4A9BD8 62%,#3A83BC 100%);
+             box-shadow: 0 5px 0 #2C6FAE, 0 8px 12px rgba(16,42,24,0.22); }
+    .signin { background: linear-gradient(180deg,#CFB4F0 0%,#9E7ED4 62%,#8668BE 100%);
+              box-shadow: 0 5px 0 #6F52A8, 0 8px 12px rgba(16,42,24,0.22); }
+    .gold { background: linear-gradient(180deg,#F7C86A 0%,#F0A93B 62%,#D9922B 100%);
+            box-shadow: 0 5px 0 #B87A1E, 0 8px 12px rgba(16,42,24,0.22); }
+    /* Parchment pill for the level picker. */
+    .tile { border-radius: 13px; background: linear-gradient(180deg,#FDF4E2 0%,#F8EBD2 100%);
+            text-align: center; padding: 6px 0 7px; }
+  </style>
+</helmet>
+
+<div style="position: relative; width: 800px; height: 360px; overflow: hidden; background: linear-gradient(180deg,#3D7CD6 0%,#5FC0EC 55%,#AEE5F3 100%);">
+
+  <svg viewBox="0 0 800 360" style="position: absolute; inset: 0;" aria-hidden="true">
+    <circle cx="416" cy="164" r="34" fill="#FFE9A3"></circle>
+    <circle cx="416" cy="164" r="24" fill="#FFF6D8"></circle>
+    <g stroke="#FFE9A3" stroke-width="3" stroke-linecap="round" opacity="0.75">
+      <path d="M416 112 v14 M416 202 v14 M364 164 h14 M454 164 h14 M379 127 l10 10 M443 191 l10 10 M453 127 l-10 10 M389 191 l-10 10"></path>
+    </g>
+    <g fill="#A0B9E1">
+      <polygon points="8,254 60,178 112,254"></polygon>
+      <polygon points="118,254 190,150 262,254"></polygon>
+      <polygon points="228,254 300,132 372,254"></polygon>
+      <polygon points="340,254 396,176 452,254"></polygon>
+    </g>
+    <g fill="#F6FBFF">
+      <polygon points="300,132 320,162 308,158 300,166 290,156 280,162"></polygon>
+      <polygon points="190,150 206,174 196,170 190,177 182,169 174,174"></polygon>
+    </g>
+    <path d="M0 248 Q 200 232 420 250 T 800 242 L800 360 L0 360 Z" fill="#9AD7A6"></path>
+    <path d="M0 278 Q 250 260 520 282 T 800 272 L800 360 L0 360 Z" fill="#6FC583"></path>
+    <path d="M0 316 Q 280 300 600 320 T 800 312 L800 360 L0 360 Z" fill="#4FAE5B"></path>
+    <path d="M330 250 L268 360 L438 360 L358 250 Z" fill="#D9BE8E"></path>
+    <g>
+      <rect x="160" y="262" width="52" height="30" fill="#C9B4EA"></rect>
+      <rect x="152" y="250" width="13" height="42" fill="#C9B4EA"></rect>
+      <rect x="207" y="250" width="13" height="42" fill="#C9B4EA"></rect>
+      <polygon points="152,250 158.5,236 165,250" fill="#9078CC"></polygon>
+      <polygon points="207,250 213.5,236 220,250" fill="#9078CC"></polygon>
+      <polygon points="170,262 186,242 202,262" fill="#9078CC"></polygon>
+    </g>
+    <g fill="#4B9450">
+      <polygon points="30,310 14,282 46,282"></polygon><polygon points="30,294 17,270 43,270"></polygon>
+      <polygon points="76,322 58,292 94,292"></polygon><polygon points="76,304 62,280 90,280"></polygon>
+      <polygon points="120,308 106,284 134,284"></polygon>
+      <polygon points="446,306 432,282 460,282"></polygon>
+      <polygon points="700,318 684,290 716,290"></polygon><polygon points="700,302 687,278 713,278"></polygon>
+      <polygon points="760,300 746,276 774,276"></polygon>
+    </g>
+    <g fill="#8A6242">
+      <rect x="27" y="308" width="6" height="10"></rect><rect x="73" y="320" width="6" height="10"></rect>
+      <rect x="117" y="306" width="5" height="9"></rect><rect x="443" y="304" width="5" height="9"></rect>
+      <rect x="697" y="316" width="6" height="10"></rect><rect x="757" y="298" width="5" height="9"></rect>
+    </g>
+    <g fill="#FFFFFF" opacity="0.95">
+      <ellipse cx="596" cy="42" rx="46" ry="24"></ellipse><ellipse cx="636" cy="36" rx="32" ry="20"></ellipse>
+      <ellipse cx="752" cy="70" rx="34" ry="18"></ellipse><ellipse cx="782" cy="64" rx="24" ry="14"></ellipse>
+    </g>
+    <g fill="#FFFFFF" opacity="0.8">
+      <path d="M96 116 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3z"></path>
+      <path d="M262 96 l2.5 7 7 2.5 -7 2.5 -2.5 7 -2.5 -7 -7 -2.5 7 -2.5z"></path>
+      <path d="M498 60 l2.5 7 7 2.5 -7 2.5 -2.5 7 -2.5 -7 -7 -2.5 7 -2.5z"></path>
+    </g>
+  </svg>
+
+  <!-- balloon -->
+  <svg width="56" height="86" viewBox="0 0 56 86" style="position: absolute; left: 52px; top: 130px;" aria-hidden="true">
+    <path d="M28 2 C43 2 53 14 53 28 C53 41 39 52 28 60 C17 52 3 41 3 28 C3 14 13 2 28 2 Z" fill="#F0806A"></path>
+    <path d="M28 2 C33 2 36 13 36 30 C36 43 33 53 28 60 C23 53 20 43 20 30 C20 13 23 2 28 2 Z" fill="#FFF2EC"></path>
+    <path d="M21 59 L24 70 M35 59 L32 70" stroke="#B8735E" stroke-width="1.8"></path>
+    <rect x="21" y="69" width="13" height="10" rx="3" fill="#8A6242"></rect>
+  </svg>
+
+  <!-- logo -->
+  <div style="position: absolute; left: 28px; top: 16px;">
+    <div style="display: flex; gap: 1px; font-size: 46px; font-weight: 800; line-height: 1;">
+      <span style="color: #FF5E5E; -webkit-text-stroke: 5px #2B4A5C; paint-order: stroke fill; transform: translateY(-3px) rotate(-3deg);">F</span>
+      <span style="color: #FF9C3F; -webkit-text-stroke: 5px #2B4A5C; paint-order: stroke fill; transform: translateY(1px) rotate(2deg);">L</span>
+      <span style="color: #FFD23F; -webkit-text-stroke: 5px #2B4A5C; paint-order: stroke fill; transform: translateY(-2px) rotate(-2deg);">E</span>
+      <span style="color: #6FD98F; -webkit-text-stroke: 5px #2B4A5C; paint-order: stroke fill; transform: translateY(2px) rotate(3deg);">X</span>
+      <span style="color: #59C2F5; -webkit-text-stroke: 5px #2B4A5C; paint-order: stroke fill; transform: translateY(-3px) rotate(-2deg);">I</span>
+      <span style="width: 14px;"></span>
+      <span style="color: #B99CF0; -webkit-text-stroke: 5px #2B4A5C; paint-order: stroke fill; transform: translateY(-1px) rotate(2deg);">R</span>
+      <span style="color: #FF7FB6; -webkit-text-stroke: 5px #2B4A5C; paint-order: stroke fill; transform: translateY(2px) rotate(-3deg);">U</span>
+      <span style="color: #FFB03F; -webkit-text-stroke: 5px #2B4A5C; paint-order: stroke fill; transform: translateY(-2px) rotate(3deg);">N</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px; margin-top: 8px; padding: 7px 13px; border-radius: 18px; background: #FFFDF5; box-shadow: 0 3px 8px rgba(16,42,24,0.22); width: fit-content;">
+      <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#FF7043"></circle></svg>
+      <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" fill="#EC4899"></rect></svg>
+      <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,1 15,9 23,9 17,14 19,22 12,17 5,22 7,14 1,9 9,9" fill="#A855F7"></polygon></svg>
+      <span style="font-size: 13px; font-weight: 700; color: #46564E; margin-left: 2px;">Match the shape and slip through the wall!</span>
+    </div>
+  </div>
+
+  <!-- runner -->
+  <svg width="150" height="168" viewBox="0 0 150 168" style="position: absolute; left: 236px; bottom: 34px;" aria-hidden="true">
+    <ellipse cx="75" cy="160" rx="42" ry="7" fill="rgba(16,42,24,0.18)"></ellipse>
+    <rect x="56" y="126" width="15" height="26" rx="7" fill="#3FA9E8"></rect>
+    <rect x="79" y="126" width="15" height="26" rx="7" fill="#3FA9E8"></rect>
+    <circle cx="34" cy="104" r="10" fill="#3FA9E8"></circle>
+    <circle cx="116" cy="104" r="10" fill="#3FA9E8"></circle>
+    <circle cx="75" cy="88" r="52" fill="url(#sl)"></circle>
+    <defs><radialGradient id="sl" cx="0.36" cy="0.3" r="0.85">
+      <stop offset="0%" stop-color="#BEEBFF"></stop><stop offset="45%" stop-color="#63C4F0"></stop><stop offset="100%" stop-color="#2E90D4"></stop>
+    </radialGradient></defs>
+    <ellipse cx="57" cy="62" rx="18" ry="11" fill="#FFFFFF" opacity="0.55" transform="rotate(-24 57 62)"></ellipse>
+    <circle cx="60" cy="86" r="8" fill="#123A52"></circle><circle cx="90" cy="86" r="8" fill="#123A52"></circle>
+    <circle cx="62.5" cy="83" r="3" fill="#FFFFFF"></circle><circle cx="92.5" cy="83" r="3" fill="#FFFFFF"></circle>
+    <path d="M62 104 Q 75 116 88 104" stroke="#123A52" stroke-width="5" fill="none" stroke-linecap="round"></path>
+  </svg>
+
+  <!-- controls -->
+  <div style="position: absolute; right: 18px; top: 44px; width: 330px; display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; gap: 11px;">
+      <div class="tile" style="flex: 1; border: 2.6px solid #4F9B45; box-shadow: 0 4px 0 #4F9B45;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#FFC44D"></circle><circle cx="9" cy="10" r="1.6" fill="#7A5E22"></circle><circle cx="15" cy="10" r="1.6" fill="#7A5E22"></circle><path d="M8 14 q4 4.5 8 0" stroke="#7A5E22" stroke-width="1.8" fill="none" stroke-linecap="round"></path></svg>
+          <span style="font-size: 14px; font-weight: 800; color: #4F9B45;">Easy</span>
+        </div>
+        <div style="font-size: 11px; font-weight: 700; color: #9C8043; margin-top: 5px;">Best 0</div>
+      </div>
+      <div class="tile" style="flex: 1; border: 2px solid #E4CCA4; box-shadow: 0 4px 0 #E4CCA4;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#FFC44D"></circle><circle cx="9" cy="10" r="1.6" fill="#7A5E22"></circle><circle cx="15" cy="10" r="1.6" fill="#7A5E22"></circle><path d="M8.5 14.6 q3.5 2.6 7 0" stroke="#7A5E22" stroke-width="1.8" fill="none" stroke-linecap="round"></path></svg>
+          <span style="font-size: 14px; font-weight: 800; color: #A0703C;">Medium</span>
+        </div>
+        <div style="font-size: 11px; font-weight: 700; color: #9C8043; margin-top: 5px;">Best 0</div>
+      </div>
+      <div class="tile" style="flex: 1; border: 2px solid #E4CCA4; box-shadow: 0 4px 0 #E4CCA4;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,1.5 15,8.8 22.8,8.8 16.5,13.6 18.8,21.4 12,16.6 5.2,21.4 7.5,13.6 1.2,8.8 9,8.8" fill="#FFB03F"></polygon></svg>
+          <span style="font-size: 14px; font-weight: 800; color: #D0504A;">Hard</span>
+        </div>
+        <div style="font-size: 11px; font-weight: 700; color: #9C8043; margin-top: 5px;">Best 0</div>
+      </div>
+    </div>
+
+    <div class="slab play" style="height: 44px;">
+      <div class="gloss"></div>
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,4 20,12 7,20" fill="#FFFFFF"></polygon></svg>
+      <span class="t" style="font-size: 17px;">PLAY</span>
+    </div>
+    <div class="slab howto" style="height: 44px;">
+      <div class="gloss"></div>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.4.3.5.7.5 1.1v1h6v-1c0-.4.1-.8.5-1.1A6 6 0 0 0 12 3z"></path></svg>
+      <span class="t" style="font-size: 17px;">HOW TO PLAY</span>
+    </div>
+    <div class="slab signin" style="height: 44px;">
+      <div class="gloss"></div>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 12h4M8 10v4M15 11h.01M18 13h.01"></path><rect x="2" y="6" width="20" height="12" rx="5"></rect></svg>
+      <span class="t" style="font-size: 17px;">SIGN IN TO PLAY GAMES</span>
+    </div>
+  </div>
+
+  <!-- gear -->
+  <div style="position: absolute; right: 9px; top: 14px; width: 38px; height: 38px; border-radius: 50%; background: #FFFDF5; box-shadow: 0 3px 8px rgba(16,42,24,0.22); display: flex; align-items: center; justify-content: center;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#46564E" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="3.4"></circle><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+  </div>
+
+  <!-- banner -->
+  <div style="position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; width: 320px; height: 50px; background: #FFFFFF; border-top: 3px solid #000; border-bottom: 3px solid #000; display: flex; align-items: center; justify-content: center; gap: 10px;">
+    <span style="font-family: system-ui, sans-serif; font-size: 13px; font-weight: 600; color: #1A73E8;">Nice job!</span>
+    <span style="font-family: system-ui, sans-serif; font-size: 12px; color: #444;">This is a 320x50 test ad.</span>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

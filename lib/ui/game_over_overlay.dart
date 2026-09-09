@@ -93,6 +93,7 @@ class _GameOverOverlayState extends State<GameOverOverlay> {
             label: 'WATCH AD FOR A LIFE',
             icon: Icons.favorite_rounded,
             fill: kRewardFill,
+            top: kRewardTop,
             edge: kRewardEdge,
             onPressed: _watchForLife,
           ),

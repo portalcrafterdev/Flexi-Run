@@ -16,6 +16,7 @@ class ChunkyButton extends StatefulWidget {
     required this.fill,
     required this.edge,
     required this.onPressed,
+    this.top,
     this.ink = kMenuButtonInk,
     super.key,
   });
@@ -24,6 +25,13 @@ class ChunkyButton extends StatefulWidget {
   final IconData icon;
   final Color fill;
   final Color edge;
+
+  /// The lit top of the moulding. Falls back to lightening [fill], which is
+  /// what every slab did before the palette gained hand-picked top stops -
+  /// lerping toward white desaturates, so a slab given only a fill still looks
+  /// right, just flatter than one given both.
+  final Color? top;
+
   final Color ink;
   final VoidCallback onPressed;
 
@@ -68,6 +76,10 @@ class _ChunkyButtonState extends State<ChunkyButton> {
                   decoration: BoxDecoration(
                     color: widget.edge,
                     borderRadius: BorderRadius.circular(kMenuButtonRadius),
+                    // Rimmed as well as the face, so the white outline runs
+                    // right around the slab instead of stopping where the lip
+                    // shows below it.
+                    border: Border.all(color: kSlabRim, width: kSlabRimWidth),
                     // Cast onto the meadow, so the slab sits above the scene
                     // rather than being printed on it.
                     boxShadow: const <BoxShadow>[
@@ -90,6 +102,7 @@ class _ChunkyButtonState extends State<ChunkyButton> {
                   label: widget.label,
                   icon: widget.icon,
                   fill: widget.fill,
+                  top: widget.top,
                   ink: widget.ink,
                 ),
               ),
@@ -107,47 +120,98 @@ class _Face extends StatelessWidget {
     required this.icon,
     required this.fill,
     required this.ink,
+    this.top,
   });
 
   final String label;
   final IconData icon;
   final Color fill;
+  final Color? top;
   final Color ink;
 
   @override
   Widget build(BuildContext context) {
+    final lit = top ?? Color.lerp(fill, Colors.white, kSlabSheen)!;
     return DecoratedBox(
       decoration: BoxDecoration(
-        // Lit from the top like everything else in the game. A flat fill reads
-        // as a coloured rectangle; a few percent of white at the top edge is
-        // what makes the same rectangle read as a moulded piece of plastic.
+        // Lit from the top like everything else in the game. Three stops, not
+        // two: the body holds most of the face and the last stop darkens only
+        // the bottom edge, which is what stops a tall slab looking like a
+        // gradient swatch.
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: <Color>[Color.lerp(fill, Colors.white, kSlabSheen)!, fill],
+          colors: <Color>[lit, fill, Color.lerp(fill, kSlabShade, 0.22)!],
+          stops: const <double>[0, 0.62, 1],
         ),
         borderRadius: BorderRadius.circular(kMenuButtonRadius),
+        border: Border.all(color: kSlabRim, width: kSlabRimWidth),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Stack(
+        // Explicit, and load-bearing: an unpositioned child in a Stack aligns
+        // to the top corner, so wrapping the label to add the gloss silently
+        // lifted it off centre on every slab.
+        alignment: Alignment.center,
         children: <Widget>[
-          Icon(icon, size: kMenuIconSize, color: ink),
-          const SizedBox(width: kMenuButtonGap),
-          // Flexible, so a long label shortens instead of overflowing the
-          // slab. Labels are written to fit, but one of them naming a platform
-          // service is not under this app's control.
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: kMenuButtonFontSize,
-                fontWeight: FontWeight.w800,
-                letterSpacing: kMenuButtonSpacing,
-                color: ink,
+          // The gloss. Sits inside the rim and only across the top, so it
+          // reads as light landing on a curved face rather than as a second
+          // colour band.
+          // Positioned.fill, not a Positioned with only a top: a fractional
+          // height needs a bounded one to be a fraction of, and without the
+          // fill it is asked to lay out against infinity.
+          Positioned.fill(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                left: kSlabGlossInset,
+                right: kSlabGlossInset,
+                top: kSlabGlossInset * 0.5,
+              ),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: FractionallySizedBox(
+                  heightFactor: kSlabGlossShare,
+                  widthFactor: 1,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: kSlabGloss,
+                      borderRadius: BorderRadius.circular(kMenuButtonRadius),
+                    ),
+                  ),
+                ),
               ),
             ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(icon, size: kMenuIconSize, color: ink),
+              const SizedBox(width: kMenuButtonGap),
+              // Flexible, so a long label shortens instead of overflowing the
+              // slab. Labels are written to fit, but one of them naming a
+              // platform service is not under this app's control.
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: kMenuButtonFontSize,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: kMenuButtonSpacing,
+                    color: ink,
+                    // A hairline of the slab's own shadow under the letters,
+                    // so white ink stays legible on the lit top stop.
+                    shadows: const <Shadow>[
+                      Shadow(
+                        color: kSlabInkShadow,
+                        offset: Offset(0, 1.5),
+                        blurRadius: 2,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -213,10 +277,7 @@ class MenuSheet extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: onClose,
-          child: const ColoredBox(
-            color: kUiScrim,
-            child: SizedBox.expand(),
-          ),
+          child: const ColoredBox(color: kUiScrim, child: SizedBox.expand()),
         ),
         SafeArea(
           child: Center(

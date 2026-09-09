@@ -12,7 +12,8 @@ import 'menu_widgets.dart';
 /// Last in the column and deliberately quiet. A game account is worth having -
 /// it is what a saved best score and a leaderboard would hang off - but it is
 /// not what a child came to this screen for, and it must never compete with
-/// PLAY. Pale slab, dark ink, no icon shouting for attention.
+/// PLAY. Violet: the coolest and least saturated of the three slabs, so it
+/// belongs to the set without pulling the eye down the column.
 ///
 /// It takes up no room at all on a platform with nothing to sign in to, so a
 /// desktop or web build simply does not have it.
@@ -47,6 +48,7 @@ class SignInButton extends StatelessWidget {
                     : 'SIGN IN TO ${Games.serviceName.toUpperCase()}',
                 icon: Icons.sports_esports_rounded,
                 fill: kSignInFill,
+                top: kSignInTop,
                 edge: kSignInEdge,
                 ink: kSignInInk,
                 onPressed: busy ? () {} : () => unawaited(Games.signIn()),
@@ -93,7 +95,9 @@ class _SignedIn extends StatelessWidget {
       decoration: BoxDecoration(
         color: kSignInFill,
         borderRadius: BorderRadius.circular(kMenuButtonRadius),
-        border: Border.all(color: kSignInEdge, width: 1.5),
+        // The same white rim the slabs carry, for the same reason: a
+        // saturated pill on a saturated meadow needs an edge.
+        border: Border.all(color: kSlabRim, width: kSlabRimWidth),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

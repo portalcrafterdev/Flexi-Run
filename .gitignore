@@ -64,3 +64,19 @@ key.properties
 
 # Scratch output from the icon generators - contact sheets and the like.
 /tool/_*
+
+# Seeded design canvases: the ~2 MB page built from the artboards and
+# published. Rebuilt from scratch on every change, so versioning it would put a
+# large regenerated blob in every design commit.
+#
+# The negation is the point. The .dc.html artboards ARE the source - they are
+# what the canvas is seeded from and the only copy of the design - and a bare
+# *.html rule swallows them along with the output.
+/design/*.html
+!/design/*.dc.html
+
+# Gradle writes build output under android/ as well as at the repo root, and
+# the stock Flutter ignore above only covers the root one - which is how
+# android/build/reports/problems/problems-report.html ended up committed.
+/android/build/
+/android/app/build/

@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Nunito:wght@700;800&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Nunito', 'Trebuchet MS', system-ui, sans-serif; }
+    a { color: #C4643F; } a:hover { color: #9d4c2e; }
+  </style>
+</helmet>
+
+<!-- HUD C - Paper & Crayon. The chrome recedes so the picture carries the
+     screen: readouts are ink on paper rather than lit panels, and the controls
+     are soft paper tiles. The risk is honest - low contrast is the failure mode
+     of this direction, so the held shape is marked by a heavy ink ring, not by
+     a brightness change. -->
+<div style="position: relative; width: 800px; height: 360px; overflow: hidden; background: #CFE3EA;">
+
+  <svg viewBox="0 0 800 360" style="position: absolute; inset: 0;" aria-hidden="true">
+    <path d="M0 202 Q 220 186 460 204 T 800 196 L800 360 L0 360 Z" fill="#B9CFA8"></path>
+    <path d="M0 240 Q 260 222 560 244 T 800 236 L800 360 L0 360 Z" fill="#8FB27F"></path>
+    <path d="M0 288 Q 300 268 620 292 T 800 284 L800 360 L0 360 Z" fill="#7FA97C"></path>
+    <polygon points="372,204 428,204 640,360 160,360" fill="#E0C79C"></polygon>
+    <g stroke="#C9AE82" stroke-width="2.5" opacity="0.7">
+      <path d="M356 254 H444 M320 300 H480"></path>
+    </g>
+    <g>
+      <rect x="286" y="186" width="228" height="126" rx="10" fill="#C98B6B"></rect>
+      <g stroke="#A56E52" stroke-width="2.4" opacity="0.8">
+        <path d="M286 218 H514 M286 250 H514 M286 282 H514"></path>
+        <path d="M326 186 V218 M400 218 V250 M362 250 V282 M450 282 V312"></path>
+      </g>
+      <polygon points="400,214 411,245 444,245 417,264 428,296 400,276 372,296 383,264 356,245 389,245" fill="#8FB27F"></polygon>
+    </g>
+    <filter id="grainH"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3"></feTurbulence></filter>
+    <rect width="800" height="360" filter="url(#grainH)" opacity="0.09"></rect>
+  </svg>
+
+  <!-- ==== readouts as ink, on a soft paper strip ==== -->
+  <div style="position: absolute; left: 18px; top: 18px; display: flex; align-items: center; gap: 12px; padding: 6px 14px; border-radius: 20px; background: rgba(255,251,240,0.9);">
+    <div style="display: flex; gap: 5px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.7-9.4-9.2A5.3 5.3 0 0 1 12 6.3a5.3 5.3 0 0 1 9.4 5.5C19.5 16.3 12 21 12 21z" fill="#D9737C"></path></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.7-9.4-9.2A5.3 5.3 0 0 1 12 6.3a5.3 5.3 0 0 1 9.4 5.5C19.5 16.3 12 21 12 21z" fill="#D9737C"></path></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.7-9.4-9.2A5.3 5.3 0 0 1 12 6.3a5.3 5.3 0 0 1 9.4 5.5C19.5 16.3 12 21 12 21z" fill="none" stroke="#B9A896" stroke-width="2"></path></svg>
+    </div>
+    <span style="font-family: 'Patrick Hand', cursive; font-size: 30px; color: #4A5D52;">120</span>
+  </div>
+
+  <div style="position: absolute; right: 18px; top: 18px; display: flex; align-items: center; gap: 10px;">
+    <div style="display: flex; align-items: center; gap: 7px; padding: 6px 14px; border-radius: 20px; background: rgba(255,251,240,0.9);">
+      <svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#D9A441"></circle><circle cx="12" cy="12" r="5" fill="#F0C87A"></circle></svg>
+      <span style="font-family: 'Patrick Hand', cursive; font-size: 24px; color: #4A5D52;">8</span>
+    </div>
+    <div style="display: flex; align-items: center; padding: 7px 12px; border-radius: 20px; background: rgba(143,193,216,0.9);">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3.5v6c0 5-3.4 9.3-8 10.5-4.6-1.2-8-5.5-8-10.5v-6z" fill="none" stroke="#3E5460" stroke-width="2.4"></path></svg>
+    </div>
+  </div>
+
+  <!-- ==== controls as paper tiles ==== -->
+  <div style="position: absolute; left: 18px; bottom: 14px; width: 92px; height: 92px; border-radius: 22px; background: rgba(255,251,240,0.88); box-shadow: 0 3px 0 rgba(74,93,82,0.16); display: flex; align-items: center; justify-content: center;">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5F7266" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+  </div>
+  <div style="position: absolute; right: 18px; bottom: 14px; width: 92px; height: 92px; border-radius: 22px; background: rgba(255,251,240,0.88); box-shadow: 0 3px 0 rgba(74,93,82,0.16); display: flex; align-items: center; justify-content: center;">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5F7266" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+  </div>
+
+  <div style="position: absolute; left: 50%; transform: translateX(-50%); bottom: 14px; display: flex; gap: 16px;">
+    <div style="width: 92px; height: 92px; border-radius: 22px; background: rgba(255,251,240,0.88); box-shadow: 0 3px 0 rgba(74,93,82,0.16); display: flex; align-items: center; justify-content: center;">
+      <svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#C4643F"></circle></svg>
+    </div>
+    <!-- held: a drawn ink ring, not a brightness change -->
+    <div style="width: 92px; height: 92px; border-radius: 22px; background: #FFFBF0; border: 4px solid #4A5D52; box-shadow: 0 3px 0 rgba(74,93,82,0.28); display: flex; align-items: center; justify-content: center;">
+      <svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" fill="#7FA97C"></rect></svg>
+    </div>
+    <div style="width: 92px; height: 92px; border-radius: 22px; background: rgba(255,251,240,0.88); box-shadow: 0 3px 0 rgba(74,93,82,0.16); display: flex; align-items: center; justify-content: center;">
+      <svg width="42" height="42" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,1.5 15,8.8 22.8,8.8 16.5,13.6 18.8,21.4 12,16.6 5.2,21.4 7.5,13.6 1.2,8.8 9,8.8" fill="#D9A441"></polygon></svg>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

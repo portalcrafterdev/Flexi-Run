@@ -11,9 +11,9 @@ import 'volume_row.dart';
 /// than the same two rows written twice: they have to agree, and a child who
 /// turns the music down mid-run should find it down on the menu afterwards.
 ///
-/// In [compact] form the two sit side by side with no labels, which is what
-/// fits on a paused landscape screen. The speaker and the note say which is
-/// which without a word being read.
+/// In [compact] form the two lose their written labels and keep their full
+/// width, which is what fits on a paused landscape screen. The speaker and the
+/// note say which is which without a word being read.
 class SoundLevels extends StatefulWidget {
   const SoundLevels({this.compact = false, super.key});
 
@@ -50,28 +50,29 @@ class _SoundLevelsState extends State<SoundLevels> {
         ],
       );
     }
-    return Row(
+    // Stacked, not side by side. Two bars sharing one 330pt card left each of
+    // them about 120pt of track, which is a hard target to set precisely with
+    // a thumb on it - and the panel has the height to spare.
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Expanded(
-          child: _CompactLevel(
-            label: 'Sound',
-            icon: _soundIcon,
-            mutedIcon: Icons.volume_off_rounded,
-            tint: _soundTint,
-            value: Prefs.soundLevel,
-            onChanged: _setSound,
-          ),
+        _CompactLevel(
+          label: 'Sound',
+          icon: _soundIcon,
+          mutedIcon: Icons.volume_off_rounded,
+          tint: _soundTint,
+          value: Prefs.soundLevel,
+          onChanged: _setSound,
         ),
-        const SizedBox(width: kMenuButtonGap * 0.6),
-        Expanded(
-          child: _CompactLevel(
-            label: 'Music',
-            icon: _musicIcon,
-            mutedIcon: Icons.music_off_rounded,
-            tint: _musicTint,
-            value: Prefs.musicLevel,
-            onChanged: _setMusic,
-          ),
+        const SizedBox(height: kMenuButtonGap * 0.5),
+        _CompactLevel(
+          label: 'Music',
+          icon: _musicIcon,
+          mutedIcon: Icons.music_off_rounded,
+          tint: _musicTint,
+          value: Prefs.musicLevel,
+          onChanged: _setMusic,
         ),
       ],
     );

@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Nunito:wght@700;800&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Nunito', 'Trebuchet MS', system-ui, sans-serif; }
+    a { color: #C4643F; } a:hover { color: #9d4c2e; }
+  </style>
+</helmet>
+
+<!-- Paper & Crayon: a picture book, not an arcade. Warm paper ground, muted
+     pigments, wobbly hand-drawn edges, and a grain wash over everything so no
+     fill reads as flat screen colour. -->
+<div style="position: relative; width: 800px; height: 360px; overflow: hidden; background: #F7EBD6;">
+
+  <svg viewBox="0 0 800 360" style="position: absolute; inset: 0;" aria-hidden="true">
+    <!-- washed sky block, edges deliberately not straight -->
+    <path d="M0 0 H800 V196 Q 600 206 400 194 T 0 200 Z" fill="#CFE3EA"></path>
+    <circle cx="648" cy="70" r="30" fill="#F0C87A"></circle>
+    <g opacity="0.5" fill="#FFFFFF">
+      <ellipse cx="140" cy="62" rx="40" ry="17"></ellipse>
+      <ellipse cx="176" cy="56" rx="28" ry="14"></ellipse>
+    </g>
+    <!-- hills in muted pigment -->
+    <path d="M0 206 Q 190 168 400 206 T 800 196 L800 262 L0 262 Z" fill="#B9CFA8"></path>
+    <path d="M0 244 Q 230 212 520 250 T 800 240 L800 360 L0 360 Z" fill="#8FB27F"></path>
+    <path d="M0 300 Q 280 276 580 306 T 800 296 L800 360 L0 360 Z" fill="#7FA97C"></path>
+    <path d="M322 250 L268 360 L432 360 L356 250 Z" fill="#E0C79C"></path>
+    <!-- crayon strokes over the hills -->
+    <g stroke="#6B9268" stroke-width="2.2" stroke-linecap="round" opacity="0.45">
+      <path d="M60 292 l10 -14M96 300 l9 -13M132 288 l10 -14M600 302 l10 -14M646 296 l9 -13M700 306 l10 -14"></path>
+    </g>
+    <g stroke="#8A6242" stroke-width="3" stroke-linecap="round">
+      <path d="M84 268 v18"></path><path d="M124 276 v14"></path>
+    </g>
+    <circle cx="84" cy="256" r="17" fill="#7FA97C"></circle>
+    <circle cx="124" cy="266" r="13" fill="#7FA97C"></circle>
+    <!-- paper grain -->
+    <filter id="grainC"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3"></feTurbulence></filter>
+    <rect width="800" height="360" filter="url(#grainC)" opacity="0.10"></rect>
+  </svg>
+
+  <!-- ==== title, handwritten, one muted ink ==== -->
+  <div style="position: absolute; left: 34px; top: 20px;">
+    <div style="font-family: 'Patrick Hand', 'Comic Sans MS', cursive; font-size: 54px; line-height: 1; color: #4A5D52; letter-spacing: 1px;">
+      Flexi <span style="color: #C4643F;">Run</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 7px; margin-top: 10px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#C4643F"></circle></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" fill="#7FA97C"></rect></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,1.5 15,8.8 22.8,8.8 16.5,13.6 18.8,21.4 12,16.6 5.2,21.4 7.5,13.6 1.2,8.8 9,8.8" fill="#D9A441"></polygon></svg>
+      <span style="font-family: 'Patrick Hand', cursive; font-size: 19px; color: #6B7A70; margin-left: 3px;">Match the shape, slip through!</span>
+    </div>
+  </div>
+
+  <!-- ==== mascot, softer and matte ==== -->
+  <div style="position: absolute; left: 244px; bottom: 8px; width: 148px; height: 166px;">
+    <svg viewBox="0 0 148 166" style="width: 100%; height: 100%;" aria-hidden="true">
+      <ellipse cx="74" cy="158" rx="40" ry="6" fill="#6B8A6B" opacity="0.3"></ellipse>
+      <rect x="56" y="124" width="15" height="26" rx="7" fill="#6FA8C4"></rect>
+      <rect x="78" y="124" width="15" height="26" rx="7" fill="#6FA8C4"></rect>
+      <circle cx="34" cy="102" r="10" fill="#6FA8C4"></circle>
+      <circle cx="114" cy="102" r="10" fill="#6FA8C4"></circle>
+      <circle cx="74" cy="86" r="51" fill="#8FC1D8"></circle>
+      <path d="M74 35 a51 51 0 0 0 -47 31 a51 51 0 0 1 47 -22 z" fill="#B4D9E8" opacity="0.75"></path>
+      <circle cx="59" cy="84" r="7.5" fill="#3E5460"></circle>
+      <circle cx="89" cy="84" r="7.5" fill="#3E5460"></circle>
+      <circle cx="61.5" cy="81" r="2.6" fill="#FFFFFF"></circle>
+      <circle cx="91.5" cy="81" r="2.6" fill="#FFFFFF"></circle>
+      <path d="M61 101 Q 74 112 87 101" stroke="#3E5460" stroke-width="4.5" fill="none" stroke-linecap="round"></path>
+      <circle cx="47" cy="98" r="6" fill="#E9A0A0" opacity="0.5"></circle>
+      <circle cx="101" cy="98" r="6" fill="#E9A0A0" opacity="0.5"></circle>
+    </svg>
+  </div>
+
+  <!-- ==== controls on a torn paper card, so they sit ON the book page ==== -->
+  <div style="position: absolute; right: 22px; top: 30px; width: 320px; padding: 16px; border-radius: 20px; background: #FFFBF0; box-shadow: 0 4px 0 rgba(74,93,82,0.14); display: flex; flex-direction: column; gap: 12px;">
+
+    <div style="display: flex; gap: 10px;">
+      <div style="flex: 1; height: 56px; border-radius: 14px; background: #7FA97C; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <svg width="42" height="12" viewBox="0 0 42 12" aria-hidden="true"><polygon points="6,0.5 7.7,4.8 12.2,4.8 8.6,7.6 9.8,11.8 6,9.2 2.2,11.8 3.4,7.6 -0.2,4.8 4.3,4.8" fill="#FFFBF0"></polygon></svg>
+        <span style="font-family: 'Patrick Hand', cursive; font-size: 17px; color: #FFFBF0;">Easy</span>
+      </div>
+      <div style="flex: 1; height: 56px; border-radius: 14px; background: #EFE6D2; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <svg width="42" height="12" viewBox="0 0 42 12" aria-hidden="true"><g fill="#9AA69B"><polygon points="6,0.5 7.7,4.8 12.2,4.8 8.6,7.6 9.8,11.8 6,9.2 2.2,11.8 3.4,7.6 -0.2,4.8 4.3,4.8"></polygon><polygon points="21,0.5 22.7,4.8 27.2,4.8 23.6,7.6 24.8,11.8 21,9.2 17.2,11.8 18.4,7.6 14.8,4.8 19.3,4.8"></polygon></g></svg>
+        <span style="font-family: 'Patrick Hand', cursive; font-size: 17px; color: #7E8C81;">Medium</span>
+      </div>
+      <div style="flex: 1; height: 56px; border-radius: 14px; background: #EFE6D2; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <svg width="42" height="12" viewBox="0 0 42 12" aria-hidden="true"><g fill="#9AA69B"><polygon points="6,0.5 7.7,4.8 12.2,4.8 8.6,7.6 9.8,11.8 6,9.2 2.2,11.8 3.4,7.6 -0.2,4.8 4.3,4.8"></polygon><polygon points="21,0.5 22.7,4.8 27.2,4.8 23.6,7.6 24.8,11.8 21,9.2 17.2,11.8 18.4,7.6 14.8,4.8 19.3,4.8"></polygon><polygon points="36,0.5 37.7,4.8 42.2,4.8 38.6,7.6 39.8,11.8 36,9.2 32.2,11.8 33.4,7.6 29.8,4.8 34.3,4.8"></polygon></g></svg>
+        <span style="font-family: 'Patrick Hand', cursive; font-size: 17px; color: #7E8C81;">Hard</span>
+      </div>
+    </div>
+
+    <div style="height: 80px; border-radius: 22px; background: #C4643F; display: flex; align-items: center; justify-content: center; gap: 12px;">
+      <svg width="32" height="32" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,4 20,12 7,20" fill="#FFFBF0"></polygon></svg>
+      <span style="font-family: 'Patrick Hand', cursive; font-size: 36px; color: #FFFBF0; letter-spacing: 1px;">Play</span>
+    </div>
+
+    <div style="height: 58px; border-radius: 18px; background: #EFE6D2; display: flex; align-items: center; justify-content: center; gap: 10px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5F7266" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.4.3.5.7.5 1.1v1h6v-1c0-.4.1-.8.5-1.1A6 6 0 0 0 12 3z"></path></svg>
+      <span style="font-family: 'Patrick Hand', cursive; font-size: 24px; color: #5F7266;">How to play</span>
+    </div>
+  </div>
+
+  <!-- ==== gear + sign-in, quiet ==== -->
+  <div style="position: absolute; right: 26px; bottom: 12px; display: flex; gap: 9px;">
+    <div style="width: 40px; height: 40px; border-radius: 50%; background: #FFFBF0; box-shadow: 0 2px 0 rgba(74,93,82,0.16); display: flex; align-items: center; justify-content: center;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5F7266" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="3.4"></circle><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+    </div>
+    <div style="width: 40px; height: 40px; border-radius: 50%; background: #FFFBF0; box-shadow: 0 2px 0 rgba(74,93,82,0.16); display: flex; align-items: center; justify-content: center;">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#5F7266" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 12h4M8 10v4M15 11h.01M18 13h.01"></path><rect x="2" y="6" width="20" height="12" rx="5"></rect></svg>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

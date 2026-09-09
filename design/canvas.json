@@ -1,0 +1,58 @@
+{
+  "pages": [
+    { "id": "page-1", "name": "Every screen" },
+    { "id": "page-2", "name": "Earlier directions" }
+  ],
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 800, "h": 360, "title": "1 - Home", "page": "page-1" },
+    { "file": "Playing.dc.html", "x": 880, "y": 0, "w": 800, "h": 360, "title": "2 - In play", "page": "page-1" },
+    { "file": "Paused.dc.html", "x": 1760, "y": 0, "w": 800, "h": 360, "title": "3 - Paused", "page": "page-1" },
+    { "file": "GameOver.dc.html", "x": 0, "y": 520, "w": 800, "h": 360, "title": "4 - End of a run", "page": "page-1" },
+    { "file": "HowTo.dc.html", "x": 880, "y": 520, "w": 800, "h": 360, "title": "5 - How to play", "page": "page-1" },
+    { "file": "Settings.dc.html", "x": 1760, "y": 520, "w": 800, "h": 360, "title": "6 - Settings", "page": "page-1" },
+
+    { "file": "HudA.dc.html", "x": 0, "y": 0, "w": 800, "h": 360, "title": "Pastel HUD (not shipped)", "page": "page-2" },
+    { "file": "DirectionB.dc.html", "x": 880, "y": 0, "w": 800, "h": 360, "title": "B - Toy Box", "page": "page-2" },
+    { "file": "DirectionC.dc.html", "x": 1760, "y": 0, "w": 800, "h": 360, "title": "C - Paper & Crayon", "page": "page-2" },
+    { "file": "HudB.dc.html", "x": 880, "y": 520, "w": 800, "h": 360, "title": "B - HUD", "page": "page-2" },
+    { "file": "HudC.dc.html", "x": 1760, "y": 520, "w": 800, "h": 360, "title": "C - HUD", "page": "page-2" }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -260,
+      "w": 800,
+      "text": "Every screen in the game, at 800x360 - the real logical size of your phone.\n\nThese are drawn from the code as it stands after today's changes, not from imagination: the slab gradients, the white rim, the parchment level pills and the faces are the ones now on your phone. Colours and sizes come out of constants.dart."
+    },
+    {
+      "id": "shipped",
+      "x": 880,
+      "y": -260,
+      "w": 800,
+      "text": "Already true on your phone: 1 (Home).\n\nPartly true: 3, 4. The panel buttons already route through the same ChunkyButton, so they picked up the rim, the gradient and the gloss for free - but PLAY AGAIN, KEEP GOING and MENU were never given the hand-picked lit top, so they are flatter than PLAY on the menu. One line each.\n\nNot yet built: 2, 5, 6."
+    },
+    {
+      "id": "playing",
+      "x": 1760,
+      "y": -260,
+      "w": 800,
+      "text": "2 - In play is the one screen the new slab language deliberately does NOT reach.\n\nThe pad tiles stay frosted, not solid: they lie over live gameplay, and an opaque tile takes a bite out of the road the player is reading. The held shape is marked by the green ring, which is the one thing on this screen that has to be readable in a glance.\n\nThe wall shows the rule the whole game rests on - the bricks occlude the runner and only the part inside the hole survives."
+    },
+    {
+      "id": "proposals",
+      "x": 0,
+      "y": 410,
+      "w": 800,
+      "text": "Two things on 5 and 6 that are proposals, not recreations.\n\nHOW TO PLAY gains a picture strip under the four steps: shape, arrow, wall, tick. The words are one sentence each and a six year old may not read any of them; the strip says the same thing without words.\n\nSETTINGS gains a Tap anywhere switch. CLAUDE.md lists it as a real setting, on by default - it has never had a control, and the sheet has the room."
+    },
+    {
+      "id": "notes",
+      "x": 880,
+      "y": 410,
+      "w": 800,
+      "text": "Details worth keeping whichever way you go.\n\nThe end-of-run panel never says \"game over\". The run ended and the next one starts from the button below it; six year olds put the phone down when told they lost.\n\nThe gold slab says the word \"ad\". A child pressing it is agreeing to watch one, and the button should be what tells them.\n\nSound sits on the pause panel as well as in Settings, because mid-run in a quiet room is where a parent actually reaches for it."
+    }
+  ],
+  "launch": { "view": "canvas", "page": "page-1" }
+}

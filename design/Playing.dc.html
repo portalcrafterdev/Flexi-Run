@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif; }
+    a { color: #2F8A3C; } a:hover { color: #21682c; }
+    /* The pad tile. Frosted rather than solid: it lies over live gameplay, and
+       an opaque tile takes a bite out of the road the player is reading. */
+    .pad { width: 92px; height: 92px; border-radius: 24px;
+           background: rgba(232,246,255,0.56); border: 2.5px solid rgba(255,255,255,0.6);
+           box-shadow: 0 3px 8px rgba(16,42,24,0.24);
+           display: flex; align-items: center; justify-content: center; }
+    .pill { display: flex; align-items: center; gap: 6px; padding: 5px 14px;
+            border-radius: 24px; background: rgba(43,74,92,0.42); }
+  </style>
+</helmet>
+
+<div style="position: relative; width: 800px; height: 360px; overflow: hidden; background: linear-gradient(180deg,#3D7CD6 0%,#5FC0EC 48%,#AEE5F3 62%);">
+
+  <svg viewBox="0 0 800 360" style="position: absolute; inset: 0;" aria-hidden="true">
+    <path d="M0 214 Q 220 198 460 216 T 800 208 L800 360 L0 360 Z" fill="#9CCBA1"></path>
+    <path d="M0 246 Q 260 230 560 250 T 800 242 L800 360 L0 360 Z" fill="#7FBC65"></path>
+    <path d="M0 290 Q 300 272 620 294 T 800 286 L800 360 L0 360 Z" fill="#56A85E"></path>
+    <polygon points="372,214 428,214 640,360 160,360" fill="#D9BE8E"></polygon>
+    <g fill="#C9A876" opacity="0.5">
+      <polygon points="379,232 421,232 442,256 358,256"></polygon>
+      <polygon points="350,282 450,282 486,318 314,318"></polygon>
+    </g>
+    <g fill="#4B9450">
+      <polygon points="60,272 46,248 74,248"></polygon><polygon points="60,258 49,238 71,238"></polygon>
+      <polygon points="726,278 710,252 742,252"></polygon><polygon points="726,262 714,240 738,240"></polygon>
+    </g>
+
+    <!-- the wall, with the runner behind it and only the hole showing through -->
+    <g>
+      <rect x="272" y="188" width="256" height="132" rx="8" fill="#C06B4A"></rect>
+      <g stroke="#A3573A" stroke-width="2.6">
+        <path d="M272 220 H528 M272 252 H528 M272 284 H528"></path>
+        <path d="M312 188 V220 M400 220 V252 M356 252 V284 M456 284 V320"></path>
+      </g>
+      <!-- the hole is a real opening: the runner shows through it and nowhere
+           else, which is the whole visual rule of the game -->
+      <circle cx="400" cy="252" r="42" fill="#7FBC65"></circle>
+      <circle cx="400" cy="252" r="34" fill="url(#body)"></circle>
+      <defs><radialGradient id="body" cx="0.36" cy="0.3" r="0.85">
+        <stop offset="0%" stop-color="#BEEBFF"></stop><stop offset="45%" stop-color="#63C4F0"></stop><stop offset="100%" stop-color="#2E90D4"></stop>
+      </radialGradient></defs>
+      <circle cx="390" cy="248" r="5" fill="#123A52"></circle>
+      <circle cx="411" cy="248" r="5" fill="#123A52"></circle>
+      <path d="M390 262 Q 400 270 411 262" stroke="#123A52" stroke-width="3.4" fill="none" stroke-linecap="round"></path>
+    </g>
+  </svg>
+
+  <!-- lives and score -->
+  <div style="position: absolute; left: 18px; top: 18px; display: flex; align-items: center; gap: 14px;">
+    <div style="display: flex; gap: 4px;">
+      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.7-9.4-9.2A5.3 5.3 0 0 1 12 6.3a5.3 5.3 0 0 1 9.4 5.5C19.5 16.3 12 21 12 21z" fill="#FF5E9C" stroke="#2B4A5C" stroke-width="2"></path></svg>
+      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.7-9.4-9.2A5.3 5.3 0 0 1 12 6.3a5.3 5.3 0 0 1 9.4 5.5C19.5 16.3 12 21 12 21z" fill="#FF5E9C" stroke="#2B4A5C" stroke-width="2"></path></svg>
+      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.7-9.4-9.2A5.3 5.3 0 0 1 12 6.3a5.3 5.3 0 0 1 9.4 5.5C19.5 16.3 12 21 12 21z" fill="rgba(232,85,78,0.25)" stroke="#2B4A5C" stroke-width="2"></path></svg>
+    </div>
+    <span style="font-size: 27px; font-weight: 800; color: #FFFFFF; -webkit-text-stroke: 6px #2B4A5C; paint-order: stroke fill;">120</span>
+  </div>
+
+  <!-- coins, shield, pause -->
+  <div style="position: absolute; right: 18px; top: 18px; display: flex; align-items: center; gap: 9px;">
+    <div class="pill">
+      <svg width="21" height="21" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F7C948" stroke="#C98A15" stroke-width="2"></circle><circle cx="12" cy="12" r="5.5" fill="#FFE9A0"></circle></svg>
+      <span style="font-size: 23px; font-weight: 800; color: #FFFFFF;">8</span>
+    </div>
+    <div style="display: flex; align-items: center; padding: 5px 12px; border-radius: 24px; background: rgba(91,232,200,0.32); border: 2px solid #5BE8C8;">
+      <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3.5v6c0 5-3.4 9.3-8 10.5-4.6-1.2-8-5.5-8-10.5v-6z" fill="none" stroke="#FFFFFF" stroke-width="2.4"></path></svg>
+    </div>
+    <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(43,74,92,0.42); display: flex; align-items: center; justify-content: center;">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4.4" height="16" rx="1.6" fill="#FFFFFF"></rect><rect x="13.6" y="4" width="4.4" height="16" rx="1.6" fill="#FFFFFF"></rect></svg>
+    </div>
+  </div>
+
+  <!-- lane arrows, 72pt in the corners -->
+  <div style="position: absolute; left: 18px; bottom: 14px; width: 72px; height: 72px; border-radius: 24px; background: rgba(232,246,255,0.56); border: 2.5px solid rgba(255,255,255,0.6); display: flex; align-items: center; justify-content: center;">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2B4A5C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+  </div>
+  <div style="position: absolute; right: 18px; bottom: 14px; width: 72px; height: 72px; border-radius: 24px; background: rgba(232,246,255,0.56); border: 2.5px solid rgba(255,255,255,0.6); display: flex; align-items: center; justify-content: center;">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2B4A5C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+  </div>
+
+  <!-- the three shapes, 92pt, gap 16. The held one wears the green ring. -->
+  <div style="position: absolute; left: 50%; transform: translateX(-50%); bottom: 14px; display: flex; gap: 16px;">
+    <div class="pad">
+      <svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#FF7043" stroke="#2B4A5C" stroke-width="1.8"></circle></svg>
+    </div>
+    <div class="pad" style="background: rgba(255,255,255,0.78); border: 3px solid #56E08A; box-shadow: 0 0 14px rgba(86,224,138,0.55), 0 3px 8px rgba(16,42,24,0.24);">
+      <svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" fill="#EC4899" stroke="#2B4A5C" stroke-width="1.8"></rect></svg>
+    </div>
+    <div class="pad">
+      <svg width="42" height="42" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,1.5 15,8.8 22.8,8.8 16.5,13.6 18.8,21.4 12,16.6 5.2,21.4 7.5,13.6 1.2,8.8 9,8.8" fill="#A855F7" stroke="#2B4A5C" stroke-width="1.8" stroke-linejoin="round"></polygon></svg>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

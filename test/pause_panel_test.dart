@@ -31,6 +31,27 @@ void main() {
         MaterialApp(home: Scaffold(body: PausePanel(game: game))),
       );
 
+  testWidgets('the panel fits a landscape handset', (tester) async {
+    // The bars used to sit side by side. Stacking them for a full-width track
+    // made the card taller, and nothing here was checking it still fits: every
+    // other test in this file renders at the default 800x600, which is nearly
+    // twice the height the phone actually has.
+    tester.view
+      ..physicalSize = const Size(800, 360)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await show(tester, await parkedRun());
+    expect(tester.takeException(), isNull);
+
+    // And the way out is on screen, not scrolled off the bottom of it.
+    for (final label in <String>['KEEP GOING', 'MENU']) {
+      final box = tester.getRect(find.text(label));
+      expect(box.bottom, lessThanOrEqualTo(360), reason: '$label off screen');
+      expect(box.top, greaterThanOrEqualTo(0), reason: '$label above screen');
+    }
+  });
+
   testWidgets('a parked run offers both levels', (tester) async {
     final game = await parkedRun();
     await show(tester, game);
