@@ -1,58 +1,218 @@
 {
   "pages": [
-    { "id": "page-1", "name": "Every screen" },
-    { "id": "page-2", "name": "Earlier directions" }
+    {
+      "id": "page-e",
+      "name": "Where they live"
+    },
+    {
+      "id": "page-0",
+      "name": "Gameplay screen"
+    },
+    {
+      "id": "page-1",
+      "name": "Every screen"
+    },
+    {
+      "id": "page-2",
+      "name": "Earlier directions"
+    }
   ],
   "artboards": [
-    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 800, "h": 360, "title": "1 - Home", "page": "page-1" },
-    { "file": "Playing.dc.html", "x": 880, "y": 0, "w": 800, "h": 360, "title": "2 - In play", "page": "page-1" },
-    { "file": "Paused.dc.html", "x": 1760, "y": 0, "w": 800, "h": 360, "title": "3 - Paused", "page": "page-1" },
-    { "file": "GameOver.dc.html", "x": 0, "y": 520, "w": 800, "h": 360, "title": "4 - End of a run", "page": "page-1" },
-    { "file": "HowTo.dc.html", "x": 880, "y": 520, "w": 800, "h": 360, "title": "5 - How to play", "page": "page-1" },
-    { "file": "Settings.dc.html", "x": 1760, "y": 520, "w": 800, "h": 360, "title": "6 - Settings", "page": "page-1" },
-
-    { "file": "HudA.dc.html", "x": 0, "y": 0, "w": 800, "h": 360, "title": "Pastel HUD (not shipped)", "page": "page-2" },
-    { "file": "DirectionB.dc.html", "x": 880, "y": 0, "w": 800, "h": 360, "title": "B - Toy Box", "page": "page-2" },
-    { "file": "DirectionC.dc.html", "x": 1760, "y": 0, "w": 800, "h": 360, "title": "C - Paper & Crayon", "page": "page-2" },
-    { "file": "HudB.dc.html", "x": 880, "y": 520, "w": 800, "h": 360, "title": "B - HUD", "page": "page-2" },
-    { "file": "HudC.dc.html", "x": 1760, "y": 520, "w": 800, "h": 360, "title": "C - HUD", "page": "page-2" }
+    {
+      "file": "EntryMenu.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 800,
+      "h": 360,
+      "title": "Menu - signed in",
+      "page": "page-e"
+    },
+    {
+      "file": "EntryRunEnd.dc.html",
+      "x": 880,
+      "y": 0,
+      "w": 800,
+      "h": 360,
+      "title": "End of a run",
+      "page": "page-e"
+    },
+    {
+      "file": "Playing.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 800,
+      "h": 360,
+      "title": "In play - now",
+      "page": "page-0"
+    },
+    {
+      "file": "PlayingNext.dc.html",
+      "x": 880,
+      "y": 0,
+      "w": 800,
+      "h": 360,
+      "title": "In play - proposed",
+      "page": "page-0"
+    },
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 800,
+      "h": 360,
+      "title": "1 - Home",
+      "page": "page-1"
+    },
+    {
+      "file": "Paused.dc.html",
+      "x": 880,
+      "y": 0,
+      "w": 800,
+      "h": 360,
+      "title": "2 - Paused",
+      "page": "page-1"
+    },
+    {
+      "file": "GameOver.dc.html",
+      "x": 1760,
+      "y": 0,
+      "w": 800,
+      "h": 360,
+      "title": "3 - End of a run",
+      "page": "page-1"
+    },
+    {
+      "file": "HowTo.dc.html",
+      "x": 0,
+      "y": 520,
+      "w": 800,
+      "h": 360,
+      "title": "4 - How to play",
+      "page": "page-1"
+    },
+    {
+      "file": "Settings.dc.html",
+      "x": 880,
+      "y": 520,
+      "w": 800,
+      "h": 360,
+      "title": "5 - Settings",
+      "page": "page-1"
+    },
+    {
+      "file": "HudA.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 800,
+      "h": 360,
+      "title": "Pastel HUD (not shipped)",
+      "page": "page-2"
+    },
+    {
+      "file": "DirectionB.dc.html",
+      "x": 880,
+      "y": 0,
+      "w": 800,
+      "h": 360,
+      "title": "B - Toy Box",
+      "page": "page-2"
+    },
+    {
+      "file": "DirectionC.dc.html",
+      "x": 1760,
+      "y": 0,
+      "w": 800,
+      "h": 360,
+      "title": "C - Paper & Crayon",
+      "page": "page-2"
+    },
+    {
+      "file": "HudB.dc.html",
+      "x": 880,
+      "y": 520,
+      "w": 800,
+      "h": 360,
+      "title": "B - HUD",
+      "page": "page-2"
+    },
+    {
+      "file": "HudC.dc.html",
+      "x": 1760,
+      "y": 520,
+      "w": 800,
+      "h": 360,
+      "title": "C - HUD",
+      "page": "page-2"
+    }
   ],
   "annotations": [
+    {
+      "id": "entry-note",
+      "x": 0,
+      "y": -300,
+      "w": 1680,
+      "page": "page-e",
+      "text": "Where the leaderboards and achievements are reached from.\n\nBoth open the platform's own screen - the Play Games overlay on Android, Game Center on iOS - on top of the game. There is no leaderboard or achievement screen inside Flexi Run itself.\n\nAll three entry points appear only while signed in. Signed out, the pill is the SIGN IN slab, there is no trophy, and the best-score line is plain text."
+    },
+    {
+      "id": "gameplay-why",
+      "x": 0,
+      "y": -320,
+      "w": 1680,
+      "page": "page-0",
+      "text": "The gameplay screen.\n\nA wall is on screen for 7.5 seconds, but for most of that it is small and far away, and its hole is a dark opening on red-brown brick. A child has to read circle-vs-square-vs-star from a silhouette alone - and the pad buttons are white because, correctly, a coloured button would teach a cue the wall could not answer.\n\nThe change is to let the wall answer it. Rim the hole in the shape's own colour. The opening stays genuinely open - meadow shows through it exactly as now - so the rule that the hole is a real transparent opening still holds. Only the edge is painted."
+    },
     {
       "id": "brief",
       "x": 0,
       "y": -260,
       "w": 800,
-      "text": "Every screen in the game, at 800x360 - the real logical size of your phone.\n\nThese are drawn from the code as it stands after today's changes, not from imagination: the slab gradients, the white rim, the parchment level pills and the faces are the ones now on your phone. Colours and sizes come out of constants.dart."
+      "text": "Every screen in the game, at 800x360 - the real logical size of your phone.\n\nThese are drawn from the code as it stands after today's changes, not from imagination: the slab gradients, the white rim, the parchment level pills and the faces are the ones now on your phone. Colours and sizes come out of constants.dart.",
+      "page": "page-1"
     },
     {
       "id": "shipped",
       "x": 880,
       "y": -260,
       "w": 800,
-      "text": "Already true on your phone: 1 (Home).\n\nPartly true: 3, 4. The panel buttons already route through the same ChunkyButton, so they picked up the rim, the gradient and the gloss for free - but PLAY AGAIN, KEEP GOING and MENU were never given the hand-picked lit top, so they are flatter than PLAY on the menu. One line each.\n\nNot yet built: 2, 5, 6."
+      "text": "Already true on your phone: 1 (Home), and 2 (Paused) as of today.\n\nPartly true: 3. The panel buttons route through the same ChunkyButton, so the end-of-run slabs picked up the rim, gradient, gloss and lit top with the pause panel.\n\nNot yet built: 4, 5.",
+      "page": "page-1"
     },
     {
       "id": "playing",
       "x": 1760,
       "y": -260,
       "w": 800,
-      "text": "2 - In play is the one screen the new slab language deliberately does NOT reach.\n\nThe pad tiles stay frosted, not solid: they lie over live gameplay, and an opaque tile takes a bite out of the road the player is reading. The held shape is marked by the green ring, which is the one thing on this screen that has to be readable in a glance.\n\nThe wall shows the rule the whole game rests on - the bricks occlude the runner and only the part inside the hole survives."
+      "text": "In play has a page of its own - see the Gameplay screen tab.\n\nIt is the one screen the menu's slab language deliberately does not reach: the pad tiles lie over live gameplay, and a solid tile takes a bite out of the road the player is reading.",
+      "page": "page-1"
     },
     {
       "id": "proposals",
       "x": 0,
       "y": 410,
       "w": 800,
-      "text": "Two things on 5 and 6 that are proposals, not recreations.\n\nHOW TO PLAY gains a picture strip under the four steps: shape, arrow, wall, tick. The words are one sentence each and a six year old may not read any of them; the strip says the same thing without words.\n\nSETTINGS gains a Tap anywhere switch. CLAUDE.md lists it as a real setting, on by default - it has never had a control, and the sheet has the room."
+      "text": "Two things on 5 and 6 that are proposals, not recreations.\n\nHOW TO PLAY gains a picture strip under the four steps: shape, arrow, wall, tick. The words are one sentence each and a six year old may not read any of them; the strip says the same thing without words.\n\nSETTINGS gains a Tap anywhere switch. CLAUDE.md lists it as a real setting, on by default - it has never had a control, and the sheet has the room.",
+      "page": "page-1"
     },
     {
       "id": "notes",
       "x": 880,
       "y": 410,
       "w": 800,
-      "text": "Details worth keeping whichever way you go.\n\nThe end-of-run panel never says \"game over\". The run ended and the next one starts from the button below it; six year olds put the phone down when told they lost.\n\nThe gold slab says the word \"ad\". A child pressing it is agreeing to watch one, and the button should be what tells them.\n\nSound sits on the pause panel as well as in Settings, because mid-run in a quiet room is where a parent actually reaches for it."
+      "text": "Details worth keeping whichever way you go.\n\nThe end-of-run panel never says \"game over\". The run ended and the next one starts from the button below it; six year olds put the phone down when told they lost.\n\nThe gold slab says the word \"ad\". A child pressing it is agreeing to watch one, and the button should be what tells them.\n\nSound sits on the pause panel as well as in Settings, because mid-run in a quiet room is where a parent actually reaches for it.",
+      "page": "page-1"
+    },
+    {
+      "id": "gameplay-what",
+      "x": 0,
+      "y": 410,
+      "w": 1680,
+      "page": "page-0",
+      "text": "Four changes, in order of how much they matter.\n\n1. The hole gets a rim in its shape's colour. Look at the small far wall: today that is a dark patch, and the shape is a guess until it is close. This is the one that buys reaction time.\n\n2. The pad buttons take those same three colours. Only possible because of 1 - otherwise it teaches a cue the wall cannot answer.\n\n3. The tiles get denser and gain the white rim the menu slabs now carry. At 0.56 alpha over bright beige path their edge vanishes exactly where a child aims.\n\n4. The score grows and the coin count joins it. The score is what the run is for and it is currently smaller than a heart."
     }
   ],
-  "launch": { "view": "canvas", "page": "page-1" }
+  "launch": {
+    "view": "canvas",
+    "page": "page-e"
+  }
 }

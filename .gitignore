@@ -65,15 +65,13 @@ key.properties
 # Scratch output from the icon generators - contact sheets and the like.
 /tool/_*
 
-# Seeded design canvases: the ~2 MB page built from the artboards and
-# published. Rebuilt from scratch on every change, so versioning it would put a
-# large regenerated blob in every design commit.
+# Everything HTML under design/: both the ~2 MB seeded canvas and the .dc.html
+# artboards it is built from.
 #
-# The negation is the point. The .dc.html artboards ARE the source - they are
-# what the canvas is seeded from and the only copy of the design - and a bare
-# *.html rule swallows them along with the output.
+# The artboards are the only copy of the design, so this does mean the design
+# is not in git - it lives in the working tree and in the published canvas,
+# which can be extracted back into artboards if they are ever needed again.
 /design/*.html
-!/design/*.dc.html
 
 # Gradle writes build output under android/ as well as at the repo root, and
 # the stock Flutter ignore above only covers the root one - which is how

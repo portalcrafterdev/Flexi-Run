@@ -17,11 +17,16 @@ import 'difficulty.dart';
 /// is left with the rules rather than the bookkeeping.
 class WallField {
   WallField(this._art, {Random? random})
-    : _picker = ShapePicker(random: random),
+    : _random = random,
+      _picker = ShapePicker(kStartLevel.shapes, random: random),
       _lanes = LanePicker(random: random);
 
   final ArtPack _art;
-  final ShapePicker _picker;
+  final Random? _random;
+
+  /// Rebuilt at the start of every run, because which shapes are in play is a
+  /// property of the level and the level can change between runs.
+  ShapePicker _picker;
   final LanePicker _lanes;
   final List<Wall> _walls = <Wall>[];
   final List<Coin> _coins = <Coin>[];
@@ -34,7 +39,7 @@ class WallField {
   /// Coins in play, furthest first. Read only: mutate through this class.
   List<Coin> get coins => _coins;
 
-  void reset() {
+  void reset(Level level) {
     for (final wall in _walls) {
       wall.removeFromParent();
     }
@@ -43,7 +48,9 @@ class WallField {
     }
     _walls.clear();
     _coins.clear();
-    _picker.reset();
+    // Rebuilt rather than reset: the set it picks from depends on the level,
+    // and the level is chosen between runs.
+    _picker = ShapePicker(level.shapes, random: _random);
     _lanes.reset();
     _spawnT = kFirstSpawnDelay;
   }

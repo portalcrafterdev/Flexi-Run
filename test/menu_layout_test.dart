@@ -84,6 +84,60 @@ void main() {
       }
     });
 
+    testWidgets('achievements and leaderboards are separate buttons', (
+      tester,
+    ) async {
+      // Two controls, not one shared entry hidden on the signed-in row. The
+      // pill must be a label again: a Semantics button on it would mean the
+      // achievements still had a second, invisible way in.
+      await pumpAt(tester, const Size(800, 360));
+      Games.playerName.value = 'Tester';
+      await tester.pump();
+
+      expect(find.bySemanticsLabel('Show achievements'), findsOneWidget);
+      expect(find.bySemanticsLabel('Show leaderboards'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp('Signed in to .* as Tester')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('the corner buttons never land on the level picker', (
+      tester,
+    ) async {
+      // The corner now holds three controls and grows leftward - straight
+      // toward the level picker, which is what the gear collided with the last
+      // two times this corner changed.
+      for (final size in <Size>[Size(900, 430), Size(800, 360)]) {
+        await pumpAt(tester, size);
+        Games.playerName.value = 'Tester';
+        await tester.pump();
+
+        final picker = tester.getRect(find.byType(LevelPicker));
+        for (final label in <String>[
+          'Show achievements',
+          'Show leaderboards',
+          'Settings',
+        ]) {
+          final box = tester.getRect(find.bySemanticsLabel(label));
+          expect(
+            box.overlaps(picker),
+            isFalse,
+            reason: '$label on the level picker at $size',
+          );
+          expect(box.left, greaterThanOrEqualTo(0), reason: '$label off screen');
+        }
+      }
+    });
+
+    testWidgets('neither button is there while signed out', (tester) async {
+      // An empty leaderboard is not worth a button, and the corner must not
+      // change width when somebody signs in.
+      await pumpAt(tester, const Size(800, 360));
+      expect(find.bySemanticsLabel('Show achievements'), findsNothing);
+      expect(find.bySemanticsLabel('Show leaderboards'), findsNothing);
+    });
+
     testWidgets('spreads across a landscape screen', (tester) async {
       await pumpAt(tester, const Size(800, 360));
 

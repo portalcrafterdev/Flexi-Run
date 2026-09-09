@@ -272,7 +272,7 @@ class ShapeShifterGame extends FlameGame {
     _hitT = 0;
     _resetAwardCounters();
     _shake.reset();
-    _field.reset();
+    _field.reset(level.value);
     _player.reset();
     _player.isVisible = true;
     state = GameState.running;
@@ -281,7 +281,7 @@ class ShapeShifterGame extends FlameGame {
 
   void goToMenu() {
     _clearPause();
-    _field.reset();
+    _field.reset(level.value);
     _player.reset();
     _player.isVisible = false;
     _road.reset();

@@ -95,7 +95,11 @@ Set<Award> awardsFor(RunStats stats) {
     Award.firstRun,
   };
 
-  if (stats.shapesUsed.length == ShapeKind.values.length) {
+  // Against the level's own set, not every shape that exists. The triangle is
+  // Hard's alone, so measuring this against ShapeKind.values would have made
+  // the badge unearnable on Easy and Medium the moment a fourth shape was
+  // added - and its console text says "all three".
+  if (stats.shapesUsed.length >= stats.level.shapes.length) {
     won.add(Award.shapeShifter);
   }
   if (stats.score >= kAwardScoreOne) won.add(Award.downThePath);

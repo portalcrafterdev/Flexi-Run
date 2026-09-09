@@ -1,4 +1,5 @@
 import 'constants.dart';
+import 'shape_kind.dart';
 
 /// How hard the game is set to play.
 ///
@@ -38,6 +39,9 @@ enum Level {
     lives: kHardLives,
     shieldEvery: kHardShieldEvery,
     forgiveSeconds: kHardForgiveSeconds,
+    // The other difference that is not a number. A fourth shape is what makes
+    // Hard a different game rather than the same one arriving faster.
+    usesTriangle: true,
   );
 
   const Level({
@@ -49,6 +53,7 @@ enum Level {
     required this.shieldEvery,
     required this.forgiveSeconds,
     this.centreLaneOnly = false,
+    this.usesTriangle = false,
   });
 
   /// What the menu calls it.
@@ -74,6 +79,23 @@ enum Level {
   /// Whether every wall opens on the middle track, leaving only the shape to
   /// solve. True on [easy] alone.
   final bool centreLaneOnly;
+
+  /// Whether the triangle is in play. True on [hard] alone.
+  ///
+  /// A fourth shape is a fourth button to find and a fourth silhouette to tell
+  /// apart at distance, which is a real step up rather than a tuning change -
+  /// so [easy] and [medium] are left exactly as they were tuned.
+  final bool usesTriangle;
+
+  /// The shapes this level plays with, in enum order.
+  ///
+  /// The one place the set is decided. The wall picker, the button row and the
+  /// tap-anywhere layer all read it, so they cannot disagree about how many
+  /// shapes are in play - a pad offering a shape no wall ever asks for would
+  /// be worse than not having it.
+  List<ShapeKind> get shapes => usesTriangle
+      ? ShapeKind.values
+      : ShapeKind.values.where((k) => k != ShapeKind.triangle).toList();
 
   /// How fast the gap closes per point of score. Derived, so the start, the
   /// floor and the ramp length can never drift apart.

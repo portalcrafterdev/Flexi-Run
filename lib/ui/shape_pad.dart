@@ -68,7 +68,11 @@ class _ShapeRow extends StatelessWidget {
       builder: (_, active, _) => Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          for (final kind in ShapeKind.values)
+          // The level's shapes, not every shape there is. Read straight off
+          // the notifier rather than listened to: the level cannot change
+          // while this row is on screen, because chooseLevel refuses during a
+          // run and the pad only exists during one.
+          for (final kind in game.level.value.shapes)
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: kShapeButtonGap / 2,
@@ -111,12 +115,21 @@ class _ShapeButton extends StatelessWidget {
         onPressed: onTap,
         face: active ? kPadFaceActive : kPadFace,
         ring: active ? kPadActiveRing : null,
-        // White on glass, as in the reference. The shape carries the meaning
-        // on its own: the holes in the walls have no colour either, so a
-        // coloured button would be teaching a cue the wall cannot answer.
+        // Each shape in its own colour, and the same colour it wears under the
+        // title on the menu.
+        //
+        // These were white, on the grounds that the holes in the walls have no
+        // colour and a coloured button would teach a cue the wall cannot
+        // answer. That still holds, and it is why the colour is not doing the
+        // matching here: which shape to wear is read off the hole's silhouette
+        // exactly as before. What the colour does is tell the three BUTTONS
+        // apart. White on pale glass made them near identical at a glance, so
+        // a child who had already decided on "star" still had to hunt for it.
         child: ShapeGlyph(
           kind: kind,
-          color: active ? kHudInk : kHudInk.withValues(alpha: 0.8),
+          color: active
+              ? colourFor(kind)
+              : colourFor(kind).withValues(alpha: 0.85),
           size: kShapeButton - kShapeGlyphInset * 2,
         ),
       ),
@@ -174,7 +187,10 @@ class _TapLayer extends StatelessWidget {
       },
       child: Row(
         children: <Widget>[
-          for (final kind in ShapeKind.values)
+          // Splits into as many bands as the level has shapes - thirds on Easy
+          // and Medium, quarters on Hard - so the screen always matches the
+          // buttons underneath it.
+          for (final kind in game.level.value.shapes)
             Expanded(
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,

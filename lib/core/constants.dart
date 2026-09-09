@@ -553,6 +553,11 @@ const kSquareCornerRatio = 0.26;
 const kStarInnerRatio = 0.47;
 const kStarPoints = 5;
 
+/// Corner rounding on the triangle, as a fraction of its half-extent. The
+/// square is rounded, so the triangle is too - it would otherwise be the only
+/// hard edge in a game where everything else is soft.
+const kTriangleCornerRatio = 0.2;
+
 const kPickBaseWeight = 1.0;
 const kPickRecentBias = 0.4;
 
@@ -1557,6 +1562,15 @@ const kChunkyDepth = 5.0;
 /// this screen aimed at a parent rather than a child, and it is competing for
 /// the same corner as the buttons.
 const kGearSize = 38.0;
+
+/// Between the trophy and the gear in the menu's top corner.
+const kGearGap = 8.0;
+
+/// The two Play Games buttons in the menu corner, coloured apart so the pair
+/// does not read as one control repeated. Gold and blue rather than the gear's
+/// slate: they are the only things in that corner a child has reason to press.
+const kTrophyInk = Color(0xFFE0A21F);
+const kLeaderboardInk = Color(0xFF4A93E8);
 
 /// How far the gear sits from the top edge.
 ///

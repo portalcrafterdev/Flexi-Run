@@ -53,17 +53,42 @@ void main() {
       );
     });
 
-    test('Shape Shifter needs every shape, not a count of three', () {
-      // Deliberately built off the enum rather than a literal 3, so adding the
-      // triangle in v2 tightens this instead of silently passing.
-      final all = ShapeKind.values.toSet();
-      expect(awardsFor(stats(shapesUsed: all)), contains(Award.shapeShifter));
+    test('Shape Shifter needs every shape the level actually plays with', () {
+      // Measured against the level's own set, not the enum. The triangle is
+      // Hard's alone, and against ShapeKind.values this badge would have gone
+      // unearnable on Easy and Medium the day a fourth shape was added.
+      for (final level in Level.values) {
+        final all = level.shapes.toSet();
+        expect(
+          awardsFor(stats(level: level, shapesUsed: all)),
+          contains(Award.shapeShifter),
+          reason: 'all of ${level.name} should earn it',
+        );
 
-      final allButOne = all.toSet()..remove(ShapeKind.values.last);
+        final oneShort = all.toSet()..remove(level.shapes.last);
+        expect(
+          awardsFor(stats(level: level, shapesUsed: oneShort)),
+          isNot(contains(Award.shapeShifter)),
+          reason: 'one short on ${level.name} should not',
+        );
+      }
+    });
+
+    test('Hard needs the triangle for it, and the other two do not', () {
+      // The concrete difference, spelled out: three shapes is enough on
+      // Medium and is not enough on Hard.
+      final three = Level.medium.shapes.toSet();
       expect(
-        awardsFor(stats(shapesUsed: allButOne)),
+        awardsFor(stats(level: Level.medium, shapesUsed: three)),
+        contains(Award.shapeShifter),
+      );
+      expect(
+        awardsFor(stats(level: Level.hard, shapesUsed: three)),
         isNot(contains(Award.shapeShifter)),
       );
+      expect(Level.hard.shapes, contains(ShapeKind.triangle));
+      expect(Level.medium.shapes, isNot(contains(ShapeKind.triangle)));
+      expect(Level.easy.shapes, isNot(contains(ShapeKind.triangle)));
     });
 
     test('the single run badges each need their own threshold', () {

@@ -15,6 +15,7 @@ import 'menu_runner.dart';
 import 'menu_widgets.dart';
 import 'sign_in_button.dart';
 import 'sound_levels.dart';
+import 'games_corner.dart';
 
 /// The home screen: a name, a character, and the things you can press.
 ///
@@ -68,7 +69,19 @@ class _MenuOverlayState extends State<MenuOverlay> {
                   top: kGearTopInset,
                   right: kHudPad / 2,
                 ),
-                child: _GearButton(onPressed: () => _open(_Sheet.settings)),
+                // The corner, not the column. A fifth slab under HOW TO PLAY
+                // is what put the gear on top of the level picker last time;
+                // a round button beside the gear costs the column nothing.
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const AchievementsButton(),
+                    const SizedBox(width: kGearGap),
+                    const LeaderboardButton(),
+                    const SizedBox(width: kGearGap),
+                    _GearButton(onPressed: () => _open(_Sheet.settings)),
+                  ],
+                ),
               ),
             ),
             if (_sheet == _Sheet.settings) _settingsSheet(),

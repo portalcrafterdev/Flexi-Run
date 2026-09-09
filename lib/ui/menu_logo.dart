@@ -131,8 +131,10 @@ class TaglinePill extends StatelessWidget {
               padding: const EdgeInsets.only(right: kTaglineGlyphGap),
               child: ShapeGlyph(
                 kind: kind,
-                color:
-                    kTitleLetterColors[kind.index % kTitleLetterColors.length],
+                // Through colourFor, not the same lookup written out again.
+                // Its doc promises the menu and the pad always agree, and that
+                // was only true by coincidence while this line duplicated it.
+                color: colourFor(kind),
                 size: kTaglineGlyph,
               ),
             ),
