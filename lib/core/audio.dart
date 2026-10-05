@@ -136,12 +136,18 @@ class Audio {
         return;
       }
       _effects.add(player);
-      // Release mode disposes the player itself when the clip ends; this is
-      // only so the set does not grow for the length of a run.
+      // DISPOSED when the clip ends, not merely forgotten.
+      //
+      // FlameAudio.play builds a brand new AudioPlayer for every sound, and
+      // each one holds a platform-side player and its event subscriptions
+      // until it is disposed. Release mode frees the audio resource but not
+      // the player. A run is one chime per wall and one per coin, so by a few
+      // hundred points there are hundreds of them still registered - and the
+      // frame rate goes down with them.
       unawaited(
         player.onPlayerComplete.first
-            .then((_) => _effects.remove(player))
-            .catchError((_) => false),
+            .then((_) => _release(player))
+            .catchError((Object _) {}),
       );
       if (rate != 1.0) await player.setPlaybackRate(rate);
     } catch (_) {
@@ -174,6 +180,19 @@ class Audio {
       await player.stop();
     } catch (_) {
       // Already finished, already released, or never really started.
+    }
+    // A stopped player never reports completing, so this is the only chance
+    // it gets to be disposed.
+    await _release(player);
+  }
+
+  /// Lets a one-shot player go.
+  static Future<void> _release(AudioPlayer player) async {
+    _effects.remove(player);
+    try {
+      await player.dispose();
+    } catch (_) {
+      // Already disposed, or the platform has gone away under it.
     }
   }
 
