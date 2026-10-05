@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flame/game.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,6 +12,8 @@ import 'core/games.dart';
 import 'core/prefs.dart';
 import 'core/shape_kind.dart';
 import 'game/shape_shifter_game.dart';
+import 'tutorial/flexirun_tutorial.dart';
+import 'tutorial/tutorial_runner.dart';
 import 'ui/game_over_overlay.dart';
 import 'ui/hud.dart';
 import 'ui/menu_overlay.dart';
@@ -24,6 +27,7 @@ Future<void> main() async {
     DeviceOrientation.landscapeRight,
   ]);
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  _registerFontLicence();
   await Prefs.init();
   await Audio.init();
   // Plays under the menu as well as the run; the Music toggle stops it.
@@ -39,6 +43,18 @@ Future<void> main() async {
   runApp(const ShapeShifterApp());
 }
 
+/// Puts the font's licence into Flutter's own licence page.
+///
+/// The OFL asks that the licence travel with the font, and the font ships
+/// inside the APK - so a copy sitting in the repository does not satisfy it on
+/// its own.
+void _registerFontLicence() {
+  LicenseRegistry.addLicense(() async* {
+    final text = await rootBundle.loadString('assets/fonts/OFL.txt');
+    yield LicenseEntryWithLineBreaks(const <String>['Rye'], text);
+  });
+}
+
 class ShapeShifterApp extends StatelessWidget {
   const ShapeShifterApp({super.key});
 
@@ -50,6 +66,10 @@ class ShapeShifterApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: kUiAccent),
         useMaterial3: true,
+        // Set once, here. Every Text in the app takes its family from the
+        // theme - none of them name one - so this is the only place it is
+        // decided.
+        fontFamily: kGameFont,
       ),
       home: const GameHost(),
     );
@@ -75,6 +95,10 @@ class _GameHostState extends State<GameHost> with WidgetsBindingObserver {
 
   final ShapeShifterGame _game = ShapeShifterGame();
   final FocusNode _focus = FocusNode();
+
+  /// Ties the coach marks to the real HUD and pad. Held here because both of
+  /// those are built below and the runner has to point at the same instances.
+  final TutorialLink _tutorial = TutorialLink();
 
   @override
   void initState() {
@@ -153,9 +177,12 @@ class _GameHostState extends State<GameHost> with WidgetsBindingObserver {
               autofocus: false,
               overlayBuilderMap:
                   <String, Widget Function(BuildContext, ShapeShifterGame)>{
-                    Overlays.menu: (_, game) => MenuOverlay(game: game),
-                    Overlays.hud: (_, game) => Hud(game: game),
-                    Overlays.pad: (_, game) => ShapePad(game: game),
+                    Overlays.menu: (_, game) =>
+                        MenuOverlay(game: game, link: _tutorial),
+                    Overlays.hud: (_, game) =>
+                        Hud(game: game, link: _tutorial),
+                    Overlays.pad: (_, game) =>
+                        ShapePad(game: game, link: _tutorial),
                     Overlays.gameOver: (_, game) => GameOverOverlay(game: game),
                   },
             ),
@@ -163,6 +190,9 @@ class _GameHostState extends State<GameHost> with WidgetsBindingObserver {
             // Last, so it stays above the pause panel and can be the thing
             // that unpauses.
             PauseToggle(game: _game),
+            // Draws nothing. The marks it starts go into the root overlay, above
+            // everything in this stack.
+            TutorialRunner(game: _game, link: _tutorial),
           ],
         ),
       ),

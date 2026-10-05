@@ -1015,6 +1015,14 @@ const kOverlayPad = 18.0;
 const kUiScrim = Color(0x66000000);
 const kUiInk = Color(0xFF2A3A44);
 const kUiAccent = Color(0xFF3FBF6E);
+
+/// The game's typeface, set once on the theme so every widget inherits it.
+///
+/// Rye is a display face - Google lists it under "Large sizes" and
+/// "Headlines", and it is drawn for a logo rather than for a paragraph. It
+/// carries a title and a button label well. It has only one weight, so every
+/// FontWeight above w400 in this app now renders at the same thickness.
+const kGameFont = 'Rye';
 const kUiHeart = Color(0xFFE8554E);
 
 /// A spent life. Left on screen as an outline rather than removed, so a child
@@ -1422,6 +1430,10 @@ const kHowToEdge = Color(0xFF2C6FAE);
 /// The gold slab keeps its old moulding: it appears once, on the game over
 /// panel, and has no neighbours to match.
 const kRewardTop = Color(0xFFF7C86A);
+/// Quieter than [kUiInk], for the line under a sheet row that explains what
+/// the row does. Dark enough to read on white at this size.
+const kSheetNoteInk = Color(0xFF5B6C75);
+
 const kSheetFill = Color(0xFFFFFFFF);
 const kSheetEdge = Color(0xFFD9E2DC);
 
@@ -1507,15 +1519,6 @@ const kTaglineGlyphGap = 4.0;
 /// top. Enough to look moulded, not enough to look faded.
 const kSlabSheen = 0.18;
 
-/// The white rim around every slab.
-///
-/// It is what lets a saturated button sit on a saturated meadow without the
-/// two bleeding into each other - the green of PLAY and the green of the hills
-/// behind it are close enough that without a rim the edge of the button goes
-/// soft exactly where a child aims.
-const kSlabRim = Color(0xFFFFFFFF);
-const kSlabRimWidth = 3.0;
-
 /// The gloss: a soft bar across the top of the face, inset from the rim.
 /// Height is a fraction of the face, so it holds its proportion on the tiles
 /// as well as the big slabs.
@@ -1571,6 +1574,7 @@ const kGearGap = 8.0;
 /// slate: they are the only things in that corner a child has reason to press.
 const kTrophyInk = Color(0xFFE0A21F);
 const kLeaderboardInk = Color(0xFF4A93E8);
+const kDisconnectInk = Color(0xFF8A9AA4);
 
 /// How far the gear sits from the top edge.
 ///

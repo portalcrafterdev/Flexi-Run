@@ -9,6 +9,7 @@ import 'package:flexirun/core/art_canvas.dart';
 import 'package:flexirun/components/wall.dart';
 import 'package:flexirun/core/constants.dart';
 import 'package:flexirun/core/lane.dart';
+import 'package:flexirun/core/level.dart';
 import 'package:flexirun/core/shape_kind.dart';
 import 'package:flexirun/game/shape_shifter_game.dart';
 
@@ -296,6 +297,10 @@ void main() {
 
     test('holes are punched over every lane', () async {
       final game = await boot();
+      // Named, not inherited from whatever the default level happens to be.
+      // Easy opens every wall on the middle track on purpose, so spreading
+      // holes across the lanes is a Medium and Hard property.
+      game.chooseLevel(Level.medium);
       game.startRun();
       final seen = <Lane>{};
 
@@ -313,6 +318,8 @@ void main() {
   group('shield', () {
     test('is granted every five clean passes', () async {
       final game = await boot();
+      // Five is Medium's number. Easy hands one out every three.
+      game.chooseLevel(Level.medium);
       game.startRun();
 
       for (var i = 0; i < kShieldEveryPasses - 1; i++) {
@@ -327,6 +334,7 @@ void main() {
 
     test('eats the next wall whatever shape it is', () async {
       final game = await boot();
+      game.chooseLevel(Level.medium);
       game.startRun();
       for (var i = 0; i < kShieldEveryPasses; i++) {
         passCleanly(game);

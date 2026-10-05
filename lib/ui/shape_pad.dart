@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/audio.dart';
 import '../core/constants.dart';
 import '../core/shape_kind.dart';
+ import '../tutorial/flexirun_tutorial.dart';
 import '../game/shape_shifter_game.dart';
 import 'chunky.dart';
 import 'shape_glyph.dart';
@@ -13,9 +14,13 @@ import 'shape_glyph.dart';
 /// A run needs both halves: the right shape *and* the right lane. Shapes are
 /// tapped, lanes are nudged.
 class ShapePad extends StatelessWidget {
-  const ShapePad({required this.game, super.key});
+  const ShapePad({required this.game, this.link, super.key});
 
   final ShapeShifterGame game;
+
+  /// Lets the coach marks point at these controls and hear when one is used.
+  /// Null wherever no tutorial can run.
+  final TutorialLink? link;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +30,7 @@ class ShapePad extends StatelessWidget {
         // has no way to discover the setting that would help them, and there
         // is no cost to leaving it enabled: a tap that lands on a button is a
         // button press, and one that misses still counts.
-        Positioned.fill(child: _TapLayer(game: game)),
+        Positioned.fill(child: _TapLayer(game: game, link: link)),
         Positioned(
           left: 0,
           right: 0,
@@ -38,13 +43,22 @@ class ShapePad extends StatelessWidget {
                 _LaneArrow(
                   icon: Icons.chevron_left_rounded,
                   label: 'Move left',
-                  onPressed: () => game.stepLane(-1),
+                  onPressed: () {
+                    game.stepLane(-1);
+                    link?.report(kStepLane);
+                  },
                 ),
-                Expanded(child: _ShapeRow(game: game)),
+                Expanded(child: _ShapeRow(game: game, link: link)),
                 _LaneArrow(
+                  // The mark points at this one. Reporting from both anyway, so
+                  // the lesson is satisfied by either arrow if it ever moves.
+                  key: link?.laneArrow,
                   icon: Icons.chevron_right_rounded,
                   label: 'Move right',
-                  onPressed: () => game.stepLane(1),
+                  onPressed: () {
+                    game.stepLane(1);
+                    link?.report(kStepLane);
+                  },
                 ),
                 const SizedBox(width: kHudPad),
               ],
@@ -57,33 +71,44 @@ class ShapePad extends StatelessWidget {
 }
 
 class _ShapeRow extends StatelessWidget {
-  const _ShapeRow({required this.game});
+  const _ShapeRow({required this.game, this.link});
 
   final ShapeShifterGame game;
+  final TutorialLink? link;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ShapeKind>(
       valueListenable: game.activeShape,
-      builder: (_, active, _) => Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
+      // Centre plus a shrink-wrapped row, rather than a full-width row with
+      // its children centred. The two look identical, but only this one gives
+      // the group a box that hugs the buttons - and a coach mark cut around a
+      // full-width box would be a hole with most of the screen in it.
+      builder: (_, active, _) => Center(
+        child: Row(
+          key: link?.shapeRow,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
           // The level's shapes, not every shape there is. Read straight off
           // the notifier rather than listened to: the level cannot change
           // while this row is on screen, because chooseLevel refuses during a
           // run and the pad only exists during one.
-          for (final kind in game.level.value.shapes)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: kShapeButtonGap / 2,
+            for (final kind in game.level.value.shapes)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: kShapeButtonGap / 2,
+                ),
+                child: _ShapeButton(
+                  kind: kind,
+                  active: kind == active,
+                  onTap: () {
+                    game.morph(kind);
+                    link?.report(kStepShape);
+                  },
+                ),
               ),
-              child: _ShapeButton(
-                kind: kind,
-                active: kind == active,
-                onTap: () => game.morph(kind),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -143,6 +168,7 @@ class _LaneArrow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onPressed,
+    super.key,
   });
 
   final IconData icon;
@@ -171,9 +197,10 @@ class _LaneArrow extends StatelessWidget {
 /// The two do not fight: a gesture that moves is a swipe, one that does not is
 /// a tap.
 class _TapLayer extends StatelessWidget {
-  const _TapLayer({required this.game});
+  const _TapLayer({required this.game, this.link});
 
   final ShapeShifterGame game;
+  final TutorialLink? link;
 
   @override
   Widget build(BuildContext context) {
@@ -184,6 +211,7 @@ class _TapLayer extends StatelessWidget {
         if (velocity.abs() < 1) return;
         Audio.tap();
         game.stepLane(velocity < 0 ? -1 : 1);
+        link?.report(kStepLane);
       },
       child: Row(
         children: <Widget>[
@@ -199,6 +227,11 @@ class _TapLayer extends StatelessWidget {
                 onTapDown: (_) {
                   Audio.tap();
                   game.morph(kind);
+                  // Reported here as well as from the button. The gaps between
+                  // the buttons fall through to this layer, and a tap that
+                  // morphs the runner but does not satisfy the step would look
+                  // like a tutorial that had stopped working.
+                  link?.report(kStepShape);
                 },
               ),
             ),

@@ -7,6 +7,7 @@ import '../core/ads.dart';
 import '../core/audio.dart';
 import '../core/constants.dart';
 import '../game/shape_shifter_game.dart';
+import '../tutorial/flexirun_tutorial.dart';
 import 'banner_slot.dart';
 import 'level_picker.dart';
 import 'menu_background.dart';
@@ -27,9 +28,13 @@ import 'games_corner.dart';
 /// and everything pressable gathered in one column on the right, where the
 /// thumb holding the phone already is.
 class MenuOverlay extends StatefulWidget {
-  const MenuOverlay({required this.game, super.key});
+  const MenuOverlay({required this.game, this.link, super.key});
 
   final ShapeShifterGame game;
+
+  /// Lets the home screen's coach marks point at these controls. Null wherever
+  /// no tutorial can run.
+  final TutorialLink? link;
 
   @override
   State<MenuOverlay> createState() => _MenuOverlayState();
@@ -79,6 +84,8 @@ class _MenuOverlayState extends State<MenuOverlay> {
                     const SizedBox(width: kGearGap),
                     const LeaderboardButton(),
                     const SizedBox(width: kGearGap),
+                    const DisconnectButton(),
+                    const SizedBox(width: kGearGap),
                     _GearButton(onPressed: () => _open(_Sheet.settings)),
                   ],
                 ),
@@ -108,6 +115,7 @@ class _MenuOverlayState extends State<MenuOverlay> {
           return spread
               ? _Spread(
                   game: widget.game,
+                  link: widget.link,
                   height: box.maxHeight,
                   onPlay: _play,
                   onHowTo: () => _open(_Sheet.howTo),
@@ -116,6 +124,7 @@ class _MenuOverlayState extends State<MenuOverlay> {
                   child: SingleChildScrollView(
                     child: _Stacked(
                       game: widget.game,
+                      link: widget.link,
                       onPlay: _play,
                       onHowTo: () => _open(_Sheet.howTo),
                     ),
@@ -164,9 +173,11 @@ class _Spread extends StatelessWidget {
     required this.height,
     required this.onPlay,
     required this.onHowTo,
+    this.link,
   });
 
   final ShapeShifterGame game;
+  final TutorialLink? link;
   final double height;
   final VoidCallback onPlay;
   final VoidCallback onHowTo;
@@ -195,7 +206,12 @@ class _Spread extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: SizedBox(
               width: kMenuColumnW,
-              child: _Controls(game: game, onPlay: onPlay, onHowTo: onHowTo),
+              child: _Controls(
+                game: game,
+                link: link,
+                onPlay: onPlay,
+                onHowTo: onHowTo,
+              ),
             ),
           ),
         ],
@@ -210,9 +226,11 @@ class _Stacked extends StatelessWidget {
     required this.game,
     required this.onPlay,
     required this.onHowTo,
+    this.link,
   });
 
   final ShapeShifterGame game;
+  final TutorialLink? link;
   final VoidCallback onPlay;
   final VoidCallback onHowTo;
 
@@ -226,7 +244,12 @@ class _Stacked extends StatelessWidget {
         children: <Widget>[
           const Center(child: _Brand(compact: true)),
           const SizedBox(height: kMenuButtonGap),
-          _Controls(game: game, onPlay: onPlay, onHowTo: onHowTo),
+          _Controls(
+            game: game,
+            link: link,
+            onPlay: onPlay,
+            onHowTo: onHowTo,
+          ),
         ],
       ),
     );
@@ -261,9 +284,11 @@ class _Controls extends StatelessWidget {
     required this.game,
     required this.onPlay,
     required this.onHowTo,
+    this.link,
   });
 
   final ShapeShifterGame game;
+  final TutorialLink? link;
   final VoidCallback onPlay;
   final VoidCallback onHowTo;
 
@@ -275,21 +300,28 @@ class _Controls extends StatelessWidget {
       children: <Widget>[
         // Above PLAY, because this is what a parent comes to the menu to set,
         // and PLAY is unmissable wherever it sits.
-        LevelPicker(game: game),
+        LevelPicker(key: link?.levels, game: game),
         // Still wider than the gap between the slabs below - the pills cast a
         // shadow and PLAY casts one upwards onto them, so a tight gap here
         // leaves the pills looking smudged along the bottom.
         const SizedBox(height: kMenuButtonGap),
         ChunkyButton(
+          key: link?.play,
           label: 'PLAY',
           icon: Icons.play_arrow_rounded,
           fill: kPlayFill,
           top: kPlayTop,
           edge: kPlayEdge,
-          onPressed: onPlay,
+          onPressed: () {
+            // Reported before the run starts, so the mark is satisfied by the
+            // real button rather than by the screen changing underneath it.
+            link?.report(kStepPlay);
+            onPlay();
+          },
         ),
         const SizedBox(height: kMenuButtonGap * 0.5),
         ChunkyButton(
+          key: link?.howTo,
           label: 'HOW TO PLAY',
           icon: Icons.lightbulb_rounded,
           fill: kHowToFill,

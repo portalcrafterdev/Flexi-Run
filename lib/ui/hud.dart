@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/constants.dart';
 import '../game/shape_shifter_game.dart';
+import '../tutorial/flexirun_tutorial.dart';
 import 'chunky.dart';
 
 /// Lives and score top left, shield top right, pause in the corner.
@@ -10,9 +11,12 @@ import 'chunky.dart';
 /// on grass, on sky and on brick at once, and no colour does that; a backing
 /// card does, for the same reason road signs have one.
 class Hud extends StatelessWidget {
-  const Hud({required this.game, super.key});
+  const Hud({required this.game, this.link, super.key});
 
   final ShapeShifterGame game;
+
+  /// Lets a coach mark point at the stats. Null wherever no tutorial can run.
+  final TutorialLink? link;
 
   @override
   Widget build(BuildContext context) {
@@ -28,21 +32,33 @@ class Hud extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          ValueListenableBuilder<int>(
-            valueListenable: game.lives,
-            builder: (_, lives, _) =>
-                // The level decides how many there are, so Easy shows five.
-                _Hearts(lives: lives, of: game.level.value.lives),
-          ),
-          const SizedBox(width: kHudPad / 2),
-          ValueListenableBuilder<int>(
-            valueListenable: game.score,
-            builder: (_, score, _) => _Score(score: score),
-          ),
-          const SizedBox(width: kHudPad),
-          ValueListenableBuilder<int>(
-            valueListenable: game.coins,
-            builder: (_, coins, _) => _Coins(count: coins),
+          // Grouped and shrink-wrapped so a coach mark can cut a hole round
+          // the three of them together. Separately they are three marks for
+          // one idea, and a hole round the Row that holds the Spacer would be
+          // a hole with the whole screen in it.
+          Row(
+            key: link?.stats,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              ValueListenableBuilder<int>(
+                valueListenable: game.lives,
+                builder: (_, lives, _) =>
+                    // The level decides how many there are, so Easy shows five.
+                    _Hearts(lives: lives, of: game.level.value.lives),
+              ),
+              const SizedBox(width: kHudPad / 2),
+              ValueListenableBuilder<int>(
+                valueListenable: game.score,
+                builder: (_, score, _) => _Score(score: score),
+              ),
+              // No gap of its own: the counter carries it, so that the gap
+              // disappears with the counter.
+              ValueListenableBuilder<int>(
+                valueListenable: game.coins,
+                builder: (_, coins, _) => _Coins(count: coins),
+              ),
+            ],
           ),
           const Spacer(),
           ValueListenableBuilder<bool>(
@@ -162,9 +178,16 @@ class _Coins extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      opacity: count > 0 ? 1 : 0,
-      duration: const Duration(milliseconds: 200),
+    // Nothing at all until the first coin - not even a gap.
+    //
+    // This used to fade out with AnimatedOpacity, which left the counter laid
+    // out at full width and merely invisible. The run always starts on zero,
+    // so the stats group always carried a coin's worth of dead space on its
+    // right - and the coach mark that cuts a hole around that group cut the
+    // dead space out with it, which is what made the hole look wrong.
+    if (count == 0) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(left: kHudPad),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[

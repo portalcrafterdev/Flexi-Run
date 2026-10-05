@@ -34,6 +34,29 @@ void main() {
     return lanes;
   }
 
+  group('a player who has never chosen', () {
+    test('starts on Easy', () async {
+      // A product decision, not an implementation detail: the first minute
+      // decides whether a six year old keeps playing, and Easy is the level
+      // that leaves only the shape to solve. A refactor could flip this back
+      // without anything else failing.
+      expect(kStartLevel, Level.easy);
+      expect(kStartLevel.centreLaneOnly, isTrue);
+    });
+
+    test('has nothing stored to read it from', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      await Prefs.init();
+      expect(Prefs.level, Level.easy);
+    });
+
+    test('the game comes up on it', () async {
+      final game = await initializeGame(ShapeShifterGame.new);
+      expect(game.level.value, Level.easy);
+      expect(game.lives.value, Level.easy.lives);
+    });
+  });
+
   group('easy', () {
     test('opens every wall on the middle track', () async {
       final game = await boot();
@@ -65,6 +88,9 @@ void main() {
 
   test('medium still uses all three tracks', () async {
     final game = await boot();
+    // Said out loud rather than left to the default, which is Easy - and Easy
+    // is precisely the level that has no lane mechanic to find.
+    game.chooseLevel(Level.medium);
     game.startRun();
 
     expect(
@@ -86,9 +112,12 @@ void main() {
     test('is refused mid-run, so a score cannot change its own rules', () async {
       final game = await boot();
       game.startRun();
-      game.chooseLevel(Level.easy);
+      // A level the run is NOT already on. Asking for the one it is on is a
+      // no-op inside chooseLevel, so the old version of this test passed
+      // whether or not the refusal worked.
+      game.chooseLevel(Level.hard);
 
-      expect(game.level.value, Level.medium);
+      expect(game.level.value, kStartLevel);
     });
 
     test('is allowed again once the run is over', () async {
@@ -110,7 +139,9 @@ void main() {
     });
 
     test('follows the level the menu is showing', () async {
-      await Prefs.setHighScore(Level.medium, 540);
+      // On the level the game comes up on, so 540 is the one the menu shows
+      // first whatever that level is.
+      await Prefs.setHighScore(kStartLevel, 540);
       await Prefs.setHighScore(Level.hard, 120);
 
       final game = await boot();

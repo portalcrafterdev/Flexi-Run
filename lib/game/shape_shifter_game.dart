@@ -61,6 +61,14 @@ class ShapeShifterGame extends FlameGame {
   /// [paused] flag, which is the engine state this drives.
   final ValueNotifier<bool> pauseNotifier = ValueNotifier<bool>(false);
 
+  /// Whether a tutorial is holding the run.
+  ///
+  /// Deliberately not [pauseNotifier]. That one puts the pause panel on screen
+  /// and refuses input; a tutorial needs the opposite - the world held still
+  /// while every control stays live, because the player is being asked to use
+  /// one.
+  final ValueNotifier<bool> tutorialHold = ValueNotifier<bool>(false);
+
   /// What the game is doing, for widgets that live outside the Flame overlays
   /// and so cannot be switched on and off by the overlay manager.
   final ValueNotifier<GameState> stateNotifier = ValueNotifier<GameState>(
@@ -205,7 +213,15 @@ class ShapeShifterGame extends FlameGame {
 
     if (_state != GameState.running) return;
 
+    // A coach mark is up. The scenery keeps rolling - a frozen frame under a
+    // tutorial reads as a crash rather than a pause - but nothing spawns,
+    // nothing closes in and nothing can be hit while the player is reading.
+    // It also means the spawn timer does not tick, so the first wall after the
+    // marks clear arrives a full gap later instead of immediately.
+    if (tutorialHold.value) return;
+
     _field.advance(
+
       speed: v,
       dt: dt,
       score: score.value,
@@ -260,6 +276,9 @@ class ShapeShifterGame extends FlameGame {
 
   void startRun() {
     _clearPause();
+    // Belt and braces: a hold whose owner went away without releasing it would
+    // otherwise be a run where no wall ever spawns.
+    tutorialHold.value = false;
     _extraLifeUsed = false;
     score.value = 0;
     coins.value = 0;
@@ -338,6 +357,17 @@ class ShapeShifterGame extends FlameGame {
     pauseNotifier.value = false;
     resumeEngine();
   }
+
+  /// Holds the run still for a tutorial, leaving the controls live.
+  ///
+  /// Only mid-run: there is nothing to hold on the menu or the game over
+  /// screen, and holding there would strand the flag set by whoever asked.
+  void holdForTutorial() {
+    if (_state != GameState.running) return;
+    tutorialHold.value = true;
+  }
+
+  void releaseFromTutorial() => tutorialHold.value = false;
 
   void shake(double amount) => _shake.add(amount);
 

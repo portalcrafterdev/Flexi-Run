@@ -87,9 +87,6 @@ class _SignedIn extends StatelessWidget {
       decoration: BoxDecoration(
         color: kSignInFill,
         borderRadius: BorderRadius.circular(kMenuButtonRadius),
-        // The same white rim the slabs carry, for the same reason: a
-        // saturated pill on a saturated meadow needs an edge.
-        border: Border.all(color: kSlabRim, width: kSlabRimWidth),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

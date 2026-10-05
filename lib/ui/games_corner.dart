@@ -44,7 +44,28 @@ class LeaderboardButton extends StatelessWidget {
   );
 }
 
-/// One round button, and the rule both of them follow: nothing to sign in to,
+/// Disconnects the games account from this game.
+///
+/// Not a platform sign-out, which is not on offer: Play Games Services v2
+/// removed the API, so the session Google holds cannot be ended from here.
+/// What it does do is everything the game controls - it forgets the player,
+/// stops reporting scores and badges, and puts SIGN IN back on the menu.
+///
+/// Grey, and next to the gear. It is a thing a grown-up does once, not
+/// something to compete with the trophy beside it.
+class DisconnectButton extends StatelessWidget {
+  const DisconnectButton({super.key});
+
+  @override
+  Widget build(BuildContext context) => _CornerButton(
+    icon: Icons.link_off_rounded,
+    tint: kDisconnectInk,
+    label: 'Disconnect ${Games.serviceName}',
+    onPressed: Games.disconnect,
+  );
+}
+
+/// One round button, and the rule they all follow: nothing to sign in to,
 /// or nobody signed in, means no button at all.
 ///
 /// An empty leaderboard is not worth a control, and the corner must not change
@@ -60,6 +81,8 @@ class _CornerButton extends StatelessWidget {
   final IconData icon;
   final Color tint;
   final String label;
+  /// Returns something or nothing; the button does not care which, so a
+  /// handler that reports whether it worked can be passed straight in.
   final Future<void> Function() onPressed;
 
   @override

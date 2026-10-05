@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flexirun/components/wall.dart';
 import 'package:flexirun/core/awards.dart';
+import 'package:flexirun/core/level.dart';
 import 'package:flexirun/core/prefs.dart';
 import 'package:flexirun/game/shape_shifter_game.dart';
 
@@ -21,6 +22,14 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     await Prefs.init();
+  });
+
+  tearDown(() async {
+    // Awards are written fire and forget, so a run that has just ended can
+    // still have writes in flight. Let them land BEFORE the next test wipes
+    // storage - otherwise they land after the wipe, and the next run appears
+    // to have earned a badge it never went near.
+    await Future<void>.delayed(const Duration(milliseconds: 20));
   });
 
   Future<ShapeShifterGame> boot() => initializeGame(ShapeShifterGame.new);
@@ -97,14 +106,18 @@ void main() {
 
     test('records what it actually earned', () async {
       final game = await boot();
+      // Medium by name: Stepping Up is Medium's own badge, so a run that
+      // inherited the default level would stop earning it the day that default
+      // changed - which is exactly what happened.
+      game.chooseLevel(Level.medium);
       game.startRun();
       playWell(game, untilScore: kAwardScoreTwo);
       playUntilOut(game);
       await Future<void>.delayed(Duration.zero);
 
       final won = Prefs.awardsWon;
-      // Played well past 100 on the default level, so the ladder up to that
-      // point and Medium's own badge are all genuinely earned.
+      // Played well past 100 on Medium, so the ladder up to that point and
+      // Medium's own badge are all genuinely earned.
       expect(won, contains(Award.firstRun.name));
       expect(won, contains(Award.downThePath.name));
       expect(won, contains(Award.pastTheTrees.name));

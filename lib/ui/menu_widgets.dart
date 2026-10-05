@@ -76,10 +76,6 @@ class _ChunkyButtonState extends State<ChunkyButton> {
                   decoration: BoxDecoration(
                     color: widget.edge,
                     borderRadius: BorderRadius.circular(kMenuButtonRadius),
-                    // Rimmed as well as the face, so the white outline runs
-                    // right around the slab instead of stopping where the lip
-                    // shows below it.
-                    border: Border.all(color: kSlabRim, width: kSlabRimWidth),
                     // Cast onto the meadow, so the slab sits above the scene
                     // rather than being printed on it.
                     boxShadow: const <BoxShadow>[
@@ -145,7 +141,6 @@ class _Face extends StatelessWidget {
           stops: const <double>[0, 0.62, 1],
         ),
         borderRadius: BorderRadius.circular(kMenuButtonRadius),
-        border: Border.all(color: kSlabRim, width: kSlabRimWidth),
       ),
       child: Stack(
         // Explicit, and load-bearing: an unpositioned child in a Stack aligns
@@ -153,7 +148,7 @@ class _Face extends StatelessWidget {
         // lifted it off centre on every slab.
         alignment: Alignment.center,
         children: <Widget>[
-          // The gloss. Sits inside the rim and only across the top, so it
+          // The gloss. Sits just inside the edge and only across the top, so it
           // reads as light landing on a curved face rather than as a second
           // colour band.
           // Positioned.fill, not a Positioned with only a top: a fractional

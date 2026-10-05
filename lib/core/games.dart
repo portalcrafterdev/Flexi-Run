@@ -49,6 +49,28 @@ class Games {
 
   static bool get isSignedIn => playerName.value != null;
 
+  /// Whether this game has an account to let go of.
+  static bool get canDisconnect => isSupported && isSignedIn;
+
+  /// Disconnects the account FROM THIS GAME.
+  ///
+  /// It is not a platform sign-out, and cannot be: Play Games Services v2
+  /// removed the sign-out API, so nothing a game can call will end the
+  /// session Google holds. What this does is everything that is actually in
+  /// the game's gift - it stops listening to the player stream, forgets the
+  /// name, and remembers the choice, so the game no longer reports a score, a
+  /// coin or a badge to anybody. The menu goes back to offering SIGN IN.
+  ///
+  /// Scores already on a leaderboard stay there. Nothing can pull those back.
+  static Future<void> disconnect() async {
+    await _sub?.cancel();
+    _sub = null;
+    _watching = false;
+    playerName.value = null;
+    failed.value = false;
+    await Prefs.setGamesOptedOut(true);
+  }
+
   /// What the platform's own account is called, for the button's label. Using
   /// the wrong one is the fastest way to look like a port of someone else's
   /// game.
@@ -59,7 +81,10 @@ class Games {
 
   /// Starts listening for an existing session. Does not prompt.
   static Future<void> init() async {
-    if (!isSupported || _watching) return;
+    // A player who disconnected is not quietly signed back in on next launch,
+    // which is what listening again would do: the stream reports the session
+    // Google still holds and the name would reappear by itself.
+    if (!isSupported || _watching || Prefs.gamesOptedOut) return;
     _watching = true;
     try {
       _sub = GameAuth.player.listen(
@@ -81,6 +106,9 @@ class Games {
     if (!isSupported || busy.value) return isSignedIn;
     busy.value = true;
     failed.value = false;
+    // Pressing sign in is the undo for disconnect.
+    await Prefs.setGamesOptedOut(false);
+    await init();
     try {
       await GameAuth.signIn();
       // signIn returns before the player stream has caught up, so the name is

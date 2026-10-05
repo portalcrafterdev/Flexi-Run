@@ -15,6 +15,7 @@ class Prefs {
   static const _kAwardsWon = 'awards_won';
   static const _kAwardsSynced = 'awards_synced';
   static const _kLifetimeCoins = 'lifetime_coins';
+  static const _kGamesOptedOut = 'games_opted_out';
 
   static SharedPreferences? _prefs;
 
@@ -45,6 +46,16 @@ class Prefs {
   /// A best per level, because a score on Easy is not the same achievement as
   /// one on Hard and a single number would quietly let the easiest setting
   /// beat the hardest.
+  /// Whether the player has disconnected their games account from this game.
+  ///
+  /// Remembered, because the platform session outlives the choice: without
+  /// this the name would simply reappear on the next launch and the disconnect
+  /// would look like it had not worked.
+  static bool get gamesOptedOut => _prefs?.getBool(_kGamesOptedOut) ?? false;
+
+  static Future<void> setGamesOptedOut(bool value) =>
+      _prefs?.setBool(_kGamesOptedOut, value) ?? Future<void>.value();
+
   static int highScore(Level level) => _prefs?.getInt(_key(level)) ?? 0;
 
   static Future<void> setHighScore(Level level, int value) async {

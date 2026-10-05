@@ -8,8 +8,8 @@ import 'shape_kind.dart';
 /// there is to get it wrong - so a child who has learned the timing on one
 /// level does not have to learn it again to move up.
 ///
-/// [medium] is the game exactly as it was tuned before levels existed, and is
-/// where a new player starts.
+/// [medium] is the game exactly as it was tuned before levels existed.
+/// [easy] is where a new player starts - see [kStartLevel].
 enum Level {
   easy(
     label: 'Easy',
@@ -103,4 +103,11 @@ enum Level {
 }
 
 /// Where a player who has never chosen starts.
-const kStartLevel = Level.medium;
+///
+/// Easy, not Medium. This game is for six to ten year olds, and the first
+/// minute decides whether a child keeps playing - so the one level that opens
+/// every wall on the middle track, leaving only the shape to solve, is the one
+/// they meet first. Anyone who finds it slow moves up with a single tap; a
+/// child who bounces off Medium does not come back to find out there was an
+/// easier setting.
+const kStartLevel = Level.easy;
