@@ -16,6 +16,7 @@ import '../components/scenery.dart';
 import '../components/wall.dart';
 import '../core/audio.dart';
 import '../core/awards.dart';
+import '../core/cloud_save.dart';
 import '../core/constants.dart';
 import '../core/games.dart';
 import '../core/lane.dart';
@@ -230,6 +231,12 @@ class ShapeShifterGame extends FlameGame {
     );
     _resolve(dt);
   }
+
+  /// Re-reads progress after the player behind it has changed.
+  ///
+  /// Signing in or out swaps which profile storage answers for, and the cached
+  /// best would otherwise be the last player's.
+  void refreshProgress() => highScore.value = Prefs.highScore(level.value);
 
   /// Switches level. Only legal outside a run, so a score can never be set
   /// under one set of rules and recorded under another.
@@ -496,6 +503,10 @@ class ShapeShifterGame extends FlameGame {
         coins: fresh,
       ),
     );
+    // And the progress itself, so a new phone picks up this run. Separate
+    // from the line above: achievements and leaderboards are Google's copy,
+    // this is the game's own.
+    unawaited(CloudSave.sync());
   }
 
   /// Wipes the achievement counters back to the start of a run.

@@ -101,4 +101,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.emoji_events_rounded), findsOneWidget);
   });
+
 }
+

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../core/cloud_save.dart';
 import '../core/constants.dart';
 import '../core/games.dart';
 import 'menu_widgets.dart';
@@ -50,7 +51,7 @@ class SignInButton extends StatelessWidget {
                 top: kSignInTop,
                 edge: kSignInEdge,
                 ink: kSignInInk,
-                onPressed: busy ? () {} : () => unawaited(Games.signIn()),
+                onPressed: busy ? () {} : () => unawaited(_signInAndSync()),
               ),
             ],
           );
@@ -67,6 +68,14 @@ class SignInButton extends StatelessWidget {
 /// name on it. Nothing marked it as pressable and nobody found it. The
 /// achievements now have a button of their own in the corner, so this row is
 /// free to be what it looks like.
+/// Signs in, then pulls down whatever the account already holds.
+///
+/// Merged rather than replaced, so a child who has been playing signed out on
+/// this phone keeps what they did here as well as what the account knew.
+Future<void> _signInAndSync() async {
+  if (await Games.signIn()) await CloudSave.sync();
+}
+
 class _SignedIn extends StatelessWidget {
   const _SignedIn({required this.name});
 

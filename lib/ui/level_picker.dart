@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/audio.dart';
 import '../core/constants.dart';
+import '../core/games.dart';
 import '../core/level.dart';
 import '../core/prefs.dart';
 import '../game/shape_shifter_game.dart';
@@ -26,28 +27,35 @@ class LevelPicker extends StatelessWidget {
       valueListenable: game.level,
       // Also rebuilt when the best changes, so a record set on the run you
       // just finished is already on the button when you get back here.
-      builder: (_, current, _) => ValueListenableBuilder<int>(
-        valueListenable: game.highScore,
-        builder: (_, _, _) => Row(
-          children: <Widget>[
-            for (final level in Level.values) ...<Widget>[
-              if (level != Level.values.first)
-                const SizedBox(width: kLevelTileGap),
-              Expanded(
-                child: _LevelTile(
-                  label: level.label,
-                  best: Prefs.highScore(level),
-                  ink: _inkFor(level),
-                  face: _faceFor(level),
-                  faceColor: level == Level.hard
-                      ? kLevelFaceHard
-                      : kLevelFaceColor,
-                  selected: level == current,
-                  onPressed: () => game.chooseLevel(level),
+      // And when the account changes. These tiles read storage directly, and
+      // storage answers for whoever is signed in - so signing out has to put
+      // the signed-out bests back on screen rather than leaving the account's
+      // numbers sitting there until the app is restarted.
+      builder: (_, current, _) => ValueListenableBuilder<String?>(
+        valueListenable: Games.playerName,
+        builder: (_, _, _) => ValueListenableBuilder<int>(
+          valueListenable: game.highScore,
+          builder: (_, _, _) => Row(
+            children: <Widget>[
+              for (final level in Level.values) ...<Widget>[
+                if (level != Level.values.first)
+                  const SizedBox(width: kLevelTileGap),
+                Expanded(
+                  child: _LevelTile(
+                    label: level.label,
+                    best: Prefs.highScore(level),
+                    ink: _inkFor(level),
+                    face: _faceFor(level),
+                    faceColor: level == Level.hard
+                        ? kLevelFaceHard
+                        : kLevelFaceColor,
+                    selected: level == current,
+                    onPressed: () => game.chooseLevel(level),
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

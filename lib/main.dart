@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 
 import 'core/ads.dart';
 import 'core/audio.dart';
+import 'core/cloud_save.dart';
 import 'core/constants.dart';
 import 'core/games.dart';
 import 'core/prefs.dart';
@@ -40,6 +41,9 @@ Future<void> main() async {
   // Only listens for a session that already exists. It never prompts, so this
   // cannot put a sign-in sheet in front of a child who just opened the game.
   unawaited(Games.init());
+  // Pulls progress down the moment an account turns up, including the session
+  // the platform hands back at launch without anybody pressing anything.
+  CloudSave.watchSignIn();
   runApp(const ShapeShifterApp());
 }
 
@@ -104,14 +108,20 @@ class _GameHostState extends State<GameHost> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Progress belongs to whoever is signed in, so the numbers on screen have
+    // to follow the account rather than the app's lifetime.
+    Games.playerName.addListener(_onAccountChanged);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    Games.playerName.removeListener(_onAccountChanged);
     _focus.dispose();
     super.dispose();
   }
+
+  void _onAccountChanged() => _game.refreshProgress();
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -120,6 +130,9 @@ class _GameHostState extends State<GameHost> with WidgetsBindingObserver {
         state == AppLifecycleState.hidden ||
         state == AppLifecycleState.inactive) {
       _game.requestPause();
+      // Last chance before the process may be killed. Local storage already
+      // has everything; this is only the copy catching up.
+      unawaited(CloudSave.sync());
       // Everything, not just the music. A sound effect is a platform side
       // player that runs to the end of its clip on its own, so a coin taken
       // in the last moment before the home button used to chime over the

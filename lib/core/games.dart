@@ -7,6 +7,7 @@ import 'package:games_services/games_services.dart';
 import 'awards.dart';
 import 'boards.dart';
 import 'prefs.dart';
+import 'save_data.dart';
 
 /// Google Play Games on Android, Game Center on iOS.
 ///
@@ -49,6 +50,31 @@ class Games {
 
   static bool get isSignedIn => playerName.value != null;
 
+  /// Points storage at whoever is playing, and carries signed-out progress up
+  /// the first time an account appears.
+  ///
+  /// The carry is deliberate and one way: a child who has played for a week
+  /// without an account should not lose it the moment they sign in. It only
+  /// ever raises values, so signing in can never cost the account anything
+  /// either. The cost is that a shared family phone hands the signed-out
+  /// scores to whoever signs in first.
+  static void _useProfileFor(PlayerData? data) {
+    if (data == null) {
+      Prefs.useProfile(Prefs.guest);
+      return;
+    }
+    final id = Prefs.profileFor(data.playerID ?? data.displayName);
+    if (id == Prefs.profile) return;
+
+    final carried = Prefs.profile == Prefs.guest
+        ? SaveData.fromPrefs()
+        : null;
+    Prefs.useProfile(id);
+    if (carried != null && !carried.isEmpty) {
+      unawaited(carried.applyToPrefs());
+    }
+  }
+
   /// Whether this game has an account to let go of.
   static bool get canDisconnect => isSupported && isSignedIn;
 
@@ -66,6 +92,10 @@ class Games {
     await _sub?.cancel();
     _sub = null;
     _watching = false;
+    // Back to the signed-out profile, so the account's scores go with the
+    // account rather than sitting on screen for whoever picks the phone up
+    // next. Nothing is deleted - they are waiting if the player signs back in.
+    Prefs.useProfile(Prefs.guest);
     playerName.value = null;
     failed.value = false;
     await Prefs.setGamesOptedOut(true);
@@ -89,12 +119,16 @@ class Games {
     try {
       _sub = GameAuth.player.listen(
         (data) {
+          _useProfileFor(data);
           playerName.value = data?.displayName;
           if (data != null) failed.value = false;
         },
         // A stream error is just "no session"; it is not a reason to make the
         // player look at anything.
-        onError: (_) => playerName.value = null,
+        onError: (_) {
+          Prefs.useProfile(Prefs.guest);
+          playerName.value = null;
+        },
       );
     } catch (_) {
       _watching = false;

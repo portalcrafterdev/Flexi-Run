@@ -9,6 +9,7 @@ import '../core/constants.dart';
 import '../game/shape_shifter_game.dart';
 import '../tutorial/flexirun_tutorial.dart';
 import 'banner_slot.dart';
+import 'clear_progress_row.dart';
 import 'level_picker.dart';
 import 'menu_background.dart';
 import 'menu_logo.dart';
@@ -139,7 +140,7 @@ class _MenuOverlayState extends State<MenuOverlay> {
   Widget _settingsSheet() => MenuSheet(
     title: 'Settings',
     onClose: _close,
-    children: const <Widget>[SoundLevels()],
+    children: const <Widget>[SoundLevels(), ClearProgressRow()],
   );
 
   Widget _howToSheet() => MenuSheet(
